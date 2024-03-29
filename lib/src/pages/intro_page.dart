@@ -1,7 +1,6 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
+
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:school_app/src/utils/firebase.dart';
@@ -26,9 +25,6 @@ class _IntroPageState extends State<IntroPage> {
     Database.getUniversities().then((value) {
       universities = value;
       filterUniversities = universities;
-      if (kDebugMode) {
-        print(universities);
-      }
     });
     super.initState();
   }
@@ -40,10 +36,6 @@ class _IntroPageState extends State<IntroPage> {
   }
 
   void _displayUniversities(String input) {
-    if (kDebugMode) {
-      print(input);
-    }
-
     setState(() {
       filterUniversities = universities
           .where((element) =>
@@ -220,7 +212,7 @@ class _IntroPageState extends State<IntroPage> {
                                               _findUniversity.text);
                                       GoRouter.of(context).goNamed("login",
                                           pathParameters: {
-                                            "universityId": uniModel.id!
+                                            "universityId": uniModel.id
                                           });
                                     }
                                   },

@@ -1,7 +1,10 @@
-import 'package:flutter/cupertino.dart';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+
 import 'package:go_router/go_router.dart';
 import 'package:school_app/src/utils/firebase.dart';
+import 'package:school_app/src/utils/setup.dart';
 
 class Setup extends StatefulWidget {
   const Setup({super.key});
@@ -11,74 +14,119 @@ class Setup extends StatefulWidget {
 }
 
 class _SetupState extends State<Setup> {
-  late final List userNames;
-  // final _formKey = GlobalKey();
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: Database.getUser(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+        if (snapshot.hasData) {
+          GoRouter.of(context).go("/home");
+        }
 
-  final usernameControl = TextEditingController();
-  final nameControl = TextEditingController();
-  final schoolEmailControl = TextEditingController();
-  final departmentControl = TextEditingController();
+        return const SetupPage();
+      },
+    );
+  }
+}
+
+class SetupPage extends StatefulWidget {
+  const SetupPage({super.key});
 
   @override
+  State<SetupPage> createState() => _SetupPageState();
+}
+
+class _SetupPageState extends State<SetupPage> {
+  final _usernameControl = TextEditingController();
+  late List<String> _existingUsernames;
+  late List<String>? _schoolDepartments;
+
+  String schoolYear = schoolYears.first;
+  @override
   void initState() {
+    Database.getUsernames().then((value) => setState(() {
+          _existingUsernames = value;
+          if (kDebugMode) print(value);
+        }));
+
+    Database.getDepartments().then((value) => setState(() {
+          _schoolDepartments = value;
+          if (kDebugMode) print(value);
+        }));
     super.initState();
-    Database.getUsernames().then((value) {
-      userNames = value;
-    });
   }
 
   @override
   void dispose() {
+    _usernameControl.dispose();
     super.dispose();
-    usernameControl.dispose();
-    nameControl.dispose();
-    schoolEmailControl.dispose();
-    departmentControl.dispose();
   }
 
-  Widget textInput(String name, TextEditingController control) {
-    return SizedBox(
-        width: MediaQuery.of(context).size.width * 0.8,
-        child: CupertinoTextFormFieldRow(
-          controller: control,
-          validator: (value) {
-            if (name == "Username") {
-              if (userNames.contains(value)) {
-                return "This username is already taken";
-              }
-            }
-            if (value != null && value.isEmpty) {
-              return "This field should not be empty";
-            }
-            return null;
-          },
-          decoration: BoxDecoration(
-            border: Border.all(color: CupertinoColors.black),
-            borderRadius: BorderRadius.circular(2),
-          ),
-          placeholder: name,
-        ));
-  }
-
-  void logOut() async {
-    await Auth().signOut().then((value) {
-      GoRouter.of(context).go('/login');
-    });
+  Widget _createTextField(
+      String name, TextEditingController control, bool required) {
+    return TextFormField(
+      controller: control,
+      decoration: InputDecoration(hintText: name),
+      validator: (String? value) {
+        if (required && value == "") {
+          return "This field is required";
+        }
+        if (name.toLowerCase() == "username") {
+          if (_existingUsernames.contains(value?.toLowerCase())) {
+            return "This username is already taken. Please choose another username";
+          }
+        }
+        return null;
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return  Scaffold(
-      body: Center(
-          child: Column(
+    return Scaffold(
+        body: Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
         children: [
-          ElevatedButton(
-              onPressed: () {
-                context.go("/home");
-              },
-              child: const Text("press"))
+          const Text(
+            "Welcome to Note Loom!",
+            style: TextStyle(
+                fontSize: 50,
+                leadingDistribution: TextLeadingDistribution.even),
+            textAlign: TextAlign.center,
+          ),
+          const Text("To get started, please set up your profile."),
+          Container(
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _createTextField("Username", _usernameControl, true),
+                DropdownButton(
+                  value: schoolYear,
+                  items: schoolYears.map((String val) {
+                    return DropdownMenuItem(
+                      value: val,
+                      child: Text(val),
+                    );
+                  }).toList(),
+                  onChanged: (String? val) {
+                    setState(() {
+                      schoolYear = val!;
+                    });
+                  },
+                ),
+              ],
+            ),
+          )
         ],
-      )),
-    );
+      ),
+    ));
   }
 }

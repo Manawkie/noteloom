@@ -39,7 +39,7 @@ class UserModel {
 }
 
 class UniversityModel {
-  final String? id;
+  final String id;
   final String name;
   final String domain;
   final String? storageLogoPath;
@@ -81,6 +81,27 @@ class UniversityModel {
   }
 }
 
+class DepartmentModel {
+  final String id;
+  final String name;
+  final DocumentReference<UniversityModel> universityRef;
+
+  DepartmentModel(
+      {required this.id, required this.name, required this.universityRef});
+
+  factory DepartmentModel.fromFirestore(
+    DocumentSnapshot<Map<String, dynamic>> snapshot,
+  ) {
+    final data = snapshot.data();
+    final id = snapshot.id;
+
+    final department = DepartmentModel(
+        id: id, name: data?['name'], universityRef: data?["universityRef"]);
+
+    return department;
+  }
+}
+
 class SubjectModel {
   String id;
   String name;
@@ -89,19 +110,49 @@ class SubjectModel {
   SubjectModel(
       {required this.id, required this.name, required this.subjectCode});
 
-
-  factory
-  SubjectModel.fromFirestore(
-    DocumentSnapshot<Map<String, dynamic>> snapshot, options
-  ) {
+  factory SubjectModel.fromFirestore(
+      DocumentSnapshot<Map<String, dynamic>> snapshot, options) {
     final data = snapshot.data();
     final id = snapshot.id;
 
     return SubjectModel(
-      id: id,
-      name: data?['name'],
-      subjectCode: data?['subjectCode']?.cast<String>()
-    );
+        id: id,
+        name: data?['name'],
+        subjectCode: data?['subjectCode']?.cast<String>());
+  }
+}
 
+class NoteModel {
+  String? id;
+  String name;
+  String storagePath;
+  List<String>? tags;
+
+  NoteModel(
+      {this.id,
+      required this.name,
+      required this.storagePath,
+      this.tags});
+
+  factory NoteModel.fromFirestore(
+      DocumentSnapshot<Map<String, dynamic>> snapshot, __) {
+    final data = snapshot.data();
+    final id = snapshot.id;
+
+    final note = NoteModel(
+        id: id,
+        name: data?['name'],
+        storagePath: data?['storagePath'],
+        tags: data?['tags'].cast<String>());
+    return note;
+  }
+
+  Map<String, dynamic> toFirestore() {
+    return {
+      "id": id,
+      "name": name,
+      "storagePath": storagePath,
+      if (tags != null) "tags": tags
+    };
   }
 }

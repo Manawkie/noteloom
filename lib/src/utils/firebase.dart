@@ -19,29 +19,16 @@ Future functionWithTryCatchFirebase(Future Function() function) async {
 
 class Auth {
   static final auth = FirebaseAuth.instance;
-  static final db = FirebaseFirestore.instance;
 
   static final googleProvider = GoogleAuthProvider();
 
-  Future login(String email, String password) async {
-    try {
-      await auth
-          .signInWithEmailAndPassword(email: email, password: password)
-          .then((cred) async {
-        await Database.getUser();
-      });
-    } on FirebaseAuthException catch (e) {
-      if (kDebugMode) {
-        print(e.message);
-      }
-    }
-  }
+  static Future<void> googleSignIn() async {
+    googleProvider.addScope("email");
+    googleProvider.addScope("profile");
 
-  Future googleSignIn() async {
     try {
       late User? userCred;
-
-      if (kIsWeb) {
+      if (kDebugMode) {
         userCred = await auth
             .signInWithPopup(googleProvider)
             .then((cred) => cred.user);
@@ -50,29 +37,24 @@ class Auth {
             .signInWithProvider(googleProvider)
             .then((cred) => cred.user);
       }
-
-      if (kDebugMode) {
-        print(auth.currentUser);
-        print("$userCred, Auth");
-        print({"id": auth.currentUser!.uid, "email": auth.currentUser!.email});
-      }
+      validateUser(userCred);
     } on FirebaseAuthException catch (e) {
-      if (kDebugMode) {
-        print(e.message);
-      }
-      return;
+      if (kDebugMode) print(e.message);
     }
   }
 
-  Future register(String email, String password) async {
-    try {
-      await auth
-          .createUserWithEmailAndPassword(email: email, password: password)
-          .then((value) {});
-    } on FirebaseAuthException catch (e) {
-      if (kDebugMode) {
-        print(e);
-      }
+  static Future validateUser(User? user) async {
+    final emails = await Database.getUniversities()
+        .then((value) => value.map((data) => data.domain));
+    if (user == null) {
+      return;
+    }
+    if (emails.contains(user.email!.split("@")[1])) {
+      await Database.getUser();
+      return true;
+    } else {
+      throw ErrorDescription(
+          "No university found for this email. Please use your university email.");
     }
   }
 
@@ -86,63 +68,8 @@ class Auth {
 class Database {
   static final db = FirebaseFirestore.instance;
 
-  static Future<UserModel?> getUser() async {
-    final user = await db
-        .collection("users")
-        .withConverter(
-            fromFirestore: UserModel.fromFirestore,
-            toFirestore: (val, options) => val.toFirestore())
-        .doc(Auth.auth.currentUser!.uid)
-        .get()
-        .then((val) => val.data());
-    if (kDebugMode) {
-      print(Auth.auth.currentUser!.displayName);
-      print(Auth.auth.currentUser!.email);
-    }
-    if (user == null) {
-      // user is new and no data can be received from the
-
-      final newUser = UserModel(
-          id: Auth.auth.currentUser!.uid, email: Auth.auth.currentUser!.email!);
-
-      await db
-          .collection("users")
-          .withConverter(
-              fromFirestore: UserModel.fromFirestore,
-              toFirestore: (val, options) => val.toFirestore())
-          .doc(Auth.auth.currentUser!.uid)
-          .set(newUser);
-
-      return newUser;
-    }
-    return user;
-  }
-
-  static Future<List<String>> getUsernames() async {
-    final usernames = <String>[]; // Initialize the list
-
-    await db
-        .collection("users")
-        .withConverter(
-            fromFirestore: UserModel.fromFirestore,
-            toFirestore: (m, _) => m.toFirestore())
-        .get()
-        .then(
-      (value) {
-        for (var user in value.docs) {
-          if (user.data().username != null) {
-            usernames.add(user.data().username!);
-          }
-        }
-      },
-    );
-
-    return usernames;
-  }
-
   static Future<List<UniversityModel>> getUniversities() async {
     final universities = <UniversityModel>[];
-
     await db
         .collection("universities")
         .withConverter(
@@ -158,4 +85,101 @@ class Database {
     );
     return universities;
   }
+
+  static Future<UserModel?> getUser() async {
+    final userFromDatabase = await db
+        .collection("/users")
+        .withConverter(
+            fromFirestore: UserModel.fromFirestore,
+            toFirestore: (user, _) => user.toFirestore())
+        .doc(Auth.auth.currentUser!.uid)
+        .get()
+        .then(
+      (value) {
+        return value.data();
+      },
+    );
+
+    if (kDebugMode) print(userFromDatabase);
+
+    if (userFromDatabase == null) {
+      return null;
+    } else {
+      return userFromDatabase;
+    }
+  }
+
+  static Future<List<String>> getUsernames() async {
+    final usernames = <String>[]; // Initialize the list
+    await db
+        .collection("users")
+        .withConverter(
+            fromFirestore: UserModel.fromFirestore,
+            toFirestore: (m, _) => m.toFirestore())
+        .get()
+        .then(
+      (QuerySnapshot<UserModel> snap) {
+        for (var docs in snap.docs) {
+          usernames.add(docs.data().username!);
+        }
+      },
+    );
+    return usernames;
+  }
+
+  static Future<List<String>?> getDepartments() async {
+    final schoolDepartments = <String>[];
+    final schooldomain = Auth.auth.currentUser!.email?.split("@")[1];
+
+    if (schooldomain == null) {
+      return null;
+    }
+
+    final school = await db
+        .collection("universities")
+        .withConverter(
+            fromFirestore: UniversityModel.fromFirestore,
+            toFirestore: (mod, _) => mod.toFirestore())
+        .where({"domain": schooldomain})
+        .get()
+        .then((value) => value.docs.first);
+    await db
+        .collection("departments")
+        .where({"schoolId": school.id})
+        .get()
+        .then((value) {
+          for (var doc in value.docs) {
+            final document = DepartmentModel.fromFirestore(doc);
+            schoolDepartments.add(document.name);
+          }
+        });
+    return schoolDepartments;
+  }
+
+  // static Future submitFile(
+  //   Uint8List fileBytes,
+  //   String fileName,
+  // ) async {
+  //   // final storagePath = await Storage.addFile();
+
+  //   await db
+  //       .collection("notes")
+  //       .withConverter(
+  //           fromFirestore: NoteModel.fromFirestore,
+  //           toFirestore: (model, __) => model.toFirestore())
+  //       .add(NoteModel(name: fileName, storagePath: storagePath));
+  // }
 }
+
+// class Storage {
+
+//   static final storage = FirebaseStorage.instance;
+
+//   static addFile()async {
+//     await storage.
+//   }
+
+//   static getFile() {
+
+//   }
+// }

@@ -1,6 +1,6 @@
-import 'package:flutter/cupertino.dart';
+
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+
 
 class PrioritySubjects extends StatefulWidget {
   const PrioritySubjects({super.key});
@@ -47,8 +47,8 @@ class _PrioritySubjectsState extends State<PrioritySubjects> {
             pinned: true,
             
             flexibleSpace: FlexibleSpaceBar(
-              stretchModes: [StretchMode.fadeTitle],
-              title: isScrolled ? null : Text('Home Page'),
+              
+              title: isScrolled ? null : const Text('Home Page'),
             ),
             title: isScrolled ? const Text('Home Page') : null,
           ),

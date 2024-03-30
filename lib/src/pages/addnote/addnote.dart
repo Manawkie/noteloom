@@ -46,7 +46,6 @@ class _AddNoteState extends State<AddNote> {
     FilePickerResult? result = await FilePicker.platform.pickFiles();
     if (result != null) {
       final file = result.files.first;
-
       setState(() {
         _nameControl.text = file.name;
       });

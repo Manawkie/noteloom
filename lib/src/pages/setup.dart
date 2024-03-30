@@ -122,6 +122,7 @@ class _SetupPageState extends State<SetupPage> {
                     });
                   },
                 ),
+                ElevatedButton(onPressed: () {}, child: Text("Get Started!"))
               ],
             ),
           )

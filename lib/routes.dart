@@ -30,7 +30,6 @@ class Routes {
             path: "/login/:universityId",
             pageBuilder: (context, state) {
               String universityId = state.pathParameters['universityId']!;
-
               return CustomTransitionPage(
                   key: state.pageKey,
                   transitionDuration: const Duration(milliseconds: 500),

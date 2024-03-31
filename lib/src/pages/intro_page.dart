@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 import 'package:flutter_svg/flutter_svg.dart';
@@ -18,12 +17,13 @@ class _IntroPageState extends State<IntroPage> {
 
   bool isOnLogin = false;
 
-  List<UniversityModel> universities = <UniversityModel>[];
-  List<UniversityModel> filterUniversities = [];
+  List<String> universities = <String>[];
+  List<String> filterUniversities = [];
   @override
   void initState() {
-    Database.getUniversities().then((value) {
-      universities = value;
+    Database.getUniversities().then((List<UniversityModel> universityLists) {
+      universities =
+          universityLists.map((university) => university.name).toList();
       filterUniversities = universities;
     });
     super.initState();
@@ -38,8 +38,8 @@ class _IntroPageState extends State<IntroPage> {
   void _displayUniversities(String input) {
     setState(() {
       filterUniversities = universities
-          .where((element) =>
-              element.name.toLowerCase().contains(input.toLowerCase()))
+          .where((university) =>
+              university.toLowerCase().contains(input.toLowerCase()))
           .toList();
     });
   }
@@ -91,7 +91,7 @@ class _IntroPageState extends State<IntroPage> {
                   curve: Curves.ease,
                   child: Container(
                     height: 300,
-                    margin: const EdgeInsets.only(left: 50, top: 50),
+                    margin: const EdgeInsets.only(left: 20, top: 20),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -102,7 +102,7 @@ class _IntroPageState extends State<IntroPage> {
                         const Text(
                           "Note Loom",
                           style: TextStyle(
-                              fontSize: 30, fontWeight: FontWeight.bold),
+                              fontSize: 50, fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(
                           height: 20,
@@ -143,9 +143,8 @@ class _IntroPageState extends State<IntroPage> {
                     child: Container(
                         decoration: BoxDecoration(
                             color: Colors.grey[200],
-                            borderRadius: const BorderRadius.only(
-                                topLeft: Radius.circular(40),
-                                topRight: Radius.circular(40))),
+                            borderRadius: const BorderRadius.vertical(
+                                top: Radius.circular(20))),
                         width: MediaQuery.of(context).size.width,
                         height: MediaQuery.of(context).size.height * 0.7,
                         child: Padding(
@@ -186,11 +185,11 @@ class _IntroPageState extends State<IntroPage> {
                                               onTap: () {
                                                 setState(() {
                                                   _findUniversity.text =
-                                                      university.name;
+                                                      university;
                                                 });
                                               },
                                               tileColor: Colors.grey[200],
-                                              title: Text(university.name),
+                                              title: Text(university),
                                             );
                                           },
                                         )
@@ -204,15 +203,10 @@ class _IntroPageState extends State<IntroPage> {
                                 child: ElevatedButton(
                                   onPressed: () {
                                     if (universities
-                                        .map((_) => _.name)
                                         .contains(_findUniversity.text)) {
-                                      final uniModel = universities.singleWhere(
-                                          (element) =>
-                                              element.name ==
-                                              _findUniversity.text);
                                       GoRouter.of(context).goNamed("login",
                                           pathParameters: {
-                                            "universityId": uniModel.id
+                                            "universityName": _findUniversity.text
                                           });
                                     }
                                   },

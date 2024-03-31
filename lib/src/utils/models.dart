@@ -2,20 +2,27 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class UserModel {
   final String id;
-  final String? username;
-  final String? name;
+  final String username;
+  final String name;
   final String email;
-  final String? universityId;
+  final String universityId;
+  final String? schoolyears;
+  final String? department;
+  final String? course;
 
   UserModel(
       {required this.id,
       required this.email,
-      this.name,
-      this.universityId,
-      this.username});
+      required this.name,
+      required this.universityId,
+      required this.username,
+      this.course,
+      this.department,
+      this.schoolyears
+      });
 
   factory UserModel.fromFirestore(
-      DocumentSnapshot<Map<String, dynamic>> snapshot, _) {
+      DocumentSnapshot<Map<String, dynamic>> snapshot, options) {
     final data = snapshot.data();
     final id = snapshot.id;
 
@@ -24,16 +31,24 @@ class UserModel {
         email: data?['email'],
         username: data?['username'],
         name: data?['name'],
-        universityId: data?['universityId']);
+        universityId: data?['universityId'],
+        course: data?['course'],
+        department: data?['department'],
+        schoolyears: data?['schoolyears']
+        );
 
     return fromFirebase;
   }
   Map<String, dynamic> toFirestore() {
     return {
       "email": email,
-      if (username != null) "username": username,
-      if (name != null) "name": name,
-      if (universityId != null) "universityId": universityId
+      "username": username,
+      "name": name,
+      "universityId": universityId,
+      if (schoolyears != null) "schoolyears": schoolyears,
+      if (department != null) "department": department,
+      if (course != null) "course": course
+      
     };
   }
 }
@@ -41,28 +56,25 @@ class UserModel {
 class UniversityModel {
   final String id;
   final String name;
-  final String domain;
   final String? storageLogoPath;
   final List<String>? subjectIds;
-  final List<String>? departmentIds;
+  final List<DepartmentModel>? departmentIds;
 
   UniversityModel(
       {required this.id,
       required this.name,
-      required this.domain,
       this.storageLogoPath,
       this.subjectIds,
       this.departmentIds});
 
   factory UniversityModel.fromFirestore(
-      DocumentSnapshot<Map<String, dynamic>> snapshot, _) {
+      DocumentSnapshot<Map<String, dynamic>> snapshot, options) {
     final data = snapshot.data();
     final id = snapshot.id;
 
     final university = UniversityModel(
         id: id,
         name: data?['name'],
-        domain: data?['domain'],
         storageLogoPath: data?['storageLogoPath'],
         subjectIds: data?['subjectIds']?.cast<String>(),
         departmentIds: data?['departmentIds']?.cast<String>());
@@ -73,7 +85,6 @@ class UniversityModel {
   Map<String, dynamic> toFirestore() {
     return {
       "name": name,
-      "domain": domain,
       if (storageLogoPath != null) "storageLogoPath": storageLogoPath,
       if (subjectIds != null) "subjectIds": subjectIds,
       if (departmentIds != null) "departmentIds": departmentIds
@@ -84,21 +95,65 @@ class UniversityModel {
 class DepartmentModel {
   final String id;
   final String name;
-  final DocumentReference<UniversityModel> universityRef;
+  final DocumentReference<UniversityModel>? universityRef;
 
-  DepartmentModel(
-      {required this.id, required this.name, required this.universityRef});
+  DepartmentModel({
+    required this.id,
+    required this.name,
+    this.universityRef,
+  });
 
   factory DepartmentModel.fromFirestore(
-    DocumentSnapshot<Map<String, dynamic>> snapshot,
-  ) {
+      DocumentSnapshot<Map<String, dynamic>> snapshot, options) {
     final data = snapshot.data();
     final id = snapshot.id;
 
     final department = DepartmentModel(
-        id: id, name: data?['name'], universityRef: data?["universityRef"]);
+      id: id,
+      name: data?['name'],
+      universityRef: data?["universityRef"],
+    );
 
     return department;
+  }
+
+  Map<String, dynamic> toFirestore() {
+    return {"name": name, "universityRef": universityRef};
+  }
+}
+
+class CourseModel {
+  final String id;
+  final String name;
+  final CollectionReference<DepartmentModel>? departmentRef;
+  final List<SubjectModel>? subjectIds;
+
+  CourseModel(
+      {required this.id,
+      required this.name,
+      this.departmentRef,
+      this.subjectIds});
+
+  factory CourseModel.fromFirestore(
+      DocumentSnapshot<Map<String, dynamic>> snapshot, options) {
+    final data = snapshot.data();
+    final id = snapshot.id;
+
+    final course = CourseModel(
+        id: id,
+        name: data?['name'],
+        departmentRef: data?['departmentRef'],
+        subjectIds: data?['subjectIds']?.cast<String>());
+
+    return course;
+  }
+
+  Map<String, dynamic> toFirestore() {
+    return {
+      "name": name,
+      "departmentRef": departmentRef,
+      if (subjectIds != null) "subjectIds": subjectIds
+    };
   }
 }
 
@@ -129,10 +184,7 @@ class NoteModel {
   List<String>? tags;
 
   NoteModel(
-      {this.id,
-      required this.name,
-      required this.storagePath,
-      this.tags});
+      {this.id, required this.name, required this.storagePath, this.tags});
 
   factory NoteModel.fromFirestore(
       DocumentSnapshot<Map<String, dynamic>> snapshot, __) {

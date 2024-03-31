@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:school_app/src/utils/models.dart';
 
@@ -20,41 +20,43 @@ Future functionWithTryCatchFirebase(Future Function() function) async {
 class Auth {
   static final auth = FirebaseAuth.instance;
 
+  static get currentUser => auth.currentUser;
+
+  static String get schoolDomain => currentUser!.email!.split("@")[1];
+
   static final googleProvider = GoogleAuthProvider();
 
   static Future<void> googleSignIn() async {
     googleProvider.addScope("email");
     googleProvider.addScope("profile");
 
+    late User? userCred;
+    if (kDebugMode) {
+      userCred =
+          await auth.signInWithPopup(googleProvider).then((cred) => cred.user);
+    } else {
+      userCred = await auth
+          .signInWithProvider(googleProvider)
+          .then((cred) => cred.user);
+    }
+
     try {
-      late User? userCred;
-      if (kDebugMode) {
-        userCred = await auth
-            .signInWithPopup(googleProvider)
-            .then((cred) => cred.user);
-      } else {
-        userCred = await auth
-            .signInWithProvider(googleProvider)
-            .then((cred) => cred.user);
-      }
-      validateUser(userCred);
+      isUserValid(userCred);
     } on FirebaseAuthException catch (e) {
       if (kDebugMode) print(e.message);
     }
   }
 
-  static Future validateUser(User? user) async {
-    final emails = await Database.getUniversities()
-        .then((value) => value.map((data) => data.domain));
-    if (user == null) {
-      return;
-    }
-    if (emails.contains(user.email!.split("@")[1])) {
-      await Database.getUser();
+  static Future<bool> isUserValid(User? user) async {
+    final schoolDomains = await Database.getUniversities().then((value) => value
+        .map(
+          (data) => data.id,
+        )
+        .toList());
+    if (schoolDomains.contains(Auth.schoolDomain)) {
       return true;
     } else {
-      throw ErrorDescription(
-          "No university found for this email. Please use your university email.");
+      return false;
     }
   }
 
@@ -100,13 +102,7 @@ class Database {
       },
     );
 
-    if (kDebugMode) print(userFromDatabase);
-
-    if (userFromDatabase == null) {
-      return null;
-    } else {
-      return userFromDatabase;
-    }
+    return userFromDatabase;
   }
 
   static Future<List<String>> getUsernames() async {
@@ -127,33 +123,78 @@ class Database {
     return usernames;
   }
 
-  static Future<List<String>?> getDepartments() async {
-    final schoolDepartments = <String>[];
-    final schooldomain = Auth.auth.currentUser!.email?.split("@")[1];
-
-    if (schooldomain == null) {
-      return null;
-    }
+  static Future<List<DepartmentModel>> getDepartments() async {
+    final schoolDepartments = <DepartmentModel>[];
+    final schooldomain = Auth.schoolDomain;
 
     final school = await db
         .collection("universities")
-        .withConverter(
-            fromFirestore: UniversityModel.fromFirestore,
-            toFirestore: (mod, _) => mod.toFirestore())
-        .where({"domain": schooldomain})
-        .get()
-        .then((value) => value.docs.first);
-    await db
+        .doc(schooldomain)
         .collection("departments")
-        .where({"schoolId": school.id})
+        .withConverter(
+            fromFirestore: DepartmentModel.fromFirestore,
+            toFirestore: (model, _) => model.toFirestore())
         .get()
-        .then((value) {
-          for (var doc in value.docs) {
-            final document = DepartmentModel.fromFirestore(doc);
-            schoolDepartments.add(document.name);
-          }
-        });
+        .then((snapshot) {
+      for (var department in snapshot.docs) {
+        schoolDepartments.add(department.data());
+      }
+    });
+
     return schoolDepartments;
+  }
+
+  static Future<List<CourseModel>> getCourses() async {
+    final courses = <CourseModel>[];
+    final schooldomain = Auth.schoolDomain;
+
+    final departments = await getDepartments();
+
+    for (var department in departments) {
+      final departmentCourses = await db
+          .collection("universities")
+          .doc(schooldomain)
+          .collection("departments")
+          .doc(department.id)
+          .collection("courses")
+          .withConverter(
+              fromFirestore: CourseModel.fromFirestore,
+              toFirestore: (model, _) => model.toFirestore())
+          .get()
+          .then((snapshot) {
+        for (var course in snapshot.docs) {
+          courses.add(course.data());
+        }
+      });
+    }
+
+    return courses;
+  }
+
+  static Future<void> createUser(
+    String username,
+    String? schoolYears,
+    String? department,
+    String? course,
+  ) async {
+    final user = UserModel(
+      id: Auth.auth.currentUser!.uid,
+      email: Auth.auth.currentUser!.email!,
+      name: Auth.auth.currentUser!.displayName!,
+      universityId: Auth.schoolDomain,
+      username: username,
+      schoolyears: schoolYears,
+      department: department,
+      course: course,
+    );
+
+    await db
+        .collection("users")
+        .withConverter(
+            fromFirestore: UserModel.fromFirestore,
+            toFirestore: (model, _) => model.toFirestore())
+        .doc(user.id)
+        .set(user);
   }
 
   // static Future submitFile(
@@ -171,15 +212,17 @@ class Database {
   // }
 }
 
-// class Storage {
+class Storage {
+  static final storage = FirebaseStorage.instance;
 
-//   static final storage = FirebaseStorage.instance;
+  static addFile(
+    String fileName,
+    Uint8List fileBytes,
+  ) async {
+    await storage
+        .ref("notes/${Auth.auth.currentUser!.uid}/$fileName")
+        .putData(fileBytes, SettableMetadata(contentType: "application/pdf"));
+  }
 
-//   static addFile()async {
-//     await storage.
-//   }
-
-//   static getFile() {
-
-//   }
-// }
+  static getFile() {}
+}

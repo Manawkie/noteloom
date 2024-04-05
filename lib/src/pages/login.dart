@@ -1,13 +1,12 @@
-import 'dart:async';
-import 'dart:js_interop';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 import 'package:go_router/go_router.dart';
 import 'package:loading_indicator/loading_indicator.dart';
+import 'package:provider/provider.dart';
+import 'package:school_app/src/providers/setup.dart';
 import 'package:school_app/src/utils/firebase.dart';
+import 'package:school_app/src/utils/sharedprefs.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key, required this.universityName});
@@ -25,6 +24,21 @@ class _LoginState extends State<Login> {
       _universityName = widget.universityName;
     });
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    Provider.of<SetUpProvider>(context).dispose();
+    super.dispose();
+  }
+
+  Future _logIn() async {
+    await Auth.googleSignIn();
+    await SharedPrefs.setDepartmentAndCourses().then((data) {
+      Provider.of<SetUpProvider>(context, listen: false)
+          .setDepartmentsAndCourses(data);
+    });
+    await SharedPrefs.getUserData();
   }
 
   @override
@@ -66,10 +80,7 @@ class _LoginState extends State<Login> {
                     children: [
                       if (snapshot.data == null)
                         ElevatedButton(
-                          onPressed: () async {
-                            await Auth.googleSignIn().then(
-                                (value) => GoRouter.of(context).refresh());
-                          },
+                          onPressed: _logIn,
                           child: const Text("Log In"),
                         ),
                       ElevatedButton(
@@ -104,18 +115,19 @@ Widget _loginState(AsyncSnapshot<User?> snapshot) {
   return FutureBuilder(
       future: Auth.isUserValid(snapshot.data),
       builder: (context, snapshot) {
-          if (snapshot.data == false) {
-            return Column(
-              children: [
-                const Text("You are not signed in with your school email.\nOr your school may not yet be supported."),
-                ElevatedButton(
-                    onPressed: () {
-                      Auth.auth.signOut();
-                    },
-                    child: const Text("Sign Out"))
-              ],
-            );
-          }
+        if (snapshot.data == false) {
+          return Column(
+            children: [
+              const Text(
+                  "You are not signed in with your school email.\nOr your school may not yet be supported."),
+              ElevatedButton(
+                  onPressed: () {
+                    Auth.auth.signOut();
+                  },
+                  child: const Text("Sign Out"))
+            ],
+          );
+        }
         return Column(
           children: [
             Text("Welcome, ${Auth.auth.currentUser!.displayName}"),

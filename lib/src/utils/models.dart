@@ -18,8 +18,7 @@ class UserModel {
       required this.username,
       this.course,
       this.department,
-      this.schoolyears
-      });
+      this.schoolyears});
 
   factory UserModel.fromFirestore(
       DocumentSnapshot<Map<String, dynamic>> snapshot, options) {
@@ -34,13 +33,26 @@ class UserModel {
         universityId: data?['universityId'],
         course: data?['course'],
         department: data?['department'],
-        schoolyears: data?['schoolyears']
-        );
+        schoolyears: data?['schoolyears']);
 
     return fromFirebase;
   }
-  Map<String, dynamic> toFirestore() {
+
+  factory UserModel.fromMap(Map<String, dynamic> data) {
+    return UserModel(
+        id: data['id'],
+        email: data['email'],
+        username: data['username'],
+        name: data['name'],
+        universityId: data['universityId'],
+        course: data['course'],
+        department: data['department'],
+        schoolyears: data['schoolyears'],);
+  }
+
+  Map<String, dynamic> toMap() {
     return {
+      "id": id,
       "email": email,
       "username": username,
       "name": name,
@@ -48,7 +60,6 @@ class UserModel {
       if (schoolyears != null) "schoolyears": schoolyears,
       if (department != null) "department": department,
       if (course != null) "course": course
-      
     };
   }
 }

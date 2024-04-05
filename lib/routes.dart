@@ -2,10 +2,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:go_router/go_router.dart';
-import 'package:school_app/src/pages/addnote/preview.dart';
 import 'package:school_app/src/pages/login.dart';
 import 'package:school_app/src/pages/not_found.dart';
 import 'package:school_app/src/pages/home_layout.dart';
+import 'package:school_app/src/pages/settings/settings.dart';
 import 'package:school_app/src/utils/firebase.dart';
 import 'package:school_app/src/pages/intro_page.dart';
 import 'package:school_app/src/pages/setup.dart';
@@ -60,21 +60,18 @@ class Routes {
               transitionsBuilder: (_, anim, __, child) =>
                   fadeTransition(_, anim, __, child)),
         ),
+      
         GoRoute(
-            path: "/preview/:name/:path",
-            pageBuilder: (context, state) {
-              final name = state.pathParameters['name']!;
-              final path = state.pathParameters['path']!;
-
-
-              return CustomTransitionPage(
-                  child: PreviewPage(
-                    name: name,
-                    path: path,
-                  ),
-                  transitionsBuilder: (_, anim, __, child) =>
-                      fromRightTransition(_, anim, __, child));
-            })
+          path: "/settings",
+          pageBuilder: (context, state) => CustomTransitionPage(
+            key: state.pageKey,
+            transitionDuration: const Duration(milliseconds: 500),
+            child: const SettingsPage(),
+            transitionsBuilder: (_, anim, __, child) =>
+                fromRightTransition(_, anim, __, child),
+                maintainState: true,
+          ),
+        )
       ],
       errorBuilder: (context, state) {
         if (kDebugMode) print(state.error);
@@ -89,15 +86,25 @@ class Routes {
 
         if (isOnPath("/login")) {
           if (Auth.auth.currentUser != null) {
-            Auth.isUserValid(Auth.auth.currentUser).then((valid) {
-              if (valid) return "setup";
+            return Auth.isUserValid(Auth.auth.currentUser).then((valid) {
+              return Database.getUser().then((user) {
+                if (valid && user != null) return "/home";
+                return "/setup";
+              });
             });
           }
         }
 
         if (isOnPath("/setup")) {
-          Database.getUser().then((user) {
-            if (user != null) return "home";
+          if (Auth.currentUser == null) {
+            return "/";
+          }
+
+          return Database.getUser().then((user) {
+            if (user != null) {
+              return "/home";
+            }
+            return null;
           });
         }
 

@@ -4,7 +4,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
+import 'package:provider/provider.dart';
+import 'package:school_app/src/providers/setup.dart';
 import 'package:school_app/src/utils/models.dart';
+import 'package:school_app/src/utils/sharedprefs.dart';
 
 Future functionWithTryCatchFirebase(Future Function() function) async {
   try {
@@ -20,7 +23,7 @@ Future functionWithTryCatchFirebase(Future Function() function) async {
 class Auth {
   static final auth = FirebaseAuth.instance;
 
-  static get currentUser => auth.currentUser;
+  static User? get currentUser => auth.currentUser;
 
   static String get schoolDomain => currentUser!.email!.split("@")[1];
 
@@ -31,7 +34,7 @@ class Auth {
     googleProvider.addScope("profile");
 
     late User? userCred;
-    if (kDebugMode) {
+    if (kIsWeb) {
       userCred =
           await auth.signInWithPopup(googleProvider).then((cred) => cred.user);
     } else {
@@ -93,7 +96,7 @@ class Database {
         .collection("/users")
         .withConverter(
             fromFirestore: UserModel.fromFirestore,
-            toFirestore: (user, _) => user.toFirestore())
+            toFirestore: (user, _) => user.toMap())
         .doc(Auth.auth.currentUser!.uid)
         .get()
         .then(
@@ -111,12 +114,12 @@ class Database {
         .collection("users")
         .withConverter(
             fromFirestore: UserModel.fromFirestore,
-            toFirestore: (m, _) => m.toFirestore())
+            toFirestore: (model, _) => model.toMap())
         .get()
         .then(
       (QuerySnapshot<UserModel> snap) {
         for (var docs in snap.docs) {
-          usernames.add(docs.data().username!);
+          usernames.add(docs.data().username);
         }
       },
     );
@@ -127,7 +130,7 @@ class Database {
     final schoolDepartments = <DepartmentModel>[];
     final schooldomain = Auth.schoolDomain;
 
-    final school = await db
+    await db
         .collection("universities")
         .doc(schooldomain)
         .collection("departments")
@@ -151,7 +154,7 @@ class Database {
     final departments = await getDepartments();
 
     for (var department in departments) {
-      final departmentCourses = await db
+      await db
           .collection("universities")
           .doc(schooldomain)
           .collection("departments")
@@ -169,6 +172,32 @@ class Database {
     }
 
     return courses;
+  }
+
+  static Future<List<Map<String, List<String>>>>
+      getDepartmentsAndCourses() async {
+    List<Map<String, List<String>>> listDepartmentAndCourses = [];
+    final departments = await getDepartments();
+
+    for (var department in departments) {
+      final List<String> courses = await Database.db
+          .collection("universities")
+          .doc(Auth.schoolDomain)
+          .collection("departments")
+          .doc(department.id)
+          .collection("courses")
+          .withConverter(
+              fromFirestore: CourseModel.fromFirestore,
+              toFirestore: (model, _) => model.toFirestore())
+          .get()
+          .then((snapshot) =>
+              snapshot.docs.map((course) => course.data().name).toList());
+      listDepartmentAndCourses.add({department.name: courses});
+    }
+
+    print(listDepartmentAndCourses);
+
+    return listDepartmentAndCourses;
   }
 
   static Future<void> createUser(
@@ -192,9 +221,11 @@ class Database {
         .collection("users")
         .withConverter(
             fromFirestore: UserModel.fromFirestore,
-            toFirestore: (model, _) => model.toFirestore())
+            toFirestore: (model, _) => model.toMap())
         .doc(user.id)
         .set(user);
+
+    await SharedPrefs.setUserData(user);
   }
 
   // static Future submitFile(
@@ -215,14 +246,13 @@ class Database {
 class Storage {
   static final storage = FirebaseStorage.instance;
 
-  static addFile(
+  static Future<String> addFile(
     String fileName,
     Uint8List fileBytes,
   ) async {
-    await storage
+    return await storage
         .ref("notes/${Auth.auth.currentUser!.uid}/$fileName")
-        .putData(fileBytes, SettableMetadata(contentType: "application/pdf"));
+        .putData(fileBytes, SettableMetadata(contentType: "application/pdf"))
+        .then((data) => data.ref.getDownloadURL());
   }
-
-  static getFile() {}
 }

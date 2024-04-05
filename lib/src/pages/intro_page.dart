@@ -89,37 +89,39 @@ class _IntroPageState extends State<IntroPage> {
                   opacity: isOnLogin ? 0 : 1,
                   duration: const Duration(milliseconds: 500),
                   curve: Curves.ease,
-                  child: Container(
-                    height: 300,
-                    margin: const EdgeInsets.only(left: 20, top: 20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          "Welcome to",
-                          style: TextStyle(fontSize: 20),
-                        ),
-                        const Text(
-                          "Note Loom",
-                          style: TextStyle(
-                              fontSize: 50, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(
-                          height: 20,
-                        ),
-                        const Text(
-                            "Find and share your notes\nwitin your university."),
-                        const SizedBox(
-                          height: 40,
-                        ),
-                        ElevatedButton(
-                            child: const Text("Get Started"),
-                            onPressed: () {
-                              setState(() {
-                                isOnLogin = !isOnLogin;
-                              });
-                            }),
-                      ],
+                  child: SafeArea(
+                    child: Container(
+                      height: 300,
+                      margin: const EdgeInsets.only(left: 20, top: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "Welcome to",
+                            style: TextStyle(fontSize: 20),
+                          ),
+                          const Text(
+                            "Note Loom",
+                            style: TextStyle(
+                                fontSize: 50, fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(
+                            height: 20,
+                          ),
+                          const Text(
+                              "Find and share your notes\nwitin your university."),
+                          const SizedBox(
+                            height: 40,
+                          ),
+                          ElevatedButton(
+                              child: const Text("Get Started"),
+                              onPressed: () {
+                                setState(() {
+                                  isOnLogin = !isOnLogin;
+                                });
+                              }),
+                        ],
+                      ),
                     ),
                   ),
                 ),

@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:persistent_bottom_nav_bar/persistent_tab_view.dart';
 import 'package:school_app/src/pages/addnote/addnote.dart';
 import 'package:school_app/src/pages/find_notes/findnotes.dart';
+import 'package:school_app/src/pages/mynotes/mynotes.dart';
 import 'package:school_app/src/pages/settings/settings.dart';
 import 'package:school_app/src/pages/home/homepage.dart';
+import 'package:school_app/src/utils/firebase.dart';
 
 class PageWithDrawer extends StatefulWidget {
   const PageWithDrawer({super.key});
@@ -39,6 +42,15 @@ class _PageWithDrawerState extends State<PageWithDrawer>
     return Scaffold(
       appBar: AppBar(
         title: const Text("Hello world"),
+        actions: [
+          IconButton(
+              onPressed: () {
+                context.go("/settings");
+              },
+              icon: CircleAvatar(
+                backgroundImage: NetworkImage(Auth.currentUser!.photoURL ?? ""),
+              ))
+        ],
       ),
       body: PersistentTabView(
         context,
@@ -46,7 +58,7 @@ class _PageWithDrawerState extends State<PageWithDrawer>
         screens: const [
           HomePage(),
           FindNotes(),
-          SettingsPage(),
+          MyNotesPage(),
           AddNote(),
         ],
         confineInSafeArea: true,
@@ -57,7 +69,7 @@ class _PageWithDrawerState extends State<PageWithDrawer>
             animateTabTransition: true,
             curve: Curves.easeOut,
             duration: Durations.medium4),
-            hideNavigationBarWhenKeyboardShows: true,
+        hideNavigationBarWhenKeyboardShows: true,
       ),
     );
   }

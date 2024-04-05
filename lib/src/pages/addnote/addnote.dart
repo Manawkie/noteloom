@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:school_app/src/components/uicomponents.dart';
 import 'package:school_app/src/utils/firebase.dart';
+import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
 class AddNote extends StatefulWidget {
   const AddNote({super.key});
@@ -23,6 +24,8 @@ class _AddNoteState extends State<AddNote> {
   late TextEditingController _tag3Control;
 
   FilePickerResult? result;
+  Uint8List? bytes;
+  String? url;
 
   @override
   void initState() {
@@ -49,17 +52,18 @@ class _AddNoteState extends State<AddNote> {
         allowMultiple: false,
         type: FileType.custom,
         allowedExtensions: ['pdf']);
+
     if (result != null) {
       final file = result!.files.single;
-      Uint8List fileBytes = file.bytes!;
+      bytes = file.bytes!;
 
       if (kDebugMode) print(file.name);
 
       setState(() {
-        _nameControl.text = file.name;
+        _nameControl.text = file.name.split(".pdf")[0];
       });
 
-      await Storage.addFile(file.name, fileBytes);
+      url = await Storage.addFile(file.name, bytes!);
     }
   }
 
@@ -86,51 +90,45 @@ class _AddNoteState extends State<AddNote> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-          height: double.infinity,
-          margin: const EdgeInsets.all(8),
-          child: Form(
-            key: _formkey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                const Text("Share your note here"),
-                const SizedBox(
-                  height: 20,
-                ),
-                myFormField(
-                    label: "Name", controller: _nameControl, isRequired: true),
-                (result == null)
-                    ? ElevatedButton(
-                        onPressed: _uploadFile,
-                        child: const Text("Upload a file"),
-                      )
-                    : ElevatedButton(
-                        onPressed: () {
-                          context.go("/preview", extra: {
-                            "name": result!.files.single.name,
-                            "path": result!.files.single.path!
-                          });
-                        },
-                        child: const Text("Preview File")),
-                myFormField(
-                    label: "Tag 1",
-                    controller: _tag1Control,
-                    isRequired: false),
-                myFormField(
-                    label: "Tag 2",
-                    controller: _tag2Control,
-                    isRequired: false),
-                myFormField(
-                    label: "Tag 3",
-                    controller: _tag3Control,
-                    isRequired: false),
-                ElevatedButton(
-                    onPressed: _submitFile, child: const Text("Post")),
-                Text(resultString)
-              ],
+        body: Container(
+      height: double.infinity,
+      margin: const EdgeInsets.all(30),
+      child: Form(
+        key: _formkey,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            const Text("Share your note here", style: TextStyle(fontSize: 30)),
+            const SizedBox(
+              height: 20,
             ),
-          )),
-    );
+            myFormField(
+                label: "Name", controller: _nameControl, isRequired: true),
+            (result == null)
+                ? ElevatedButton(
+                    onPressed: _uploadFile,
+                    child: const Text("Upload a file"),
+                  )
+                : ElevatedButton(
+                    onPressed: () {
+                      context.goNamed("preview", pathParameters: {
+                        "name": _nameControl.text,
+                        "url": url!
+                      });
+                    },
+                    child: const Text("Preview File")),
+            myFormField(
+                label: "Tag 1", controller: _tag1Control, isRequired: false),
+            myFormField(
+                label: "Tag 2", controller: _tag2Control, isRequired: false),
+            myFormField(
+                label: "Tag 3", controller: _tag3Control, isRequired: false),
+            ElevatedButton(onPressed: _submitFile, child: const Text("Post")),
+            Text(resultString),
+            if (bytes != null) Flexible(child: SfPdfViewer.memory(bytes!))
+          ],
+        ),
+      ),
+    ));
   }
 }

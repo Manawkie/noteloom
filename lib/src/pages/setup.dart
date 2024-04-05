@@ -1,73 +1,46 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 import 'package:go_router/go_router.dart';
-import 'package:loading_indicator/loading_indicator.dart';
+import 'package:provider/provider.dart';
 import 'package:school_app/src/components/uicomponents.dart';
+import 'package:school_app/src/providers/setup.dart';
 import 'package:school_app/src/utils/firebase.dart';
-import 'package:school_app/src/utils/models.dart';
-import 'package:school_app/src/utils/setup.dart';
+import 'package:school_app/src/utils/sharedprefs.dart';
 
 class Setup extends StatelessWidget {
   const Setup({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: FutureBuilder(
-        future: Database.getUser(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: SizedBox(
-                  width: 30,
-                  height: 30,
-                  child: LoadingIndicator(
-                    indicatorType: Indicator.ballTrianglePathColored,
-                  )),
-            );
-          }
-          if (snapshot.hasData) {
-            GoRouter.of(context).go("/home");
-          }
-          return const SetupPage();
-        },
-      ),
-    );
-  }
-}
+    return Consumer<SetUpProvider>(builder: (context, setup, child) {
+      if (setup.readDepartmentsAndCourses.isEmpty) {
+        SharedPrefs.getDepartmentAndCourses();
+        return Scaffold(
+          body: Center(child: myLoadingIndicator()),
+        );
+      }
 
-class SetupPage extends StatelessWidget {
-  const SetupPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder(
-        future: getDepartmentAndCourses(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: SizedBox(
-                  width: 30,
-                  height: 30,
-                  child: LoadingIndicator(
-                    indicatorType: Indicator.ballTrianglePathColored,
-                  )),
-            );
-          }
-          if (snapshot.hasData) {
-            return SetupForm(data: snapshot.data!);
-          }
-          return const Center(
-            child: Text("An error occured"),
-          );
-        });
+      return Scaffold(
+        body: SetupForm(
+          data: setup.readDepartmentsAndCourses,
+          schoolYears: setup.readSchoolYears,
+        ),
+      );
+    });
   }
 }
 
 class SetupForm extends StatefulWidget {
-  const SetupForm({super.key, required this.data});
-  final List<Map<String, List<String>>> data;
+  const SetupForm({
+    super.key,
+    required this.data,
+    required this.schoolYears,
+  });
+
+  final List<Map<String, dynamic>> data;
+  final List<String> schoolYears;
+
   @override
   State<SetupForm> createState() => _SetupFormState();
 }
@@ -78,11 +51,11 @@ class _SetupFormState extends State<SetupForm> {
 
   final List<String> _departments = ["Select a Department"];
   final List<String> _courses = ["Select a Department first"];
-  List<String> _filteredCourses = ["Select a Department first"];
+  final List<String> _filteredCourses = ["Select a Department first"];
 
   final List<String> _takenUsernames = [];
 
-  String _selectedYear = schoolYears.first;
+  String _selectedYear = "";
   String _selectedDepartment = "";
   String _selectedCourse = "";
 
@@ -96,6 +69,7 @@ class _SetupFormState extends State<SetupForm> {
     });
 
     for (var department in widget.data) {
+      if (kDebugMode) print(widget.data);
       department.forEach((key, value) {
         _departments.add(key);
         for (var course in value) {
@@ -103,6 +77,11 @@ class _SetupFormState extends State<SetupForm> {
         }
       });
     }
+
+    setState(() {
+      _selectedYear = widget.schoolYears.first;
+    });
+
     super.initState();
   }
 
@@ -115,7 +94,7 @@ class _SetupFormState extends State<SetupForm> {
   void _getStarted() async {
     if (_formKey.currentState!.validate()) {
       final schoolYear =
-          _selectedYear == "Select a Year" ? null : _selectedYear;
+          _selectedYear == "School Year" ? null : _selectedYear;
       final department = _selectedDepartment == "Select a Department"
           ? null
           : _selectedDepartment;
@@ -131,7 +110,7 @@ class _SetupFormState extends State<SetupForm> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(10),
       child: Form(
         key: _formKey,
         child: Column(
@@ -172,42 +151,28 @@ class _SetupFormState extends State<SetupForm> {
                     if (value!.isEmpty) {
                       return "This field is required.";
                     }
-
                     if (_takenUsernames.contains(value)) {
                       return "This username is already taken.";
                     }
-
                     return null;
                   }),
-                  DropdownButtonFormField(
+                  myButtonFormField(
                       value: _selectedYear,
-                      items: schoolYears
-                          .map((e) => DropdownMenuItem(
-                                value: e,
-                                child: Text(e),
-                              ))
-                          .toList(),
+                      items: widget.schoolYears,
                       onChanged: (value) {
                         setState(() {
-                          _selectedYear = value!;
+                          _selectedYear = value;
                         });
                       }),
-                  DropdownButtonFormField(
+                  myButtonFormField(
                       value: _selectedDepartment,
-                      items: _departments
-                          .map((e) => DropdownMenuItem(
-                                value: e,
-                                child: Text(e),
-                              ))
-                          .toList(),
+                      items: _departments,
                       onChanged: (value) {
                         setState(() {
                           _selectedDepartment = value!;
                           _selectedCourse = _filteredCourses.first;
                           _filteredCourses.clear();
-
                           _filteredCourses.add(_courses.first);
-
                           for (var department in widget.data) {
                             department.forEach((key, value) {
                               if (key == _selectedDepartment) {
@@ -220,21 +185,30 @@ class _SetupFormState extends State<SetupForm> {
                         });
                       }),
                   if (_filteredCourses.isNotEmpty)
-                    DropdownButtonFormField(
+                    myButtonFormField(
                         value: _selectedCourse,
-                        items: _filteredCourses
-                            .map((e) => DropdownMenuItem(
-                                  value: e,
-                                  child: Text(e),
-                                ))
-                            .toList(),
+                        items: _filteredCourses,
                         onChanged: (value) {
                           setState(() {
                             _selectedCourse = value!;
                           });
                         }),
                   ElevatedButton(
-                      onPressed: _getStarted, child: const Text("Get started!"))
+                      onPressed: _getStarted,
+                      child: const Text("Get started!")),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text("Not your account? "),
+                      ElevatedButton(
+                          onPressed: () async {
+                            await Auth.auth
+                                .signOut()
+                                .then((_) => GoRouter.of(context).refresh());
+                          },
+                          child: const Text("Sign Out")),
+                    ],
+                  )
                 ],
               ),
             ),

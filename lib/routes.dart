@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:go_router/go_router.dart';
+import 'package:school_app/src/pages/addnote/addnote.dart';
+import 'package:school_app/src/pages/addnote/layout.dart';
 import 'package:school_app/src/pages/login.dart';
 import 'package:school_app/src/pages/not_found.dart';
 import 'package:school_app/src/pages/home_layout.dart';
@@ -60,7 +62,6 @@ class Routes {
               transitionsBuilder: (_, anim, __, child) =>
                   fadeTransition(_, anim, __, child)),
         ),
-      
         GoRoute(
           path: "/settings",
           pageBuilder: (context, state) => CustomTransitionPage(
@@ -69,9 +70,19 @@ class Routes {
             child: const SettingsPage(),
             transitionsBuilder: (_, anim, __, child) =>
                 fromRightTransition(_, anim, __, child),
-                maintainState: true,
+            maintainState: true,
           ),
-        )
+        ),
+        GoRoute(
+          name: "addnote",
+          path: "/addnote",
+          pageBuilder: (context, state) => CustomTransitionPage(
+              key: state.pageKey,
+              transitionDuration: const Duration(milliseconds: 500),
+              child: const AddNoteLayout(),
+              transitionsBuilder: (_, anim, __, child) =>
+                  fromBottomTransition(_, anim, __, child)),
+        ),
       ],
       errorBuilder: (context, state) {
         if (kDebugMode) print(state.error);
@@ -112,14 +123,19 @@ class Routes {
       });
 }
 
+enum Type { fromRight, fromBottom, fade }
+
 SlideTransition fromRightTransition(
     BuildContext context,
     Animation<double> animation,
     Animation<double> secondaryAnimation,
     Widget child) {
   return SlideTransition(
-    position: animation.drive(Tween(begin: const Offset(1, 0), end: Offset.zero)
-        .chain(CurveTween(curve: Curves.easeInOutQuad))),
+    position: animation.drive(
+      Tween(begin: const Offset(1, 0), end: Offset.zero).chain(
+        CurveTween(curve: Curves.easeInOutQuad),
+      ),
+    ),
     child: child,
   );
 }
@@ -130,8 +146,14 @@ SlideTransition fromBottomTransition(
     Animation<double> secondaryAnimation,
     Widget child) {
   return SlideTransition(
-    position: animation.drive(Tween(begin: const Offset(0, 1), end: Offset.zero)
-        .chain(CurveTween(curve: Curves.easeInOutQuad))),
+    position: animation.drive(
+      Tween(
+        begin: const Offset(0, 1),
+        end: Offset.zero,
+      ).chain(
+        CurveTween(curve: Curves.easeInOutQuad),
+      ),
+    ),
     child: child,
   );
 }
@@ -139,8 +161,12 @@ SlideTransition fromBottomTransition(
 FadeTransition fadeTransition(BuildContext context, Animation<double> animation,
     Animation<double> secondaryAnimation, Widget child) {
   return FadeTransition(
-    opacity: Tween(begin: 0.toDouble(), end: 1.toDouble())
-        .animate(CurvedAnimation(parent: animation, curve: Curves.ease)),
+    opacity: Tween(
+      begin: 0.toDouble(),
+      end: 1.toDouble(),
+    ).animate(
+      CurvedAnimation(parent: animation, curve: Curves.ease),
+    ),
     child: child,
   );
 }

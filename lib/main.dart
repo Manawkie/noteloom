@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:school_app/firebase_options.dart';
 import 'package:school_app/routes.dart';
-import 'package:school_app/src/providers/setup.dart';
+import 'package:school_app/src/utils/providers.dart';
+import 'package:school_app/src/utils/theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,6 +31,6 @@ class MyApp extends StatelessWidget {
         routerConfig: Routes.routes,
         debugShowCheckedModeBanner: false,
         title: 'Flutter Demo',
-        theme: ThemeData(primarySwatch: Colors.blue));
+        theme: AppTheme.defaultTheme);
   }
 }

@@ -5,7 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
-import 'package:school_app/src/providers/setup.dart';
+import 'package:school_app/src/utils/providers.dart';
 import 'package:school_app/src/utils/models.dart';
 import 'package:school_app/src/utils/sharedprefs.dart';
 
@@ -202,7 +202,6 @@ class Database {
 
   static Future<void> createUser(
     String username,
-    String? schoolYears,
     String? department,
     String? course,
   ) async {
@@ -212,7 +211,6 @@ class Database {
       name: Auth.auth.currentUser!.displayName!,
       universityId: Auth.schoolDomain,
       username: username,
-      schoolyears: schoolYears,
       department: department,
       course: course,
     );
@@ -225,7 +223,7 @@ class Database {
         .doc(user.id)
         .set(user);
 
-    await SharedPrefs.setUserData(user);
+    SharedPrefs.setUserData(user);
   }
 
   // static Future submitFile(

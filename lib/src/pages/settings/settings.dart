@@ -1,11 +1,11 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:school_app/src/components/uicomponents.dart';
-import 'package:school_app/src/providers/setup.dart';
+import 'package:school_app/src/utils/providers.dart';
 import 'package:school_app/src/utils/firebase.dart';
 import 'package:school_app/src/utils/models.dart';
+import 'package:school_app/src/utils/sharedprefs.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -58,21 +58,17 @@ class _SetupFormState extends State<SetupForm> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _username;
 
-  List<String> _schoolYears = [];
   final List<String> _departments = ["Select a Department"];
   final List<String> _courses = ["Select a Department first"];
   final List<String> _filteredCourses = ["Select a Department first"];
   final List<String> _takenUsernames = [];
 
-  String _selectedYear = "";
   String _selectedDepartment = "";
   String _selectedCourse = "";
 
   @override
   void initState() {
     // set form fields to the user's data
-    _schoolYears = widget.schoolYears;
-    _selectedYear = widget.user.schoolyears ?? _schoolYears.first;
     _username = TextEditingController(text: widget.user.username);
     _selectedDepartment = widget.user.department ?? _departments.first;
 
@@ -114,16 +110,11 @@ class _SetupFormState extends State<SetupForm> {
   void _saveData() async {
     if (_formKey.currentState!.validate()) {
       // save the data
-      final schoolYear =
-          _selectedYear == "School Year" ? null : _selectedYear;
       final department = _selectedDepartment == "Select a Department"
           ? null
           : _selectedDepartment;
-      final course = _selectedCourse == "Select a Department first"
-          ? null
-          : _selectedCourse;
 
-      Database.createUser(_username.text, schoolYear, department, course);
+      Database.createUser(_username.text, department, _selectedCourse);
     }
   }
 
@@ -151,14 +142,7 @@ class _SetupFormState extends State<SetupForm> {
               }
               return null;
             }),
-            myButtonFormField(
-                value: _selectedYear,
-                items: _schoolYears,
-                onChanged: (value) {
-                  setState(() {
-                    _selectedYear = value;
-                  });
-                }),
+          
             myButtonFormField(
                 value: _selectedDepartment,
                 items: _departments,

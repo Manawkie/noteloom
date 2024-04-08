@@ -219,3 +219,37 @@ class NoteModel {
     };
   }
 }
+class MessageModel {
+  String? id;
+  String message;
+  String senderId;
+  String receiverId;
+  String timestamp;
+
+  MessageModel(
+      {this.id, required this.message, required this.senderId, required this.receiverId, required this.timestamp});
+
+  factory MessageModel.fromFirestore(
+      DocumentSnapshot<Map<String, dynamic>> snapshot, __) {
+    final data = snapshot.data();
+    final id = snapshot.id;
+
+    final message = MessageModel(
+        id: id,
+        message: data?['message'],
+        senderId: data?['senderId'],
+        receiverId: data?['receiverId'],
+        timestamp: data?['timestamp']);
+    return message;
+  }
+
+  Map<String, dynamic> toFirestore() {
+    return {
+      "id": id,
+      "message": message,
+      "senderId": senderId,
+      "receiverId": receiverId,
+      "timestamp": timestamp,
+    };
+  }
+}

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:provider/provider.dart';
-import 'package:school_app/src/providers/setup.dart';
+import 'package:school_app/src/utils/providers.dart';
 import 'package:school_app/src/utils/firebase.dart';
 import 'package:school_app/src/utils/sharedprefs.dart';
 
@@ -28,13 +28,12 @@ class _LoginState extends State<Login> {
 
   @override
   void dispose() {
-    Provider.of<SetUpProvider>(context).dispose();
     super.dispose();
   }
 
   Future _logIn() async {
     await Auth.googleSignIn();
-    await SharedPrefs.setDepartmentAndCourses().then((data) {
+    SharedPrefs.setDepartmentAndCourses().then((data) {
       Provider.of<SetUpProvider>(context, listen: false)
           .setDepartmentsAndCourses(data);
     });

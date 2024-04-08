@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:school_app/src/components/uicomponents.dart';
-import 'package:school_app/src/providers/setup.dart';
+import 'package:school_app/src/utils/providers.dart';
 import 'package:school_app/src/utils/firebase.dart';
 import 'package:school_app/src/utils/sharedprefs.dart';
 
@@ -55,7 +55,6 @@ class _SetupFormState extends State<SetupForm> {
 
   final List<String> _takenUsernames = [];
 
-  String _selectedYear = "";
   String _selectedDepartment = "";
   String _selectedCourse = "";
 
@@ -78,9 +77,6 @@ class _SetupFormState extends State<SetupForm> {
       });
     }
 
-    setState(() {
-      _selectedYear = widget.schoolYears.first;
-    });
 
     super.initState();
   }
@@ -93,8 +89,6 @@ class _SetupFormState extends State<SetupForm> {
 
   void _getStarted() async {
     if (_formKey.currentState!.validate()) {
-      final schoolYear =
-          _selectedYear == "School Year" ? null : _selectedYear;
       final department = _selectedDepartment == "Select a Department"
           ? null
           : _selectedDepartment;
@@ -102,7 +96,7 @@ class _SetupFormState extends State<SetupForm> {
           ? null
           : _selectedCourse;
 
-      await Database.createUser(_username.text, schoolYear, department, course)
+      await Database.createUser(_username.text, department, course)
           .then((value) => context.go("/home"));
     }
   }
@@ -156,14 +150,6 @@ class _SetupFormState extends State<SetupForm> {
                     }
                     return null;
                   }),
-                  myButtonFormField(
-                      value: _selectedYear,
-                      items: widget.schoolYears,
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedYear = value;
-                        });
-                      }),
                   myButtonFormField(
                       value: _selectedDepartment,
                       items: _departments,

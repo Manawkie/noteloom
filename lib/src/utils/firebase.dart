@@ -4,8 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
-import 'package:provider/provider.dart';
-import 'package:school_app/src/utils/providers.dart';
+
 import 'package:school_app/src/utils/models.dart';
 import 'package:school_app/src/utils/sharedprefs.dart';
 
@@ -195,9 +194,60 @@ class Database {
       listDepartmentAndCourses.add({department.name: courses});
     }
 
-    print(listDepartmentAndCourses);
-
     return listDepartmentAndCourses;
+  }
+
+  static Future<List<Map<String, String>>> getUserSubjects() async {
+    final userSubjects = <Map<String, String>>[];
+
+    // get the user's course
+    late String userDepartment;
+    late String userCourse;
+
+    await SharedPrefs.getUserData().then((data) {
+      if (data.course == null) {
+        throw Exception("User has not selected a course");
+      }
+      userDepartment = data.department!;
+      userCourse = data.course!;
+    });
+
+    CollectionReference<Map<String, dynamic>> departmentRef = db
+        .collection("universities")
+        .doc(Auth.schoolDomain)
+        .collection("departments");
+
+    final queryDepartment = await departmentRef
+        .withConverter(
+          fromFirestore: DepartmentModel.fromFirestore,
+          toFirestore: (model, _) => model.toFirestore(),
+        )
+        .where("name", isEqualTo: userDepartment)
+        .get()
+        .then((value) => value.docs.first);
+
+    final userSubjectsQuery = await departmentRef
+        .doc(queryDepartment.id)
+        .collection("courses")
+        .withConverter(
+            fromFirestore: CourseModel.fromFirestore,
+            toFirestore: (model, _) => model.toFirestore())
+        .where("name", isEqualTo: userCourse)
+        .get()
+        .then((snap) {
+      final userCourseData = snap.docs.first.data();
+      return userCourseData.subjects;
+    });
+
+    for (var subject in userSubjectsQuery!) {
+      final subjectData = await subject
+          .withConverter(
+              fromFirestore: SubjectModel.fromFirestore,
+              toFirestore: (model, _) => model.toFirestore())
+          .get();
+      userSubjects.add({"subject": subjectData.data()!.Subject, "id": subject.id});
+    }
+    return userSubjects;
   }
 
   static Future<void> createUser(
@@ -226,19 +276,29 @@ class Database {
     SharedPrefs.setUserData(user);
   }
 
-  // static Future submitFile(
-  //   Uint8List fileBytes,
-  //   String fileName,
-  // ) async {
-  //   // final storagePath = await Storage.addFile();
+  static Future<void> submitFile(
+    Uint8List fileBytes,
+    String fileName,
+    String subject,
+    List<String> tags,
+    String? summary,
+  ) async {
+    final storagePath = await Storage.addFile(fileName, fileBytes);
 
-  //   await db
-  //       .collection("notes")
-  //       .withConverter(
-  //           fromFirestore: NoteModel.fromFirestore,
-  //           toFirestore: (model, __) => model.toFirestore())
-  //       .add(NoteModel(name: fileName, storagePath: storagePath));
-  // }
+    await db
+        .collection("notes")
+        .withConverter(
+            fromFirestore: NoteModel.fromFirestore,
+            toFirestore: (model, __) => model.toFirestore())
+        .add(NoteModel(
+          name: fileName,
+          subject: subject,
+          time: DateTime.now().toString(),
+          storagePath: storagePath,
+          tags: tags,
+          summary: summary,
+        ));
+  }
 }
 
 class Storage {
@@ -248,9 +308,17 @@ class Storage {
     String fileName,
     Uint8List fileBytes,
   ) async {
-    return await storage
+    await storage
         .ref("notes/${Auth.auth.currentUser!.uid}/$fileName")
-        .putData(fileBytes, SettableMetadata(contentType: "application/pdf"))
-        .then((data) => data.ref.getDownloadURL());
+        .putData(fileBytes, SettableMetadata(contentType: "application/pdf"));
+    return "notes/${Auth.auth.currentUser!.uid}/$fileName";
+  }
+
+  static Future<void> deleteFile(String storagePath) async {
+    await storage.refFromURL(storagePath).delete();
+  }
+
+  static Future<Uint8List?> getFile(String storagePath) async {
+    return await storage.refFromURL(storagePath).getData();
   }
 }

@@ -10,7 +10,9 @@ class HomePage extends StatelessWidget {
           future: Future.delayed(const Duration(seconds: 2)),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(child: myLoadingIndicator());
+              return Center(child: Scaffold(
+                backgroundColor: Colors.white,
+                body: Center(child: myLoadingIndicator())));
             }
             return const Home();
           }),
@@ -25,8 +27,12 @@ class Home extends StatefulWidget {
   State<Home> createState() => _HomeState();
 }
 
-class _HomeState extends State<Home> {
+class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin  {
   final _scrollControl = ScrollController();
+
+
+  @override
+  bool get wantKeepAlive => true;
 
   bool overScrolled = false;
   @override
@@ -53,33 +59,52 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    return CustomScrollView(
-      controller: _scrollControl,
-      slivers: [
+    super.build(context);
+    return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.primary,
+      
+      body: CustomScrollView(controller: _scrollControl, slivers: [
         SliverAppBar(
           title: overScrolled ? const Text("Hello") : null,
           backgroundColor: Theme.of(context).primaryColor,
-          pinned: true,
           expandedHeight: 200,
-          flexibleSpace: !overScrolled ? const Padding(
-            padding: EdgeInsets.all(20),
-            child: Text(
-              "Welcome to Note Loom!",
-              style: TextStyle(fontSize: 20, color: Colors.white),
-            ),
-          ) : Container() ,
+          flexibleSpace: !overScrolled
+              ? const FlexibleSpaceBar(
+                  title: Text(
+                    "Welcome to Note Loom!",
+                    style: TextStyle(fontSize: 20, color: Colors.white),
+                  ),
+                )
+              : Container(),
         ),
-        SliverList.builder(
-            itemCount: 20,
-            itemBuilder: ((context, index) {
-              return Container(
-                width: double.infinity,
-                height: MediaQuery.of(context).size.height * 0.1,
-                padding: const EdgeInsets.all(10),
-                child: Text("Item: ${index + 1}"),
-              );
-            }))
-      ],
+        SliverToBoxAdapter(
+            child: Container(
+                padding: const EdgeInsets.all(20),
+                decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius:
+                        BorderRadius.vertical(top: Radius.circular(45))),
+                child: Column(
+                  children: _getUserNotes(),
+                )))
+      ]),
+    );
+  }
+
+  List<Widget> _getUserNotes() {
+    return List.generate(
+      10,
+      (index) => Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Container(
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Theme.of(context).colorScheme.primary)),
+          height: 200,
+          width: double.infinity,
+          child: Center(child: Text(index.toString())),
+        ),
+      ),
     );
   }
 }

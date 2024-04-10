@@ -5,7 +5,6 @@ import 'package:school_app/src/components/uicomponents.dart';
 import 'package:school_app/src/utils/providers.dart';
 import 'package:school_app/src/utils/firebase.dart';
 import 'package:school_app/src/utils/models.dart';
-import 'package:school_app/src/utils/sharedprefs.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -22,13 +21,12 @@ class SettingsPage extends StatelessWidget {
         ),
         title: const Text("Settings"),
       ),
-      body: Consumer2<SetUpProvider, UserProvider>(
+      body: Consumer2<UniversityDataProvider, UserProvider>(
           builder: (context, setup, user, child) {
         if (user.readUserData != null &&
             setup.readDepartmentsAndCourses.isNotEmpty) {
           return SetupForm(
             departmentsAndCourses: setup.readDepartmentsAndCourses,
-            schoolYears: setup.readSchoolYears,
             user: user.readUserData!,
           );
         }
@@ -41,13 +39,11 @@ class SettingsPage extends StatelessWidget {
 
 class SetupForm extends StatefulWidget {
   final List<Map<String, dynamic>> departmentsAndCourses;
-  final List<String> schoolYears;
   final UserModel user;
 
   const SetupForm(
       {super.key,
       required this.departmentsAndCourses,
-      required this.schoolYears,
       required this.user});
 
   @override

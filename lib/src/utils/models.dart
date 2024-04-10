@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:school_app/src/utils/firebase.dart';
 
 class UserModel {
   final String id;
@@ -40,14 +41,15 @@ class UserModel {
 
   factory UserModel.fromMap(Map<String, dynamic> data) {
     return UserModel(
-        id: data['id'],
-        email: data['email'],
-        username: data['username'],
-        name: data['name'],
-        universityId: data['universityId'],
-        course: data['course'],
-        department: data['department'],
-        schoolyears: data['schoolyears'],);
+      id: data['id'],
+      email: data['email'],
+      username: data['username'],
+      name: data['name'],
+      universityId: data['universityId'],
+      course: data['course'],
+      department: data['department'],
+      schoolyears: data['schoolyears'],
+    );
   }
 
   Map<String, dynamic> toMap() {
@@ -136,45 +138,35 @@ class DepartmentModel {
 class CourseModel {
   final String id;
   final String name;
-  final CollectionReference<DepartmentModel>? departmentRef;
-  final List<SubjectModel>? subjectIds;
+  final List<DocumentReference>? subjects;
 
-  CourseModel(
-      {required this.id,
-      required this.name,
-      this.departmentRef,
-      this.subjectIds});
+  CourseModel({required this.id, required this.name, this.subjects});
 
   factory CourseModel.fromFirestore(
       DocumentSnapshot<Map<String, dynamic>> snapshot, options) {
     final data = snapshot.data();
     final id = snapshot.id;
+    
 
     final course = CourseModel(
         id: id,
         name: data?['name'],
-        departmentRef: data?['departmentRef'],
-        subjectIds: data?['subjectIds']?.cast<String>());
+        subjects: data?['subjects'].cast<DocumentReference>());
 
     return course;
   }
 
   Map<String, dynamic> toFirestore() {
-    return {
-      "name": name,
-      "departmentRef": departmentRef,
-      if (subjectIds != null) "subjectIds": subjectIds
-    };
+    return {"name": name, if (subjects != null) "subjects": subjects};
   }
 }
 
 class SubjectModel {
   String id;
-  String name;
-  List<String> subjectCode;
+  String Subject;
+  List<String>? subjectCode;
 
-  SubjectModel(
-      {required this.id, required this.name, required this.subjectCode});
+  SubjectModel({required this.id, required this.Subject, this.subjectCode});
 
   factory SubjectModel.fromFirestore(
       DocumentSnapshot<Map<String, dynamic>> snapshot, options) {
@@ -183,19 +175,34 @@ class SubjectModel {
 
     return SubjectModel(
         id: id,
-        name: data?['name'],
+        Subject: data?['Subject'],
         subjectCode: data?['subjectCode']?.cast<String>());
+  }
+  Map<String, dynamic> toFirestore() {
+    return {
+      "Subject": Subject,
+      if (subjectCode != null) "subjectCode": subjectCode,
+    };
   }
 }
 
 class NoteModel {
   String? id;
   String name;
+  String subject;
+  String time;
   String storagePath;
   List<String>? tags;
+  String? summary;
 
   NoteModel(
-      {this.id, required this.name, required this.storagePath, this.tags});
+      {this.id,
+      required this.name,
+      required this.subject,
+      required this.time,
+      required this.storagePath,
+      this.tags,
+      this.summary});
 
   factory NoteModel.fromFirestore(
       DocumentSnapshot<Map<String, dynamic>> snapshot, __) {
@@ -205,20 +212,27 @@ class NoteModel {
     final note = NoteModel(
         id: id,
         name: data?['name'],
+        subject: data?['subject'],
+        time: data?['time'],
         storagePath: data?['storagePath'],
-        tags: data?['tags'].cast<String>());
+        tags: data?['tags'].cast<String>(),
+        summary: data?['summary']);
+
     return note;
   }
 
   Map<String, dynamic> toFirestore() {
     return {
-      "id": id,
       "name": name,
+      "subject": subject,
+      "time": DateTime.now().toString(),
       "storagePath": storagePath,
-      if (tags != null) "tags": tags
+      if (tags != null) "tags": tags,
+      if (summary != null) "summary": summary
     };
   }
 }
+
 class MessageModel {
   String? id;
   String message;
@@ -227,7 +241,11 @@ class MessageModel {
   String timestamp;
 
   MessageModel(
-      {this.id, required this.message, required this.senderId, required this.receiverId, required this.timestamp});
+      {this.id,
+      required this.message,
+      required this.senderId,
+      required this.receiverId,
+      required this.timestamp});
 
   factory MessageModel.fromFirestore(
       DocumentSnapshot<Map<String, dynamic>> snapshot, __) {

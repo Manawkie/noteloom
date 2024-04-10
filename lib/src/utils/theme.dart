@@ -13,16 +13,25 @@ class AppTheme {
   Color get primaryColor => _primaryColor;
 
   static final defaultTheme = ThemeData(
-    primaryColor: _primaryColor,
-    appBarTheme: const AppBarTheme(
-        backgroundColor: _primaryColor,
-        titleTextStyle: TextStyle(color: Colors.white, fontSize: 20)),
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: _primaryColor,
-    ),
-    navigationBarTheme:
-        const NavigationBarThemeData(backgroundColor: _grayColor),
-  );
+      primaryColor: _primaryColor,
+      appBarTheme: const AppBarTheme(
+          iconTheme: IconThemeData(color: Colors.white),
+          backgroundColor: _primaryColor,
+          titleTextStyle: TextStyle(color: Colors.white, fontSize: 20)),
+      colorScheme:
+          ColorScheme.fromSeed(seedColor: _primaryColor, secondary: _grayColor),
+      textTheme: const TextTheme(bodySmall: TextStyle(color: Colors.white)),
+      navigationBarTheme:
+          const NavigationBarThemeData(backgroundColor: _grayColor),
+      searchBarTheme: SearchBarThemeData(
+          backgroundColor: MaterialStateColor.resolveWith((states) {
+            if (states.contains(MaterialState.focused)) {
+              return _grayColor;
+            }
+            return Colors.white;
+          }),
+          textStyle:
+              MaterialStateProperty.all(const TextStyle(color: Colors.black))));
 
   static final darkTheme = ThemeData(
     primaryColor: _darkPrimaryColor,

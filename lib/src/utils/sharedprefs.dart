@@ -47,4 +47,30 @@ class SharedPrefs {
     sf.setString("userData", jsonEncode(user.toMap()));
     return user;
   }
+
+  static Future<List<Map<String, dynamic>>> getSubjects() async {
+    final sf = await SharedPreferences.getInstance();
+    final subjects = sf.getString("subjects");
+
+    if (subjects == null) {
+      final userSubjects = await Database.getUserSubjects();
+      await setSubjects(userSubjects);
+      return userSubjects;
+    }
+
+    final List<dynamic> decodedData = jsonDecode(subjects);
+
+    if (decodedData.isEmpty) {
+      final userSubjects = await Database.getUserSubjects();
+      await setSubjects(userSubjects);
+      return userSubjects;
+    }
+    
+    return decodedData.cast<Map<String, dynamic>>();
+  }
+
+  static Future<void> setSubjects(List<Map<String, String>> subjects) async {
+    final sf = await SharedPreferences.getInstance();
+    sf.setString("subjects", jsonEncode(subjects));
+  }
 }

@@ -13,7 +13,7 @@ class Setup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<SetUpProvider>(builder: (context, setup, child) {
+    return Consumer<UniversityDataProvider>(builder: (context, setup, child) {
       if (setup.readDepartmentsAndCourses.isEmpty) {
         SharedPrefs.getDepartmentAndCourses();
         return Scaffold(
@@ -24,7 +24,6 @@ class Setup extends StatelessWidget {
       return Scaffold(
         body: SetupForm(
           data: setup.readDepartmentsAndCourses,
-          schoolYears: setup.readSchoolYears,
         ),
       );
     });
@@ -35,11 +34,9 @@ class SetupForm extends StatefulWidget {
   const SetupForm({
     super.key,
     required this.data,
-    required this.schoolYears,
   });
 
   final List<Map<String, dynamic>> data;
-  final List<String> schoolYears;
 
   @override
   State<SetupForm> createState() => _SetupFormState();
@@ -76,7 +73,6 @@ class _SetupFormState extends State<SetupForm> {
         }
       });
     }
-
 
     super.initState();
   }

@@ -4,9 +4,11 @@ import 'package:loading_indicator/loading_indicator.dart';
 Widget myFormField(
     {required String label,
     required TextEditingController controller,
-    required bool isRequired}) {
+    required bool isRequired,
+    void Function(String)? onChanged}) {
   return TextFormField(
     controller: controller,
+    onChanged: onChanged,
     decoration: InputDecoration(
       labelText: label,
     ),

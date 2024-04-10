@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:school_app/src/utils/firebase.dart';
 import 'package:school_app/src/utils/models.dart';
@@ -72,15 +70,12 @@ class _IntroPageState extends State<IntroPage> {
                       child: AnimatedContainer(
                         margin: EdgeInsets.only(
                           bottom: isOnLogin
-                              ? MediaQuery.of(context).size.height * 0.25
+                              ? MediaQuery.of(context).size.height * 0.15
                               : 0,
                         ),
                         duration: const Duration(milliseconds: 1000),
                         curve: Curves.ease,
-                        child: SvgPicture.asset(
-                          "assets/images/app/introimage.svg",
-                          height: MediaQuery.of(context).size.height * 0.7,
-                        ),
+                        child: Image.asset("assets/images/app/introimage.png")
                       ))),
               Positioned(
                 top: 0,
@@ -98,23 +93,25 @@ class _IntroPageState extends State<IntroPage> {
                         children: [
                           const Text(
                             "Welcome to",
-                            style: TextStyle(fontSize: 20),
+                            style: TextStyle(fontSize: 20, color: Colors.white),
                           ),
                           const Text(
                             "Note Loom",
                             style: TextStyle(
-                                fontSize: 50, fontWeight: FontWeight.bold),
+                                fontSize: 50, fontWeight: FontWeight.bold, color: Colors.white),
                           ),
                           const SizedBox(
                             height: 20,
                           ),
-                          const Text(
-                              "Find and share your notes\nwitin your university."),
+                          Text(
+                            "Find and share your notes\nwitin your university.",
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
                           const SizedBox(
                             height: 40,
                           ),
                           ElevatedButton(
-                              child: const Text("Get Started"),
+                              child: const Text("Get Started", ),
                               onPressed: () {
                                 setState(() {
                                   isOnLogin = !isOnLogin;
@@ -157,7 +154,7 @@ class _IntroPageState extends State<IntroPage> {
                             children: [
                               const Text(
                                 "Check if your school is\navailable:",
-                                style: TextStyle(fontSize: 40),
+                                style: TextStyle(fontSize: 20),
                               ),
                               const SizedBox(
                                 height: 20,
@@ -174,7 +171,7 @@ class _IntroPageState extends State<IntroPage> {
 
                               // used for list of universities
 
-                              Expanded(
+                              Flexible(
                                 child: SingleChildScrollView(
                                   child: filterUniversities.isNotEmpty
                                       ? ListView.builder(
@@ -195,7 +192,7 @@ class _IntroPageState extends State<IntroPage> {
                                             );
                                           },
                                         )
-                                      : Container(), // Add a container if the universities list is empty
+                                      : Container()
                                 ),
                               ),
                               const SizedBox(
@@ -206,10 +203,10 @@ class _IntroPageState extends State<IntroPage> {
                                   onPressed: () {
                                     if (universities
                                         .contains(_findUniversity.text)) {
-                                      GoRouter.of(context).goNamed("login",
-                                          pathParameters: {
-                                            "universityName": _findUniversity.text
-                                          });
+                                      GoRouter.of(context)
+                                          .goNamed("login", pathParameters: {
+                                        "universityName": _findUniversity.text
+                                      });
                                     }
                                   },
                                   child: const Text("Get Started"),

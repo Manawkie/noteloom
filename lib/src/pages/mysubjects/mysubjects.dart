@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class PrioritySubjects extends StatefulWidget {
@@ -11,6 +10,10 @@ class PrioritySubjects extends StatefulWidget {
 class _PrioritySubjectsState extends State<PrioritySubjects> {
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return const Scaffold(
+      body: Center( 
+        child: Text("My Subjects Page"),
+      ),
+    );
   }
 }

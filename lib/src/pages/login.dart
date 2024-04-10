@@ -33,11 +33,22 @@ class _LoginState extends State<Login> {
 
   Future _logIn() async {
     await Auth.googleSignIn();
-    SharedPrefs.setDepartmentAndCourses().then((data) {
-      Provider.of<SetUpProvider>(context, listen: false)
-          .setDepartmentsAndCourses(data);
+  }
+
+  Future getStarted() async {
+
+    // load data to sharefpreferences
+
+    final universityProvider =
+        Provider.of<UniversityDataProvider>(context, listen: false);
+
+    await SharedPrefs.setDepartmentAndCourses().then((data) async {
+      universityProvider.setDepartmentsAndCourses(data);
     });
     await SharedPrefs.getUserData();
+
+    await SharedPrefs.getSubjects();
+    if (mounted) GoRouter.of(context).go("/setup");
   }
 
   @override
@@ -88,7 +99,7 @@ class _LoginState extends State<Login> {
                         },
                         child: const Text("Return to Home Page"),
                       ),
-                      _loginState(snapshot)
+                      _loginState(snapshot, getStarted)
                     ],
                   ),
                 ),
@@ -99,7 +110,8 @@ class _LoginState extends State<Login> {
   }
 }
 
-Widget _loginState(AsyncSnapshot<User?> snapshot) {
+Widget _loginState(
+    AsyncSnapshot<User?> snapshot, Future Function() getStarted) {
   if (snapshot.connectionState == ConnectionState.waiting) {
     return const SizedBox(
       width: 30,
@@ -129,12 +141,11 @@ Widget _loginState(AsyncSnapshot<User?> snapshot) {
         }
         return Column(
           children: [
-            Text("Welcome, ${Auth.auth.currentUser!.displayName}"),
+            (Auth.auth.currentUser!.displayName != null)
+                ? Text("Welcome, ${Auth.auth.currentUser!.displayName}")
+                : const Text("Welcome!"),
             ElevatedButton(
-                onPressed: () {
-                  context.go("/setup");
-                },
-                child: const Text("Continue")),
+                onPressed: getStarted, child: const Text("Continue")),
           ],
         );
       });

@@ -16,6 +16,7 @@ void main() async {
         ChangeNotifierProvider(create: (context) => UniversityDataProvider()),
         ChangeNotifierProvider(create: (context) => UserProvider()),
         ChangeNotifierProvider(create: (context) => NotesProvider()),
+        ChangeNotifierProvider(create: (context) => QueryNotesProvider())
       ],
       child: const MyApp(),
     ),

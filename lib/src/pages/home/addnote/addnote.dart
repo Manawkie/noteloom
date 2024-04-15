@@ -1,5 +1,3 @@
-import 'dart:js_interop';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -45,15 +43,15 @@ class _AddNoteState extends State<AddNote> {
 
     final getUserSubjects =
         Provider.of<UniversityDataProvider>(context, listen: false)
-            .readUserSubjects;
+            .readSubjects;
 
     for (Map<String, dynamic> subjectData in getUserSubjects) {
-      print(subjectData);
-      subjects.add(subjectData["subject"]!);
+      subjects.add(subjectData.values.first.toString());
     }
 
     subjects.insert(0, "Select a Subject");
     _subject = noteData.readSubject ?? subjects.first;
+
     super.initState();
   }
 
@@ -106,9 +104,11 @@ class _AddNoteState extends State<AddNote> {
         result = addnote.readResult;
       }
 
+      if (kDebugMode) print(uni.readSubjects);
+
       if (subjects.length == 1) {
-        for (var element in uni.readUserSubjects) {
-          subjects.add(element["subject"]!);
+        for (var subject in uni.readSubjects) {
+          subjects.add(subject.values.first.toString());
         }
       }
 
@@ -131,6 +131,16 @@ class _AddNoteState extends State<AddNote> {
           result = null;
           bytes = null;
         });
+      }
+
+      void clearFields() {
+        addnote.clearFields();
+        _nameControl.text = addnote.readName!;
+        _summaryControl.text = addnote.readSummary!;
+        _subject = addnote.subject ?? subjects.first;
+        _tag1Control.text = addnote.readTag1!;
+        _tag2Control.text = addnote.readTag2!;
+        _tag3Control.text = addnote.readTag3!;
       }
 
       return Scaffold(
@@ -166,14 +176,11 @@ class _AddNoteState extends State<AddNote> {
                       });
                       addnote.setName(resultString);
                     }),
-                myButtonFormField(
-                    value: _subject,
-                    items: subjects,
-                    onChanged: (value) {
-                      setState(() {
-                        _subject = value;
-                      });
-                    }),
+                ElevatedButton(
+                    onPressed: () {
+                      context.go("/addnote/selectsubject");
+                    },
+                    child: Text(_subject)),
                 (result == null)
                     ? ElevatedButton(
                         onPressed: () async {
@@ -221,8 +228,20 @@ class _AddNoteState extends State<AddNote> {
                     addnote.setSummary(value);
                   },
                 ),
-                ElevatedButton(
-                    onPressed: _submitFile, child: const Text("Post")),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                        onPressed: _submitFile, child: const Text("Post")),
+                    IconButton(
+                      onPressed: clearFields,
+                      icon: const Icon(
+                        Icons.remove_circle_outline,
+                        color: Colors.red,
+                      ),
+                    )
+                  ],
+                ),
               ],
             ),
           ),

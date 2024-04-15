@@ -28,6 +28,7 @@ dependencies:
   syncfusion_flutter_pdfviewer: ^24.2.8
   provider: ^6.1.2
   shared_preferences: ^2.2.2
+  liquid_pull_to_refresh: ^3.0.1
 
 dev_dependencies:
   flutter_test:

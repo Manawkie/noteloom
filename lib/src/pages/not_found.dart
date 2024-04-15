@@ -14,17 +14,22 @@ class _NotFoundPageState extends State<NotFoundPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          Center(
-            child: Text(widget.error.toString()),
-          ),
-          GestureDetector(
-              onTap: () {
-                context.go("/home");
-              },
-              child: const Text("Return home"))
-        ],
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Center(
+              child: Text(widget.error.toString()),
+            ),
+            GestureDetector(
+                onTap: () {
+                  context.go("/home");
+                },
+                child: const Text("Return home"))
+          ],
+        ),
       ),
     );
   }

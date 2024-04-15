@@ -18,6 +18,11 @@ class _PreviewNoteState extends State<PreviewNote> {
   Widget build(BuildContext context) {
     return Consumer<NotesProvider>(builder: (context, addnote, child) {
       final bytes = addnote.readBytes;
+
+      final subject = addnote.readSubject;
+
+      if (kDebugMode) print(subject);
+      
       return Scaffold(
           appBar: AppBar(
             leading: IconButton(
@@ -47,7 +52,10 @@ class _PreviewNoteState extends State<PreviewNote> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: const TextStyle(fontSize: 30),),
+        Text(
+          title,
+          style: const TextStyle(fontSize: 30),
+        ),
         Flexible(child: SfPdfViewer.memory(bytes)),
       ],
     );

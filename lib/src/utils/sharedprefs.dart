@@ -28,13 +28,16 @@ class SharedPrefs {
     return databaseData;
   }
 
-  static Future<UserModel> getUserData() async {
+  static Future<UserModel?> getUserData() async {
     final sf = await SharedPreferences.getInstance();
     final userData = sf.getString("userData");
 
     if (userData == null) {
       final user = await Database.getUser();
-      return await setUserData(user!);
+      if (user == null) {
+        return null;
+      }
+      return await setUserData(user);
     }
 
     final Map<String, dynamic> decodedData = jsonDecode(userData);
@@ -53,23 +56,23 @@ class SharedPrefs {
     final subjects = sf.getString("subjects");
 
     if (subjects == null) {
-      final userSubjects = await Database.getUserSubjects();
-      await setSubjects(userSubjects);
-      return userSubjects;
+      final userSubjects = await Database.getAllSubjects();
+
+      final List<Map<String, String>> universitySubjects = [];
+      for (var subject in userSubjects) {
+        universitySubjects.add({subject.id: subject.subject});
+      }
+
+      await setSubjects(universitySubjects);
+      return universitySubjects;
     }
 
     final List<dynamic> decodedData = jsonDecode(subjects);
 
-    if (decodedData.isEmpty) {
-      final userSubjects = await Database.getUserSubjects();
-      await setSubjects(userSubjects);
-      return userSubjects;
-    }
-    
     return decodedData.cast<Map<String, dynamic>>();
   }
 
-  static Future<void> setSubjects(List<Map<String, String>> subjects) async {
+  static Future<void> setSubjects(List<Map<String, dynamic>> subjects) async {
     final sf = await SharedPreferences.getInstance();
     sf.setString("subjects", jsonEncode(subjects));
   }

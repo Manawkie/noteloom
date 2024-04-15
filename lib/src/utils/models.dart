@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:school_app/src/utils/firebase.dart';
 
 class UserModel {
   final String id;
@@ -146,7 +145,6 @@ class CourseModel {
       DocumentSnapshot<Map<String, dynamic>> snapshot, options) {
     final data = snapshot.data();
     final id = snapshot.id;
-    
 
     final course = CourseModel(
         id: id,
@@ -161,12 +159,22 @@ class CourseModel {
   }
 }
 
-class SubjectModel {
-  String id;
-  String Subject;
-  List<String>? subjectCode;
+abstract class Results {}
 
-  SubjectModel({required this.id, required this.Subject, this.subjectCode});
+class SubjectModel extends Results {
+  String id;
+  String subject;
+  List<String>? subjectCode;
+  String? universityId;
+  List<String>? courseId;
+
+  SubjectModel({
+    required this.id,
+    required this.subject,
+    this.subjectCode,
+    this.universityId,
+    this.courseId
+  });
 
   factory SubjectModel.fromFirestore(
       DocumentSnapshot<Map<String, dynamic>> snapshot, options) {
@@ -175,21 +183,28 @@ class SubjectModel {
 
     return SubjectModel(
         id: id,
-        Subject: data?['Subject'],
-        subjectCode: data?['subjectCode']?.cast<String>());
+        subject: data?['subject'],
+        subjectCode: data?['subjectCode']?.cast<String>(),
+        universityId: data?['universityId'],
+        courseId: data?['courseId']?.cast<String>()
+        );
   }
   Map<String, dynamic> toFirestore() {
     return {
-      "Subject": Subject,
+      "subject": subject,
       if (subjectCode != null) "subjectCode": subjectCode,
+      if (universityId != null) "universityId": universityId,
+      if (courseId != null) "courseId": courseId
     };
   }
 }
 
-class NoteModel {
+class NoteModel extends Results {
   String? id;
+  String schoolId;
   String name;
-  String subject;
+  String? author;
+  String subjectId;
   String time;
   String storagePath;
   List<String>? tags;
@@ -197,10 +212,12 @@ class NoteModel {
 
   NoteModel(
       {this.id,
+      required this.schoolId,
       required this.name,
-      required this.subject,
+      required this.subjectId,
       required this.time,
       required this.storagePath,
+      this.author,
       this.tags,
       this.summary});
 
@@ -211,8 +228,10 @@ class NoteModel {
 
     final note = NoteModel(
         id: id,
+        schoolId: data?['schoolId'],
         name: data?['name'],
-        subject: data?['subject'],
+        author: data?['author'],
+        subjectId: data?['subject'],
         time: data?['time'],
         storagePath: data?['storagePath'],
         tags: data?['tags'].cast<String>(),
@@ -224,7 +243,9 @@ class NoteModel {
   Map<String, dynamic> toFirestore() {
     return {
       "name": name,
-      "subject": subject,
+      "author": author,
+      "schoolId": schoolId,
+      "subjectId": subjectId,
       "time": DateTime.now().toString(),
       "storagePath": storagePath,
       if (tags != null) "tags": tags,

@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
-import 'package:school_app/src/pages/addnote/addnote.dart';
-import 'package:school_app/src/pages/addnote/previewnote.dart';
+import 'package:school_app/src/pages/home/addnote/addnote.dart';
+import 'package:school_app/src/pages/home/addnote/previewnote.dart';
 
 class AddNoteLayout extends StatefulWidget {
   const AddNoteLayout({super.key});

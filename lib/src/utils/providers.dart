@@ -2,6 +2,7 @@
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
+import 'package:school_app/src/utils/firebase.dart';
 import 'package:school_app/src/utils/models.dart';
 import 'package:school_app/src/utils/sharedprefs.dart';
 
@@ -11,13 +12,13 @@ class UniversityDataProvider extends ChangeNotifier {
       _departmentsAndCourses;
 
   List<Map<String, dynamic>> _userSubjects = [];
-  List<Map<String, dynamic>> get readUserSubjects => _userSubjects;
+  List<Map<String, dynamic>> get readSubjects => _userSubjects;
 
   UniversityDataProvider() {
     SharedPrefs.getDepartmentAndCourses().then((data) {
       setDepartmentsAndCourses(data);
     });
-    SharedPrefs.getSubjects().then((data) => setUserSubjects(data));
+    SharedPrefs.getSubjects().then((data) => setSubjects(data));
   }
 
   void setDepartmentsAndCourses(List<Map<String, dynamic>> data) {
@@ -25,7 +26,7 @@ class UniversityDataProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setUserSubjects(List<Map<String, dynamic>> data) {
+  void setSubjects(List<Map<String, dynamic>> data) {
     _userSubjects = data;
     notifyListeners();
   }
@@ -92,6 +93,11 @@ class NotesProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setSubject(String subject) {
+    this.subject = subject;
+    notifyListeners();
+  }
+
   void setSummary(String value) {
     summary = value;
     notifyListeners();
@@ -104,5 +110,52 @@ class NotesProvider extends ChangeNotifier {
       _result = null;
       notifyListeners();
     }
+  }
+
+  void clearFields() {
+    name = "";
+    summary = "";
+    tag1 = "";
+    tag2 = "";
+    tag3 = "";
+    notifyListeners();
+  }
+}
+
+class QueryNotesProvider extends ChangeNotifier {
+
+  List<NoteModel> universityNotes = [];
+  List<SubjectModel> universitySubjects = [];
+
+  List<NoteModel> get getUniversityNotes => universityNotes;
+  List<SubjectModel> get getUniversitySubjects => universitySubjects;
+
+  QueryNotesProvider() {
+    Database.getAllNotes().then(
+      (data) => setNotes(
+        data.cast<NoteModel>(),
+      ),
+    );
+    
+    Database.getAllSubjects().then(
+      (data) => setSubjects(
+        data.cast<SubjectModel>(),
+      ),
+    );
+    
+  }
+
+  setNotes(List<NoteModel> data) {
+    universityNotes = data;
+    notifyListeners();
+  }
+
+  setSubjects(List<SubjectModel> data) {
+    universitySubjects = data;
+    notifyListeners();
+  } 
+
+  NoteModel? findNote(String id) {
+    return universityNotes.firstWhere((note) => note.id == id);
   }
 }

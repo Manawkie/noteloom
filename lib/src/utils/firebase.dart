@@ -197,57 +197,22 @@ class Database {
     return listDepartmentAndCourses;
   }
 
-  static Future<List<Map<String, String>>> getUserSubjects() async {
-    final userSubjects = <Map<String, String>>[];
+  static Future<List<SubjectModel>> getAllSubjects() async {
+    final subjects = <SubjectModel>[];
 
-    // get the user's course
-    late String userDepartment;
-    late String userCourse;
-
-    await SharedPrefs.getUserData().then((data) {
-      if (data.course == null) {
-        throw Exception("User has not selected a course");
-      }
-      userDepartment = data.department!;
-      userCourse = data.course!;
-    });
-
-    CollectionReference<Map<String, dynamic>> departmentRef = db
-        .collection("universities")
-        .doc(Auth.schoolDomain)
-        .collection("departments");
-
-    final queryDepartment = await departmentRef
+    await db
+        .collection("subjects")
         .withConverter(
-          fromFirestore: DepartmentModel.fromFirestore,
-          toFirestore: (model, _) => model.toFirestore(),
-        )
-        .where("name", isEqualTo: userDepartment)
-        .get()
-        .then((value) => value.docs.first);
-
-    final userSubjectsQuery = await departmentRef
-        .doc(queryDepartment.id)
-        .collection("courses")
-        .withConverter(
-            fromFirestore: CourseModel.fromFirestore,
+            fromFirestore: SubjectModel.fromFirestore,
             toFirestore: (model, _) => model.toFirestore())
-        .where("name", isEqualTo: userCourse)
         .get()
-        .then((snap) {
-      final userCourseData = snap.docs.first.data();
-      return userCourseData.subjects;
+        .then((snapshot) {
+      for (var subject in snapshot.docs) {
+        subjects.add(subject.data());
+      }
     });
 
-    for (var subject in userSubjectsQuery!) {
-      final subjectData = await subject
-          .withConverter(
-              fromFirestore: SubjectModel.fromFirestore,
-              toFirestore: (model, _) => model.toFirestore())
-          .get();
-      userSubjects.add({"subject": subjectData.data()!.Subject, "id": subject.id});
-    }
-    return userSubjects;
+    return subjects;
   }
 
   static Future<void> createUser(
@@ -292,12 +257,32 @@ class Database {
             toFirestore: (model, __) => model.toFirestore())
         .add(NoteModel(
           name: fileName,
-          subject: subject,
+          schoolId: Auth.schoolDomain,
+          author: await SharedPrefs.getUserData().then((user) => user!.username),
+          subjectId: subject,
           time: DateTime.now().toString(),
           storagePath: storagePath,
           tags: tags,
           summary: summary,
         ));
+  }
+
+  static Future<List<dynamic>> getAllNotes() async {
+    final allNotes = [];
+
+    await db
+        .collection("notes")
+        .withConverter(
+            fromFirestore: NoteModel.fromFirestore,
+            toFirestore: (model, _) => model.toFirestore())
+        .get()
+        .then((QuerySnapshot<NoteModel> snapshot) {
+      for (var note in snapshot.docs) {
+        allNotes.add(note.data());
+      }
+    });
+
+    return allNotes;
   }
 }
 
@@ -315,10 +300,27 @@ class Storage {
   }
 
   static Future<void> deleteFile(String storagePath) async {
+    // get the file referene from the database and delete it,
+    // then delete the file from the storage
+    await Database.db
+        .collection("notes")
+        .where("storagePath", isEqualTo: storagePath)
+        .get()
+        .then((snapshot) {
+      snapshot.docs.first.reference.delete();
+    });
     await storage.refFromURL(storagePath).delete();
   }
 
-  static Future<Uint8List?> getFile(String storagePath) async {
-    return await storage.refFromURL(storagePath).getData();
+  static Future<String> getFile(String storagePath) async {
+    final noteRef = storage.ref(storagePath);
+
+    final url = await noteRef.getDownloadURL();
+
+    if (kDebugMode) {
+      print(url);
+    }
+
+    return url;
   }
 }

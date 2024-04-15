@@ -36,16 +36,18 @@ class _LoginState extends State<Login> {
   }
 
   Future getStarted() async {
-
     // load data to sharefpreferences
 
     final universityProvider =
         Provider.of<UniversityDataProvider>(context, listen: false);
+    final userInfo = Provider.of<UserProvider>(context, listen: false);
 
     await SharedPrefs.setDepartmentAndCourses().then((data) async {
       universityProvider.setDepartmentsAndCourses(data);
     });
-    await SharedPrefs.getUserData();
+    await Database.getUser().then((value) {
+      SharedPrefs.setUserData(value);
+    }); 
 
     await SharedPrefs.getSubjects();
     if (mounted) GoRouter.of(context).go("/setup");

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 
 class UserModel {
   final String id;
@@ -164,17 +165,16 @@ abstract class Results {}
 class SubjectModel extends Results {
   String id;
   String subject;
-  List<String>? subjectCode;
+  String? subjectCode;
   String? universityId;
   List<String>? courseId;
 
-  SubjectModel({
-    required this.id,
-    required this.subject,
-    this.subjectCode,
-    this.universityId,
-    this.courseId
-  });
+  SubjectModel(
+      {required this.id,
+      required this.subject,
+      this.subjectCode,
+      this.universityId,
+      this.courseId});
 
   factory SubjectModel.fromFirestore(
       DocumentSnapshot<Map<String, dynamic>> snapshot, options) {
@@ -184,15 +184,14 @@ class SubjectModel extends Results {
     return SubjectModel(
         id: id,
         subject: data?['subject'],
-        subjectCode: data?['subjectCode']?.cast<String>(),
+        subjectCode: data?['subject code'],
         universityId: data?['universityId'],
-        courseId: data?['courseId']?.cast<String>()
-        );
+        courseId: data?['courseId']?.cast<String>());
   }
   Map<String, dynamic> toFirestore() {
     return {
       "subject": subject,
-      if (subjectCode != null) "subjectCode": subjectCode,
+      if (subjectCode != null) "subject code": subjectCode,
       if (universityId != null) "universityId": universityId,
       if (courseId != null) "courseId": courseId
     };
@@ -203,11 +202,11 @@ class NoteModel extends Results {
   String? id;
   String schoolId;
   String name;
-  String? author;
+  String author;
   String subjectId;
   String time;
   String storagePath;
-  List<String>? tags;
+  List<String?>? tags;
   String? summary;
 
   NoteModel(
@@ -217,7 +216,7 @@ class NoteModel extends Results {
       required this.subjectId,
       required this.time,
       required this.storagePath,
-      this.author,
+      required this.author,
       this.tags,
       this.summary});
 
@@ -231,7 +230,7 @@ class NoteModel extends Results {
         schoolId: data?['schoolId'],
         name: data?['name'],
         author: data?['author'],
-        subjectId: data?['subject'],
+        subjectId: data?['subjectId'],
         time: data?['time'],
         storagePath: data?['storagePath'],
         tags: data?['tags'].cast<String>(),

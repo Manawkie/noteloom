@@ -53,15 +53,23 @@ class _SelectSubjectPageState extends State<SelectSubjectPage> {
             SliverList(
                 delegate: SliverChildBuilderDelegate(
               (context, index) {
+
+                final subjectInfo = notes.universitySubjects[index];
+
                 return ListTile(
-                  title: Text(notes.universitySubjects[index].subject),
+                  title: Text(subjectInfo.subject),
                   onTap: () {
+                    final selectedSubject =
+                        notes.getUniversitySubjects[index].subject;
+
                     context.read<NotesProvider>().setSubject(
-                          notes.universitySubjects[index].subject,
+                          selectedSubject,
                         );
                     context.go("/addnote");
                     GoRouter.of(context).refresh();
+
                   },
+                  subtitle: Text(subjectInfo.subjectCode ?? ""),
                 );
               },
               childCount: notes.universitySubjects.length,

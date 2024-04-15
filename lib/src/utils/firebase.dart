@@ -258,7 +258,8 @@ class Database {
         .add(NoteModel(
           name: fileName,
           schoolId: Auth.schoolDomain,
-          author: await SharedPrefs.getUserData().then((user) => user!.username),
+          author:
+              await SharedPrefs.getUserData().then((user) => user!.username),
           subjectId: subject,
           time: DateTime.now().toString(),
           storagePath: storagePath,
@@ -267,8 +268,8 @@ class Database {
         ));
   }
 
-  static Future<List<dynamic>> getAllNotes() async {
-    final allNotes = [];
+  static Future<List<NoteModel>> getAllNotes() async {
+    final allNotes = <NoteModel>[];
 
     await db
         .collection("notes")
@@ -276,7 +277,7 @@ class Database {
             fromFirestore: NoteModel.fromFirestore,
             toFirestore: (model, _) => model.toFirestore())
         .get()
-        .then((QuerySnapshot<NoteModel> snapshot) {
+        .then((snapshot) {
       for (var note in snapshot.docs) {
         allNotes.add(note.data());
       }

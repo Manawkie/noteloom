@@ -1,5 +1,4 @@
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -26,6 +25,7 @@ class _AddNoteState extends State<AddNote> {
   String _subject = "";
   late TextEditingController _summaryControl;
 
+  List<Map<String, dynamic>> subjectIds = [];
   List<String> subjects = [];
 
   FilePickerResult? result;
@@ -45,12 +45,14 @@ class _AddNoteState extends State<AddNote> {
         Provider.of<UniversityDataProvider>(context, listen: false)
             .readSubjects;
 
+    subjectIds = getUserSubjects;
+
     for (Map<String, dynamic> subjectData in getUserSubjects) {
       subjects.add(subjectData.values.first.toString());
     }
 
     subjects.insert(0, "Select a Subject");
-    _subject = noteData.readSubject ?? subjects.first;
+    _subject = noteData.readSubject ?? "Select a Subject";
 
     super.initState();
   }
@@ -83,6 +85,15 @@ class _AddNoteState extends State<AddNote> {
   void _submitFile() {
     if (_formkey.currentState!.validate()) {
       if (result != null && bytes != null) {
+        // final subjectID = subjectIds
+        //     .where((element) => element.values.first == _subject)
+        //     .first
+        //     .keys
+        //     .first
+        //     .toString();
+
+        // print(subjectID);
+
         Database.submitFile(
             bytes!,
             _nameControl.text,
@@ -103,8 +114,6 @@ class _AddNoteState extends State<AddNote> {
       if (addnote.readResult != null) {
         result = addnote.readResult;
       }
-
-      if (kDebugMode) print(uni.readSubjects);
 
       if (subjects.length == 1) {
         for (var subject in uni.readSubjects) {
@@ -137,7 +146,7 @@ class _AddNoteState extends State<AddNote> {
         addnote.clearFields();
         _nameControl.text = addnote.readName!;
         _summaryControl.text = addnote.readSummary!;
-        _subject = addnote.subject ?? subjects.first;
+        _subject = addnote.subject ?? "Select a Subject";
         _tag1Control.text = addnote.readTag1!;
         _tag2Control.text = addnote.readTag2!;
         _tag3Control.text = addnote.readTag3!;
@@ -180,7 +189,7 @@ class _AddNoteState extends State<AddNote> {
                     onPressed: () {
                       context.go("/addnote/selectsubject");
                     },
-                    child: Text(_subject)),
+                    child: Text(addnote.readSubject ?? "Select a Subject")),
                 (result == null)
                     ? ElevatedButton(
                         onPressed: () async {
@@ -232,7 +241,11 @@ class _AddNoteState extends State<AddNote> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     ElevatedButton(
-                        onPressed: _submitFile, child: const Text("Post")),
+                        onPressed: () {
+                          _submitFile();
+                          clearFields();
+                        },
+                        child: const Text("Post")),
                     IconButton(
                       onPressed: clearFields,
                       icon: const Icon(

@@ -32,7 +32,7 @@ class _FindNotesState extends State<FindNotes> {
             value.cast<NoteModel>(),
           ),
         );
-
+        
         return Scaffold(
           body: Center(
             child: Column(

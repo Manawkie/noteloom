@@ -45,10 +45,15 @@ class SharedPrefs {
     return UserModel.fromMap(decodedData);
   }
 
-  static Future<UserModel> setUserData(UserModel user) async {
+  static Future<UserModel?> setUserData(UserModel? user) async {
     final sf = await SharedPreferences.getInstance();
-    sf.setString("userData", jsonEncode(user.toMap()));
-    return user;
+    if (user != null) {
+      sf.setString("userData", jsonEncode(user.toMap()));
+      return user;
+    }
+
+    sf.setString("userData", "");
+    return null;
   }
 
   static Future<List<Map<String, dynamic>>> getSubjects() async {

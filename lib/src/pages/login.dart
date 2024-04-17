@@ -42,12 +42,16 @@ class _LoginState extends State<Login> {
         Provider.of<UniversityDataProvider>(context, listen: false);
     final userInfo = Provider.of<UserProvider>(context, listen: false);
 
+
+    // override all set deps and courses
     await SharedPrefs.setDepartmentAndCourses().then((data) async {
       universityProvider.setDepartmentsAndCourses(data);
     });
-    await Database.getUser().then((value) {
-      SharedPrefs.setUserData(value);
-    }); 
+
+    // override user data with the new user
+    await Database.getUser().then((value) async {
+      userInfo.setUserData(value);
+    });
 
     await SharedPrefs.getSubjects();
     if (mounted) GoRouter.of(context).go("/setup");

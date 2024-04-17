@@ -75,7 +75,7 @@ class NotesProvider extends ChangeNotifier {
   }
 
   void setResult(
-      FilePickerResult result,
+      FilePickerResult? result,
       String filename,
       String fileSummary,
       String fileSubject,
@@ -83,7 +83,7 @@ class NotesProvider extends ChangeNotifier {
       String fileTags2,
       String fileTags3) {
     _result = result;
-    bytes = result.files.single.bytes!;
+    bytes = result?.files.single.bytes!;
     name = filename;
     summary = fileSummary;
     subject = fileSubject;
@@ -113,7 +113,10 @@ class NotesProvider extends ChangeNotifier {
   }
 
   void clearFields() {
+    _result = null;
+    bytes = null;
     name = "";
+    subject = "Select a Subject";
     summary = "";
     tag1 = "";
     tag2 = "";
@@ -123,7 +126,6 @@ class NotesProvider extends ChangeNotifier {
 }
 
 class QueryNotesProvider extends ChangeNotifier {
-
   List<NoteModel> universityNotes = [];
   List<SubjectModel> universitySubjects = [];
 
@@ -136,26 +138,29 @@ class QueryNotesProvider extends ChangeNotifier {
         data.cast<NoteModel>(),
       ),
     );
-    
+
     Database.getAllSubjects().then(
       (data) => setSubjects(
         data.cast<SubjectModel>(),
       ),
     );
-    
   }
 
-  setNotes(List<NoteModel> data) {
+  void setNotes(List<NoteModel> data) {
     universityNotes = data;
     notifyListeners();
   }
 
-  setSubjects(List<SubjectModel> data) {
+  void setSubjects(List<SubjectModel> data) {
     universitySubjects = data;
     notifyListeners();
-  } 
+  }
 
   NoteModel? findNote(String id) {
     return universityNotes.firstWhere((note) => note.id == id);
+  }
+
+  SubjectModel? findSubject(String id) {
+    return universitySubjects.firstWhere((subject) => subject.id == id);
   }
 }

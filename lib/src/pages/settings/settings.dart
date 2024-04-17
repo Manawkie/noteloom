@@ -15,7 +15,7 @@ class SettingsPage extends StatelessWidget {
       appBar: AppBar(
         leading: IconButton(
           onPressed: () {
-            GoRouter.of(context).go("/home");
+            context.pop();
           },
           icon: const Icon(Icons.arrow_back),
         ),
@@ -42,9 +42,7 @@ class SetupForm extends StatefulWidget {
   final UserModel user;
 
   const SetupForm(
-      {super.key,
-      required this.departmentsAndCourses,
-      required this.user});
+      {super.key, required this.departmentsAndCourses, required this.user});
 
   @override
   State<SetupForm> createState() => _SetupFormState();
@@ -83,7 +81,9 @@ class _SetupFormState extends State<SetupForm> {
 
     // get all taken usernames
     Database.getUsernames().then((value) {
-      _takenUsernames.where((element) => element != widget.user.username).toList();
+      _takenUsernames
+          .where((element) => element != widget.user.username)
+          .toList();
     });
 
     super.initState();
@@ -138,7 +138,6 @@ class _SetupFormState extends State<SetupForm> {
               }
               return null;
             }),
-          
             myButtonFormField(
                 value: _selectedDepartment,
                 items: _departments,

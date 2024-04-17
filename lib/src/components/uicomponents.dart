@@ -51,3 +51,18 @@ Widget myLoadingIndicator() {
     ),
   );
 }
+
+Widget myToast(ThemeData theme, String text) {
+  return Container(
+    padding: const EdgeInsets.all(12),
+    decoration: BoxDecoration(
+        color: theme.colorScheme.primary,
+        borderRadius: BorderRadius.circular(8)),
+    child: Text(
+      text,
+      style: const TextStyle(
+        color: Colors.white,
+      ),
+    ),
+  );
+}

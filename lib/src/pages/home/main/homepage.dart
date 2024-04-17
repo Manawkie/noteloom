@@ -74,7 +74,7 @@ class _HomePageState extends State<HomePage> {
                 }
                 return SliverToBoxAdapter(
                   child: Container(
-                    padding: const EdgeInsets.only(top: 45),
+                    padding: const EdgeInsets.all(20),
                     decoration: const BoxDecoration(
                       borderRadius: BorderRadius.vertical(
                         top: Radius.circular(45),
@@ -82,7 +82,11 @@ class _HomePageState extends State<HomePage> {
                       color: Colors.white,
                     ),
                     child: Column(
-                      children: [..._buildList()],
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text("Recent Notes and Subjects"),
+                        ..._buildList()
+                      ],
                     ),
                   ),
                 );

@@ -49,11 +49,15 @@ class _PageWithDrawerState extends State<PageWithDrawer>
           actions: [
             IconButton(
                 onPressed: () {
-                  context.go("/settings");
+                  context.go("/home/profile");
                 },
-                icon: CircleAvatar(
-                  backgroundImage:
-                      NetworkImage(Auth.currentUser!.photoURL ?? ""),
+                icon: Hero(
+                  tag: Auth.currentUser!.uid,
+                  
+                  child: CircleAvatar(
+                    backgroundImage:
+                        NetworkImage(Auth.currentUser!.photoURL ?? ""),
+                  ),
                 ))
           ],
         ),
@@ -94,7 +98,7 @@ class _PageWithDrawerState extends State<PageWithDrawer>
 
   final List<Widget> _pages = [
     const HomePage(),
-    const FindNotes(),
+    const MyWidget(),
     const MyNotesPage(),
     const PrioritySubjects(),
   ];

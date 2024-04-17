@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -38,76 +40,141 @@ class RenderNote extends StatefulWidget {
 }
 
 class _RenderNoteState extends State<RenderNote> {
+  bool isSaved = false;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios),
-          onPressed: () {
-            context.pop();
-          },
-        ),
-        title: Text(widget.note.name),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(10),
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  widget.note.subjectId,
-                  style: const TextStyle(fontSize: 20),
-                ),
-                Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-                  IconButton(
-                    icon: const Icon(Icons.bookmark),
-                    onPressed: () {},
-                  ),
-                  Row(
-                    children: [
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 8),
-                        child: Text("69"),
-                      ),
-                      IconButton(
-                          onPressed: () {}, icon: const Icon(Icons.thumb_up))
-                    ],
-                  )
-                ])
-              ],
+    return FutureBuilder(
+        future: Future.wait([
+          Storage.getFile(widget.note.storagePath),
+          Database.isNoteSaved(widget.note),
+        ]),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Scaffold(
+              body: Center(
+                child: Text("Loading Page"),
+              ),
+            );
+          }
+          return Scaffold(
+            appBar: AppBar(
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back_ios_new),
+                onPressed: () {
+                  context.pop();
+                },
+              ),
             ),
-            SizedBox(
-              width: double.infinity,
+            body: Padding(
+              padding: const EdgeInsets.all(10),
               child: Column(
                 children: [
-                  Text(
-                    widget.note.summary ?? "",
-                    textAlign: TextAlign.start,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.note.name,
+                            style: const TextStyle(fontSize: 20),
+                          ),
+                          Text(
+                            widget.note.subjectId,
+                          ),
+                        ],
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          Saved(
+                            isSaved: snapshot.data![1] as bool,
+                            note: widget.note,
+                          ),
+                          Row(
+                            children: [
+                              const Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 8),
+                                child: Text("69"),
+                              ),
+                              IconButton(
+                                  onPressed: () {},
+                                  icon: const Icon(Icons.thumb_up))
+                            ],
+                          )
+                        ],
+                      )
+                    ],
                   ),
-                  Text("@${widget.note.author ?? "student"}"),
+                  SizedBox(
+                    width: double.infinity,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.note.summary ?? "",
+                          textAlign: TextAlign.start,
+                        ),
+                        Text("@${widget.note.author}"),
+                      ],
+                    ),
+                  ),
+                  Flexible(child: SfPdfViewer.memory(snapshot.data?[0] as Uint8List))
                 ],
               ),
             ),
-            Expanded(
-                child: FutureBuilder(
-              future: Storage.getFile(widget.note.storagePath),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting ||
-                    snapshot.data == null) {
-                  return Center(
-                    child: myLoadingIndicator(),
-                  );
-                }
-                return SfPdfViewer.network(snapshot.data!);
-              },
-            ))
-          ],
+          );
+        });
+  }
+}
+
+class Saved extends StatefulWidget {
+  const Saved({super.key, required this.isSaved, required this.note});
+
+  final bool isSaved;
+  final NoteModel note;
+
+  @override
+  State<Saved> createState() => _SavedState();
+}
+
+class _SavedState extends State<Saved> {
+  bool isSaved = false;
+
+  @override
+  void initState() {
+    isSaved = widget.isSaved;
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    Database.saveNote(
+      
+      
+      widget.note, isSaved);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+        icon: Icon(
+          Icons.bookmark,
+          color: isSaved ? Theme.of(context).colorScheme.primary : null,
         ),
-      ),
-    );
+        onPressed: () {
+          setState(() {
+            isSaved = !isSaved;
+          });
+        });
   }
 }

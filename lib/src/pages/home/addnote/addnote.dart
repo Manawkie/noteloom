@@ -1,6 +1,7 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:school_app/src/components/uicomponents.dart';
@@ -31,6 +32,8 @@ class _AddNoteState extends State<AddNote> {
   FilePickerResult? result;
   Uint8List? bytes;
 
+  late FToast ftoast;
+
   @override
   void initState() {
     final noteData = Provider.of<NotesProvider>(context, listen: false);
@@ -54,10 +57,14 @@ class _AddNoteState extends State<AddNote> {
     subjects.insert(0, "Select a Subject");
     _subject = noteData.readSubject ?? "Select a Subject";
 
+    ftoast = FToast();
+    ftoast.init(context);
+
     super.initState();
   }
 
   String resultString = "";
+
   @override
   void dispose() {
     _nameControl.dispose();
@@ -82,19 +89,10 @@ class _AddNoteState extends State<AddNote> {
     }
   }
 
-  void _submitFile() {
+  Future _submitFile() async {
     if (_formkey.currentState!.validate()) {
       if (result != null && bytes != null) {
-        // final subjectID = subjectIds
-        //     .where((element) => element.values.first == _subject)
-        //     .first
-        //     .keys
-        //     .first
-        //     .toString();
-
-        // print(subjectID);
-
-        Database.submitFile(
+        await Database.submitFile(
             bytes!,
             _nameControl.text,
             _subject,
@@ -106,6 +104,8 @@ class _AddNoteState extends State<AddNote> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Consumer2<NotesProvider, UniversityDataProvider>(
         builder: (context, addnote, uni, child) {
       if (addnote.readBytes != null) {
@@ -113,6 +113,10 @@ class _AddNoteState extends State<AddNote> {
       }
       if (addnote.readResult != null) {
         result = addnote.readResult;
+      }
+
+      if (addnote.readSubject != null) {
+        _subject = addnote.readSubject!;
       }
 
       if (subjects.length == 1) {
@@ -123,7 +127,7 @@ class _AddNoteState extends State<AddNote> {
 
       void setNote() {
         addnote.setResult(
-          result!,
+          result,
           _nameControl.text,
           _summaryControl.text,
           _subject,
@@ -144,6 +148,8 @@ class _AddNoteState extends State<AddNote> {
 
       void clearFields() {
         addnote.clearFields();
+        result = null;
+        bytes = null;
         _nameControl.text = addnote.readName!;
         _summaryControl.text = addnote.readSummary!;
         _subject = addnote.subject ?? "Select a Subject";
@@ -215,15 +221,18 @@ class _AddNoteState extends State<AddNote> {
                 myFormField(
                     label: "Tag 1",
                     controller: _tag1Control,
-                    isRequired: false),
+                    isRequired: false,
+                    onChanged: (value) => setNote()),
                 myFormField(
                     label: "Tag 2",
                     controller: _tag2Control,
-                    isRequired: false),
+                    isRequired: false,
+                    onChanged: (value) => setNote()),
                 myFormField(
                     label: "Tag 3",
                     controller: _tag3Control,
-                    isRequired: false),
+                    isRequired: false,
+                    onChanged: (value) => setNote()),
                 TextFormField(
                   controller: _summaryControl,
                   decoration: const InputDecoration(
@@ -241,9 +250,24 @@ class _AddNoteState extends State<AddNote> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     ElevatedButton(
-                        onPressed: () {
-                          _submitFile();
-                          clearFields();
+                        onPressed: () async {
+                          try {
+                            if (_subject == "Select a Subject" || !subjects.contains(_subject)) {
+                              throw ErrorDescription("Please select a Subject first");
+                            }
+
+                            await _submitFile();
+                            clearFields();
+                          } on ErrorDescription catch (e) {
+                            ftoast.showToast(
+                              child: myToast(theme, e.toString()),
+                              gravity: ToastGravity.BOTTOM_RIGHT,
+                              fadeDuration: const Duration(milliseconds: 400),
+                              toastDuration: const Duration(seconds: 2),
+                              isDismissable: true,
+                              ignorePointer: false,
+                            );
+                          }
                         },
                         child: const Text("Post")),
                     IconButton(

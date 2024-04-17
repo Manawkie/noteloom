@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
@@ -7,72 +8,28 @@ import 'package:school_app/src/utils/firebase.dart';
 import 'package:school_app/src/utils/models.dart';
 import 'package:school_app/src/utils/providers.dart';
 
-class FindNotes extends StatefulWidget {
-  const FindNotes({super.key});
+class MyWidget extends StatefulWidget {
+  const MyWidget({super.key});
 
   @override
-  State<FindNotes> createState() => _FindNotesState();
+  State<MyWidget> createState() => _MyWidgetState();
 }
 
-class _FindNotesState extends State<FindNotes> {
-  final SearchController _seachcontroller = SearchController();
-
-  @override
-  void dispose() {
-    _seachcontroller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<QueryNotesProvider>(builder: (context, notes, child) {
-      if (notes.universityNotes.isEmpty) {
-        Database.getAllNotes().then(
-          (value) => notes.setNotes(
-            value.cast<NoteModel>(),
-          ),
-        );
-        
-        return Scaffold(
-          body: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [const Text("Loading Notes..."), myLoadingIndicator()],
-            ),
-          ),
-        );
-      }
-
-      return Scaffold(
-        body: FindNotesPage(
-          notes: notes.getUniversityNotes,
-        ),
-      );
-    });
-  }
-}
-
-class FindNotesPage extends StatefulWidget {
-  const FindNotesPage({super.key, required this.notes});
-
-  final List<NoteModel> notes;
-
-  @override
-  State<FindNotesPage> createState() => _FindNotesPageState();
-}
-
-class _FindNotesPageState extends State<FindNotesPage> {
+class _MyWidgetState extends State<MyWidget> {
   TextEditingController _searchText = TextEditingController();
 
+  List<NoteModel> _allNotes = [];
+  List<SubjectModel> _allSubjects = [];
   List<Results> _filteredResults = [];
 
   @override
   void initState() {
     _searchText = TextEditingController();
-    _filteredResults = widget.notes;
     super.initState();
     _searchText.addListener(() {
-      filterResults();
+      setState(() {
+        filterResults();
+      });
     });
   }
 
@@ -83,85 +40,127 @@ class _FindNotesPageState extends State<FindNotesPage> {
   }
 
   void filterResults() {
-    setState(
-      () {
-        _filteredResults = widget.notes.where((note) {
-          if (note.name
-              .toLowerCase()
-              .contains(_searchText.text.toLowerCase())) {
-            return true;
-          }
-          if (note.subjectId
-              .toLowerCase()
-              .contains(_searchText.text.toLowerCase())) {
-            return true;
-          }
-          return false;
-        }).toList();
-      },
-    );
+    final filteredNotes = _allNotes.where((note) {
+      if (note.name.toLowerCase().contains(_searchText.text.toLowerCase())) {
+        return true;
+      }
+
+      if (note.subjectId
+          .toLowerCase()
+          .contains(_searchText.text.toLowerCase())) {
+        return true;
+      }
+
+      return false;
+    }).toList();
+
+    final filteredSubjects = _allSubjects.where((subject) {
+      if (subject.subject
+          .toLowerCase()
+          .contains(_searchText.text.toLowerCase())) {
+        return true;
+      }
+
+      if (subject.subjectCode
+          .toLowerCase()
+          .contains(_searchText.text.toLowerCase())) {
+        return true;
+      }
+
+      return false;
+    }).toList();
+
+    _filteredResults = [...filteredSubjects, ...filteredNotes];
   }
 
   @override
   Widget build(BuildContext context) {
-    return LiquidPullToRefresh(
-      springAnimationDurationInMilliseconds: 1000,
-      onRefresh: () {
-        final queryNotes =
-            Provider.of<QueryNotesProvider>(context, listen: false);
+    return Consumer<QueryNotesProvider>(builder: (context, notes, child) {
+      if (notes.universityNotes.isEmpty) {
+        Database.getAllNotes().then((allNotes) {
+          notes.setNotes(allNotes.cast<NoteModel>());
+        });
 
-        Database.getAllNotes().then(
-          (value) {
-            queryNotes.setNotes(value.cast<NoteModel>());
-          },
+        if (kDebugMode) {
+          print("Getting notes");
+        }
+
+        return Scaffold(
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text("Loading Notes..."),
+                myLoadingIndicator(),
+              ],
+            ),
+          ),
         );
-        return Future.value();
-      },
-      child: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            title: TextField(
-              style: const TextStyle(color: Colors.white),
-              controller: _searchText,
-              decoration: const InputDecoration(
-                hintStyle: TextStyle(color: Colors.white),
-                hintText: "Search Notes",
-                fillColor: Colors.white,
-                border: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.white),
-                ),
-              ),
-            ),
-          ),
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (BuildContext context, int index) {
-                final result = _filteredResults[index];
+      }
 
-                if (result.runtimeType == NoteModel) {
-                  return _buildNoteItem(result as NoteModel);
-                }
+      void onRefresh() async {
+        final getAllNotes = await Database.getAllNotes();
+        notes.setNotes(getAllNotes);
+      }
 
-                if (result.runtimeType == SubjectModel) {
-                  return _buildSubjectItem(result as SubjectModel);
-                }
+      _allNotes = context.read<QueryNotesProvider>().getUniversityNotes;
+      _allSubjects = context.read<QueryNotesProvider>().getUniversitySubjects;
 
-                return Container();
-              },
-              childCount: _filteredResults.length,
-            ),
-          ),
-          if (_filteredResults
-              .any((result) => result.runtimeType != SubjectModel))
-            SliverToBoxAdapter(
-              child: GestureDetector(
-                child: const SizedBox(
-                  height: 150,
-                  child: Text("Can't find your subject? Add it here!"),
-                ),
-              ),
-            )
-        ],
+      filterResults();
+
+      return Scaffold(
+          body: LiquidPullToRefresh(
+              onRefresh: () async => onRefresh(),
+              child: CustomScrollView(
+                slivers: [
+                  SliverAppBar(
+                    title: TextField(
+                      style: const TextStyle(color: Colors.white),
+                      controller: _searchText,
+                      decoration: const InputDecoration(
+                        hintStyle: TextStyle(color: Colors.white),
+                        hintText: "Search Notes",
+                        fillColor: Colors.white,
+                        border: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  ),
+                  renderNotes(),
+                  if (!_filteredResults.any(
+                      (Results result) => result.runtimeType == SubjectModel))
+                    const SliverToBoxAdapter(
+                      child: SizedBox(
+                        height: 150,
+                        width: double.infinity,
+                        child: Center(
+                          child: Text("Can't find your subject?"),
+                        ),
+                      ),
+                    )
+                ],
+              )));
+    });
+  }
+
+  SliverList renderNotes() {
+    return SliverList(
+      delegate: SliverChildBuilderDelegate(
+        (context, index) {
+          final dynamic result = _filteredResults[index];
+
+          if (result.runtimeType == NoteModel) {
+            return _buildNoteItem(result as NoteModel);
+          }
+
+          if (result.runtimeType == SubjectModel) {
+            return _buildSubjectItem(result as SubjectModel);
+          }
+
+          return Container();
+        },
+        childCount: _filteredResults.length,
       ),
     );
   }
@@ -197,8 +196,13 @@ class _FindNotesPageState extends State<FindNotesPage> {
           border: Border.all(color: Colors.grey),
           borderRadius: BorderRadius.circular(8.0),
         ),
-        child: Column(
-          children: [Text(subjectModel.subject)],
+        child: Center(
+          child: Column(
+            children: [
+              Text(subjectModel.subject),
+              Text(subjectModel.subjectCode)
+            ],
+          ),
         ),
       ),
     );

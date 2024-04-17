@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:school_app/src/pages/home/addnote/layout.dart';
 import 'package:school_app/src/pages/home/addnote/selectsubject.dart';
+import 'package:school_app/src/pages/home/profile/profile.dart';
 import 'package:school_app/src/pages/info%20pages/note/notepage.dart';
 import 'package:school_app/src/pages/login.dart';
 import 'package:school_app/src/pages/not_found.dart';
@@ -12,6 +13,7 @@ import 'package:school_app/src/pages/settings/settings.dart';
 import 'package:school_app/src/utils/firebase.dart';
 import 'package:school_app/src/pages/intro_page.dart';
 import 'package:school_app/src/pages/setup.dart';
+
 class Routes {
   static final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -54,25 +56,30 @@ class Routes {
                 transitionsBuilder: (_, __, ___, child) =>
                     fromRightTransition(_, __, __, child))),
         GoRoute(
-          path: "/home",
-          pageBuilder: (context, state) => CustomTransitionPage(
-              key: state.pageKey,
-              transitionDuration: const Duration(milliseconds: 1000),
-              child: const PageWithDrawer(),
-              transitionsBuilder: (_, anim, __, child) =>
-                  fadeTransition(_, anim, __, child)),
-        ),
-        GoRoute(
-          path: "/settings",
-          pageBuilder: (context, state) => CustomTransitionPage(
-            key: state.pageKey,
-            transitionDuration: const Duration(milliseconds: 500),
-            child: const SettingsPage(),
-            transitionsBuilder: (_, anim, __, child) =>
-                fromRightTransition(_, anim, __, child),
-            maintainState: true,
-          ),
-        ),
+            path: "/home",
+            pageBuilder: (context, state) => CustomTransitionPage(
+                key: state.pageKey,
+                transitionDuration: const Duration(milliseconds: 1000),
+                child: const PageWithDrawer(),
+                transitionsBuilder: (_, anim, __, child) =>
+                    fadeTransition(_, anim, __, child)),
+            routes: [
+              GoRoute(
+                path: "profile",
+                builder: (context, state) => const ProfilePage(),
+              ),
+              GoRoute(
+                path: "settings",
+                pageBuilder: (context, state) => CustomTransitionPage(
+                  key: state.pageKey,
+                  transitionDuration: const Duration(milliseconds: 500),
+                  child: const SettingsPage(),
+                  transitionsBuilder: (_, anim, __, child) =>
+                      fromRightTransition(_, anim, __, child),
+                  maintainState: true,
+                ),
+              ),
+            ]),
         GoRoute(
             name: "addnote",
             path: "/addnote",

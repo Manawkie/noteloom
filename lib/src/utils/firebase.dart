@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
+import 'package:school_app/src/utils/cache.dart';
 
 import 'package:school_app/src/utils/models.dart';
 import 'package:school_app/src/utils/sharedprefs.dart';
@@ -285,6 +287,53 @@ class Database {
 
     return allNotes;
   }
+
+  static Future saveNote(NoteModel note, bool saved) async {
+    final saveData = SavedNoteModel(noteid: note.id!, date: DateTime.now());
+
+    final userSaves = db
+        .collection('users')
+        .doc(Auth.currentUser!.uid)
+        .collection("saved notes")
+        .withConverter(
+            fromFirestore: SavedNoteModel.fromFirestore,
+            toFirestore: (model, _) => model.toFirestore());
+
+    if (saved) {
+      await userSaves.add(saveData);
+    } else {
+      await userSaves
+          .where("noteid", isEqualTo: note.id)
+          .get()
+          .then((snap) async {
+        final dataId = snap.docs.first.id;
+
+        await userSaves.doc(dataId).delete();
+      });
+    }
+  }
+
+  static Future<bool> isNoteSaved(NoteModel note) async {
+    final getNoteData = await db
+        .collection('users')
+        .doc(Auth.currentUser!.uid)
+        .collection("saved notes")
+        .withConverter(
+            fromFirestore: SavedNoteModel.fromFirestore,
+            toFirestore: (model, _) => model.toFirestore())
+        .where("noteid", isEqualTo: note.id)
+        .get();
+
+    if (getNoteData.docs.isEmpty) {
+      return false;
+    }
+
+    return true;
+  }
+
+  static Future<Stream> getLikes(NoteModel note) async {
+    return db.collection('notes').doc(note.id).collection('likes').snapshots();
+  }
 }
 
 class Storage {
@@ -294,15 +343,19 @@ class Storage {
     String fileName,
     Uint8List fileBytes,
   ) async {
-    await storage
-        .ref("notes/${Auth.auth.currentUser!.uid}/$fileName")
-        .putData(fileBytes, SettableMetadata(contentType: "application/pdf"));
+    final fileRef =
+        storage.ref("notes/${Auth.auth.currentUser!.uid}/$fileName");
+
+    if (await fileRef.getData() != null) {
+      throw ErrorDescription("File already exists");
+    }
+
+    await fileRef.putData(
+        fileBytes, SettableMetadata(contentType: "application/pdf"));
     return "notes/${Auth.auth.currentUser!.uid}/$fileName";
   }
 
   static Future<void> deleteFile(String storagePath) async {
-    // get the file referene from the database and delete it,
-    // then delete the file from the storage
     await Database.db
         .collection("notes")
         .where("storagePath", isEqualTo: storagePath)
@@ -313,15 +366,20 @@ class Storage {
     await storage.refFromURL(storagePath).delete();
   }
 
-  static Future<String> getFile(String storagePath) async {
-    final noteRef = storage.ref(storagePath);
+  static Future<Uint8List> getFile(String storagePath) async {
+    final Uint8List? cachedFile = await CachedData.getCachedFile(storagePath);
 
-    final url = await noteRef.getDownloadURL();
-
-    if (kDebugMode) {
-      print(url);
+    if (cachedFile != null) {
+      return cachedFile;
     }
 
-    return url;
+    final noteRef = storage.ref(storagePath);
+    final bytes = await noteRef.getData();
+
+    if (bytes != null) {
+      await CachedData.setCachedFile(storagePath, bytes);
+    }
+
+    return bytes!;
   }
 }

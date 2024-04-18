@@ -125,17 +125,6 @@ class Routes {
           return state.matchedLocation.startsWith(path);
         }
 
-        if (isOnPath("/login")) {
-          if (Auth.auth.currentUser != null) {
-            return Auth.isUserValid(Auth.auth.currentUser).then((valid) {
-              return Database.getUser().then((user) {
-                if (valid && user != null) return "/home";
-                return "/setup";
-              });
-            });
-          }
-        }
-
         if (isOnPath("/setup")) {
           if (Auth.currentUser == null) {
             return "/";
@@ -153,7 +142,6 @@ class Routes {
       });
 }
 
-enum Type { fromRight, fromBottom, fade }
 
 SlideTransition fromRightTransition(
     BuildContext context,

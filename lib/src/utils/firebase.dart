@@ -1,10 +1,10 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:school_app/src/utils/cache.dart';
 
 import 'package:school_app/src/utils/models.dart';
@@ -93,6 +93,8 @@ class Database {
   }
 
   static Future<UserModel?> getUser() async {
+    if (kDebugMode) print("Getting user data from database");
+
     final userFromDatabase = await db
         .collection("/users")
         .withConverter(
@@ -180,6 +182,8 @@ class Database {
     List<Map<String, List<String>>> listDepartmentAndCourses = [];
     final departments = await getDepartments();
 
+    if (kDebugMode) print("Getting departments and courses");
+
     for (var department in departments) {
       final List<String> courses = await Database.db
           .collection("universities")
@@ -201,6 +205,8 @@ class Database {
 
   static Future<List<SubjectModel>> getAllSubjects() async {
     final subjects = <SubjectModel>[];
+
+    if (kDebugMode) print("Getting all subjects");
 
     await db
         .collection("subjects")
@@ -243,7 +249,7 @@ class Database {
     SharedPrefs.setUserData(user);
   }
 
-  static Future<void> submitFile(
+  static Future<NoteModel> submitFile(
     Uint8List fileBytes,
     String fileName,
     String subject,
@@ -252,22 +258,47 @@ class Database {
   ) async {
     final storagePath = await Storage.addFile(fileName, fileBytes);
 
+    final newNote = NoteModel(
+      name: fileName,
+      schoolId: Auth.schoolDomain,
+      author: await SharedPrefs.getUserData().then((user) => user!.username),
+      subjectId: subject,
+      time: DateTime.now().toString(),
+      storagePath: storagePath,
+      tags: tags,
+      summary: summary,
+    );
+
     await db
         .collection("notes")
         .withConverter(
             fromFirestore: NoteModel.fromFirestore,
             toFirestore: (model, __) => model.toFirestore())
-        .add(NoteModel(
-          name: fileName,
-          schoolId: Auth.schoolDomain,
-          author:
-              await SharedPrefs.getUserData().then((user) => user!.username),
-          subjectId: subject,
-          time: DateTime.now().toString(),
-          storagePath: storagePath,
-          tags: tags,
-          summary: summary,
-        ));
+        .add(newNote);
+    
+    return newNote;
+  }
+
+  static Future<void> setRecents(String resultpath) async {
+    final user = db
+        .collection('users')
+        .withConverter(
+          fromFirestore: UserModel.fromFirestore,
+          toFirestore: (model, _) => model.toMap(),
+        )
+        .doc(Auth.currentUser!.uid);
+
+    final recents = await user.get().then((snap) => snap.data()?.recents) ?? [];
+
+    if (recents.contains(resultpath)) {
+      return;
+    }
+    if (recents.length > 10) {
+      recents.removeAt(0);
+    }
+    recents.add(resultpath);
+
+    user.update({"recents": recents});
   }
 
   static Future<List<NoteModel>> getAllNotes() async {
@@ -289,7 +320,10 @@ class Database {
   }
 
   static Future saveNote(NoteModel note, bool saved) async {
-    final saveData = SavedNoteModel(noteid: note.id!, date: DateTime.now());
+    final saveData = SavedNoteModel(
+      noteid: note.id!,
+      date: DateTime.now(),
+    );
 
     final userSaves = db
         .collection('users')
@@ -300,17 +334,48 @@ class Database {
             toFirestore: (model, _) => model.toFirestore());
 
     if (saved) {
-      await userSaves.add(saveData);
+      if (!await isNoteSaved(note)) {
+        await userSaves.add(saveData);
+      }
     } else {
       await userSaves
           .where("noteid", isEqualTo: note.id)
           .get()
           .then((snap) async {
         final dataId = snap.docs.first.id;
-
         await userSaves.doc(dataId).delete();
       });
     }
+  }
+
+  static Future<List<SavedNoteModel>> getAllSavedNotes() async {
+    final savedNoteIds = <SavedNoteModel>[];
+
+    if (kDebugMode) print("Getting saved notes");
+    await db
+        .collection('users')
+        .doc(Auth.currentUser!.uid)
+        .collection("saved notes")
+        .withConverter(
+            fromFirestore: SavedNoteModel.fromFirestore,
+            toFirestore: (model, _) => model.toFirestore())
+        .get()
+        .then(
+      (snapshot) {
+        if (snapshot.docs.isEmpty) {
+          return savedNoteIds;
+        }
+        for (var note in snapshot.docs) {
+          savedNoteIds.add(
+            note.data(),
+          );
+        }
+      },
+    );
+
+    print(savedNoteIds);
+
+    return savedNoteIds;
   }
 
   static Future<bool> isNoteSaved(NoteModel note) async {
@@ -338,21 +403,26 @@ class Database {
 
 class Storage {
   static final storage = FirebaseStorage.instance;
+  static Reference get ref => storage.ref();
 
   static Future<String> addFile(
     String fileName,
     Uint8List fileBytes,
   ) async {
-    final fileRef =
-        storage.ref("notes/${Auth.auth.currentUser!.uid}/$fileName");
+    final fileRef = ref.child("notes/${Auth.auth.currentUser!.uid}/$fileName");
 
-    if (await fileRef.getData() != null) {
-      throw ErrorDescription("File already exists");
+    try {
+      final FullMetadata metadata = await fileRef.getMetadata();
+      if (metadata.size == fileBytes.length) {
+        throw ErrorDescription("File already exists");
+      }
+      return "notes/${Auth.auth.currentUser!.uid}/$fileName";
+    } finally {
+      await fileRef.putData(
+          fileBytes, SettableMetadata(contentType: "application/pdf"));
+
+      return 'notes/${Auth.auth.currentUser!.uid}/$fileName';
     }
-
-    await fileRef.putData(
-        fileBytes, SettableMetadata(contentType: "application/pdf"));
-    return "notes/${Auth.auth.currentUser!.uid}/$fileName";
   }
 
   static Future<void> deleteFile(String storagePath) async {

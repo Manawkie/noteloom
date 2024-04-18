@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:school_app/src/components/uicomponents.dart';
 import 'package:school_app/src/utils/firebase.dart';
+import 'package:school_app/src/utils/models.dart';
 import 'package:school_app/src/utils/providers.dart';
 
 class AddNote extends StatefulWidget {
@@ -26,7 +27,6 @@ class _AddNoteState extends State<AddNote> {
   String _subject = "";
   late TextEditingController _summaryControl;
 
-  List<Map<String, dynamic>> subjectIds = [];
   List<String> subjects = [];
 
   FilePickerResult? result;
@@ -34,6 +34,7 @@ class _AddNoteState extends State<AddNote> {
 
   late FToast ftoast;
 
+  bool isUploading = false;
   @override
   void initState() {
     final noteData = Provider.of<NotesProvider>(context, listen: false);
@@ -44,17 +45,6 @@ class _AddNoteState extends State<AddNote> {
     _tag3Control = TextEditingController(text: noteData.readTag3 ?? "");
     _summaryControl = TextEditingController(text: noteData.summary ?? "");
 
-    final getUserSubjects =
-        Provider.of<UniversityDataProvider>(context, listen: false)
-            .readSubjects;
-
-    subjectIds = getUserSubjects;
-
-    for (Map<String, dynamic> subjectData in getUserSubjects) {
-      subjects.add(subjectData.values.first.toString());
-    }
-
-    subjects.insert(0, "Select a Subject");
     _subject = noteData.readSubject ?? "Select a Subject";
 
     ftoast = FToast();
@@ -92,12 +82,13 @@ class _AddNoteState extends State<AddNote> {
   Future _submitFile() async {
     if (_formkey.currentState!.validate()) {
       if (result != null && bytes != null) {
-        await Database.submitFile(
+        final newNote = await Database.submitFile(
             bytes!,
             _nameControl.text,
             _subject,
             [_tag1Control.text, _tag2Control.text, _tag3Control.text],
             _summaryControl.text);
+        return newNote;
       }
     }
   }
@@ -106,7 +97,7 @@ class _AddNoteState extends State<AddNote> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Consumer2<NotesProvider, UniversityDataProvider>(
+    return Consumer2<NotesProvider, QueryNotesProvider>(
         builder: (context, addnote, uni, child) {
       if (addnote.readBytes != null) {
         bytes = addnote.readBytes;
@@ -119,9 +110,9 @@ class _AddNoteState extends State<AddNote> {
         _subject = addnote.readSubject!;
       }
 
-      if (subjects.length == 1) {
-        for (var subject in uni.readSubjects) {
-          subjects.add(subject.values.first.toString());
+      if (subjects.isEmpty) {
+        for (var subject in uni.getUniversitySubjects) {
+          subjects.add(subject.subject);
         }
       }
 
@@ -249,27 +240,60 @@ class _AddNoteState extends State<AddNote> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    ElevatedButton(
-                        onPressed: () async {
-                          try {
-                            if (_subject == "Select a Subject" || !subjects.contains(_subject)) {
-                              throw ErrorDescription("Please select a Subject first");
-                            }
+                    (isUploading)
+                        ? ElevatedButton(
+                            onPressed: () {},
+                            child: SizedBox(
+                                height: 10,
+                                width: 10,
+                                child: myLoadingIndicator()))
+                        : ElevatedButton(
+                            onPressed: () async {
+                              setState(() {
+                                isUploading = true;
+                              });
+                              try {
+                                if (_subject == "Select a Subject" ||
+                                    !subjects.contains(_subject)) {
+                                  throw ErrorDescription(
+                                      "Please select a Subject first");
+                                }
 
-                            await _submitFile();
-                            clearFields();
-                          } on ErrorDescription catch (e) {
-                            ftoast.showToast(
-                              child: myToast(theme, e.toString()),
-                              gravity: ToastGravity.BOTTOM_RIGHT,
-                              fadeDuration: const Duration(milliseconds: 400),
-                              toastDuration: const Duration(seconds: 2),
-                              isDismissable: true,
-                              ignorePointer: false,
-                            );
-                          }
-                        },
-                        child: const Text("Post")),
+                                final NoteModel? newNote = await _submitFile();
+                                clearFields();
+                                setState(() {
+                                  isUploading = false;
+                                });
+                                ftoast.showToast(
+                                  child: myToast(theme, "Note posted!"),
+                                  gravity: ToastGravity.BOTTOM,
+                                  fadeDuration:
+                                      const Duration(milliseconds: 400),
+                                  toastDuration: const Duration(seconds: 2),
+                                  isDismissable: true,
+                                  ignorePointer: false,
+                                );
+                                final newList = uni.getUniversityNotes;
+                                newList.add(newNote!);
+
+                                uni.setUniversityNotes(
+                                    newList);
+                              } on ErrorDescription catch (e) {
+                                setState(() {
+                                  isUploading = false;
+                                });
+                                ftoast.showToast(
+                                  child: myToast(theme, e.toString()),
+                                  gravity: ToastGravity.BOTTOM_RIGHT,
+                                  fadeDuration:
+                                      const Duration(milliseconds: 400),
+                                  toastDuration: const Duration(seconds: 2),
+                                  isDismissable: true,
+                                  ignorePointer: false,
+                                );
+                              }
+                            },
+                            child: const Text("Post")),
                     IconButton(
                       onPressed: clearFields,
                       icon: const Icon(

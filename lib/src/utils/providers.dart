@@ -11,31 +11,31 @@ class UniversityDataProvider extends ChangeNotifier {
   List<Map<String, dynamic>> get readDepartmentsAndCourses =>
       _departmentsAndCourses;
 
-  List<Map<String, dynamic>> _userSubjects = [];
-  List<Map<String, dynamic>> get readSubjects => _userSubjects;
 
   UniversityDataProvider() {
     SharedPrefs.getDepartmentAndCourses().then((data) {
       setDepartmentsAndCourses(data);
     });
-    SharedPrefs.getSubjects().then((data) => setSubjects(data));
   }
-
+  
   void setDepartmentsAndCourses(List<Map<String, dynamic>> data) {
     _departmentsAndCourses = data;
     notifyListeners();
   }
 
-  void setSubjects(List<Map<String, dynamic>> data) {
-    _userSubjects = data;
-    notifyListeners();
-  }
+
 }
 
 class UserProvider extends ChangeNotifier {
+  
   UserModel? _userData;
-
   UserModel? get readUserData => _userData;
+
+  List<SavedNoteModel> _savedNotes = [];
+  List<SavedNoteModel> get readSavedNotes => _savedNotes;
+
+  List<String> _savedNoteIds = [];
+  List<String> get readSavedNoteIds => _savedNoteIds;
 
   UserProvider() {
     if (kDebugMode) print("Reading user data");
@@ -44,6 +44,16 @@ class UserProvider extends ChangeNotifier {
 
   void setUserData(UserModel? data) {
     _userData = data;
+    notifyListeners();
+  }
+
+  void setSavedNotes(List<SavedNoteModel> data) {
+    _savedNotes = data;
+    notifyListeners();
+  }
+
+  void setSavedNoteIds(List<String> data) {
+    _savedNoteIds = data;
     notifyListeners();
   }
 }
@@ -134,24 +144,24 @@ class QueryNotesProvider extends ChangeNotifier {
 
   QueryNotesProvider() {
     Database.getAllNotes().then(
-      (data) => setNotes(
+      (data) => setUniversityNotes(
         data.cast<NoteModel>(),
       ),
     );
 
     Database.getAllSubjects().then(
-      (data) => setSubjects(
+      (data) => setAllSubjects(
         data.cast<SubjectModel>(),
       ),
     );
   }
 
-  void setNotes(List<NoteModel> data) {
+  void setUniversityNotes(List<NoteModel> data) {
     universityNotes = data;
     notifyListeners();
   }
 
-  void setSubjects(List<SubjectModel> data) {
+  void setAllSubjects(List<SubjectModel> data) {
     universitySubjects = data;
     notifyListeners();
   }

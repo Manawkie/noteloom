@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:provider/provider.dart';
+import 'package:school_app/src/utils/models.dart';
 import 'package:school_app/src/utils/providers.dart';
 import 'package:school_app/src/utils/firebase.dart';
 import 'package:school_app/src/utils/sharedprefs.dart';
@@ -36,25 +37,54 @@ class _LoginState extends State<Login> {
   }
 
   Future getStarted() async {
-    // load data to sharefpreferences
+    //// University Information
 
-    final universityProvider =
-        Provider.of<UniversityDataProvider>(context, listen: false);
+    final notesProvider =
+        Provider.of<QueryNotesProvider>(context, listen: false);
+
     final userInfo = Provider.of<UserProvider>(context, listen: false);
 
-
     // override all set deps and courses
-    await SharedPrefs.setDepartmentAndCourses().then((data) async {
-      universityProvider.setDepartmentsAndCourses(data);
-    });
+    // [{dep : [course, course, course], {dep: [course, course, course]}}]
+
+    final List<Map<String, List<String>>> departmentsAndCourses =
+        await Database.getDepartmentsAndCourses();
+    await SharedPrefs.setDepartmentAndCourses(departmentsAndCourses);
+
+    // override all set subjects
+
+    // [Subject, Subject...]
+    final List<SubjectModel> allSubjects = await Database.getAllSubjects();
+    notesProvider.setAllSubjects(allSubjects);
+
+    //// User's information
 
     // override user data with the new user
     await Database.getUser().then((value) async {
       userInfo.setUserData(value);
     });
 
-    await SharedPrefs.getSubjects();
-    if (mounted) GoRouter.of(context).go("/setup");
+    // get all of the user's saved likes
+    final savedNotes = await Database.getAllSavedNotes();
+    userInfo.setSavedNotes(savedNotes);
+
+    List<String> savedNotesIds = [];
+    for (var note in savedNotes) {
+      savedNotesIds.add(note.noteid);
+    }
+
+    await SharedPrefs.setSavedNotes(savedNotesIds);
+
+    // get all of the user's recent notes and subjects
+    // await SharedPrefs.getRecents();
+
+    // get all of the user's priority subjects
+    // await SharedPrefs.getPrioritySubjects();
+
+    // get all of the user's own notes();
+    // await SharedPrefs.getSelfNotes();
+
+    if (mounted) context.go("/setup");
   }
 
   @override

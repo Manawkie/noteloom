@@ -1,8 +1,5 @@
 // class for caching retrieved data
 
-import 'dart:io';
-import 'dart:typed_data';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
@@ -19,7 +16,7 @@ class CachedData {
   }
 
   static Future setCachedFile(String filePath, Uint8List bytes) async {
-    var file = await cache.putFile(filePath, bytes);
+  await cache.putFile(filePath, bytes);
 
     if (kDebugMode) {
       print("Set Successful: $filePath");

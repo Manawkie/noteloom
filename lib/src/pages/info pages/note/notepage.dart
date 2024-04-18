@@ -3,10 +3,10 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:school_app/src/components/uicomponents.dart';
 import 'package:school_app/src/utils/firebase.dart';
 import 'package:school_app/src/utils/models.dart';
 import 'package:school_app/src/utils/providers.dart';
+import 'package:school_app/src/utils/sharedprefs.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
 class NotePage extends StatelessWidget {
@@ -42,9 +42,15 @@ class RenderNote extends StatefulWidget {
 class _RenderNoteState extends State<RenderNote> {
   bool isSaved = false;
 
-  @override
-  void initState() {
-    super.initState();
+  void onExit() {
+    final contextCopy = context;
+    Database.saveNote(widget.note, isSaved);
+    SharedPrefs.addLikedNote(widget.note, isSaved);
+    SharedPrefs.addLikedNote(widget.note, isSaved).then((newList) {
+      Provider.of<UserProvider>(contextCopy, listen: false).setSavedNoteIds(
+        newList,
+      );
+    });
   }
 
   @override
@@ -52,7 +58,7 @@ class _RenderNoteState extends State<RenderNote> {
     return FutureBuilder(
         future: Future.wait([
           Storage.getFile(widget.note.storagePath),
-          Database.isNoteSaved(widget.note),
+          SharedPrefs.isNoteSaved(widget.note),
         ]),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -62,11 +68,18 @@ class _RenderNoteState extends State<RenderNote> {
               ),
             );
           }
+
+          if (snapshot.hasData) {
+            // add as recent note
+            Database.setRecents("notes/${widget.note.id}");
+          }
+
           return Scaffold(
             appBar: AppBar(
               leading: IconButton(
                 icon: const Icon(Icons.arrow_back_ios_new),
                 onPressed: () {
+                  onExit();
                   context.pop();
                 },
               ),
@@ -98,6 +111,9 @@ class _RenderNoteState extends State<RenderNote> {
                           Saved(
                             isSaved: snapshot.data![1] as bool,
                             note: widget.note,
+                            setSaved: (bool saved) {
+                              isSaved = saved;
+                            },
                           ),
                           Row(
                             children: [
@@ -127,7 +143,8 @@ class _RenderNoteState extends State<RenderNote> {
                       ],
                     ),
                   ),
-                  Flexible(child: SfPdfViewer.memory(snapshot.data?[0] as Uint8List))
+                  Flexible(
+                      child: SfPdfViewer.memory(snapshot.data?[0] as Uint8List))
                 ],
               ),
             ),
@@ -137,10 +154,15 @@ class _RenderNoteState extends State<RenderNote> {
 }
 
 class Saved extends StatefulWidget {
-  const Saved({super.key, required this.isSaved, required this.note});
+  const Saved(
+      {super.key,
+      required this.isSaved,
+      required this.note,
+      required this.setSaved});
 
   final bool isSaved;
   final NoteModel note;
+  final Function(bool isSaved) setSaved;
 
   @override
   State<Saved> createState() => _SavedState();
@@ -156,15 +178,6 @@ class _SavedState extends State<Saved> {
   }
 
   @override
-  void dispose() {
-    Database.saveNote(
-      
-      
-      widget.note, isSaved);
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return IconButton(
         icon: Icon(
@@ -175,6 +188,7 @@ class _SavedState extends State<Saved> {
           setState(() {
             isSaved = !isSaved;
           });
+          widget.setSaved(isSaved);
         });
   }
 }

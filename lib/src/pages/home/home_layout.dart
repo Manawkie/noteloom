@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:school_app/src/pages/home/find_notes/findnotes.dart';
-import 'package:school_app/src/pages/home/mynotes/mynotes.dart';
 import 'package:school_app/src/pages/home/mysubjects/mysubjects.dart';
 import 'package:school_app/src/pages/home/main/homepage.dart';
+import 'package:school_app/src/pages/home/savednotes/savednotes.dart';
 import 'package:school_app/src/utils/firebase.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -99,7 +99,7 @@ class _PageWithDrawerState extends State<PageWithDrawer>
   final List<Widget> _pages = [
     const HomePage(),
     const MyWidget(),
-    const MyNotesPage(),
+    const SavedNotesPage(),
     const PrioritySubjects(),
   ];
 }

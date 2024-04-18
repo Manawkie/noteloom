@@ -6,11 +6,9 @@ class UserModel {
   final String name;
   final String email;
   final String universityId;
-  final String? schoolyears;
   final String? department;
   final String? course;
-  final List<String>? savedNotes;
-  final List<String>? prioritySubjects;
+  final List<String>? recents;
 
   UserModel(
       {required this.id,
@@ -20,9 +18,7 @@ class UserModel {
       required this.username,
       this.course,
       this.department,
-      this.schoolyears,
-      this.savedNotes,
-      this.prioritySubjects});
+      this.recents});
 
   factory UserModel.fromFirestore(
       DocumentSnapshot<Map<String, dynamic>> snapshot, options) {
@@ -30,32 +26,29 @@ class UserModel {
     final id = snapshot.id;
 
     final fromFirebase = UserModel(
-        id: id,
-        email: data?['email'],
-        username: data?['username'],
-        name: data?['name'],
-        universityId: data?['universityId'],
-        course: data?['course'],
-        department: data?['department'],
-        schoolyears: data?['schoolyears'],
-        savedNotes: data?['savedNotes'].cast<String>(),
-        prioritySubjects: data?['prioritySubjects'].cast<String>());
-
+      id: id,
+      email: data?['email'],
+      username: data?['username'],
+      name: data?['name'],
+      universityId: data?['universityId'],
+      course: data?['course'],
+      department: data?['department'],
+      recents: data?['recents']?.cast<String>()
+    );
     return fromFirebase;
   }
 
   factory UserModel.fromMap(Map<String, dynamic> data) {
     return UserModel(
-        id: data['id'],
-        email: data['email'],
-        username: data['username'],
-        name: data['name'],
-        universityId: data['universityId'],
-        course: data['course'],
-        department: data['department'],
-        schoolyears: data['schoolyears'],
-        savedNotes: data['savedNotes'],
-        prioritySubjects: data['prioritySubjects']);
+      id: data['id'],
+      email: data['email'],
+      username: data['username'],
+      name: data['name'],
+      universityId: data['universityId'],
+      course: data['course'],
+      department: data['department'],
+      recents: data['recents']?.cast<String>()
+    );
   }
 
   Map<String, dynamic> toMap() {
@@ -65,9 +58,9 @@ class UserModel {
       "username": username,
       "name": name,
       "universityId": universityId,
-      if (schoolyears != null) "schoolyears": schoolyears,
       if (department != null) "department": department,
-      if (course != null) "course": course
+      if (course != null) "course": course,
+      if (recents != null) "recents": recents
     };
   }
 }
@@ -313,7 +306,7 @@ class SavedNoteModel {
     final likedNoteData = SavedNoteModel(
         id: id,
         noteid: data?['noteid'],
-        date: DateTime.tryParse(data?['date'])!);
+        date: data?['date']?.toDate() as DateTime);
 
     return likedNoteData;
   }

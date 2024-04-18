@@ -20,7 +20,7 @@ class _SelectSubjectPageState extends State<SelectSubjectPage> {
         builder: (context, notes, note, child) {
       if (notes.universitySubjects.isEmpty) {
         Database.getAllSubjects().then(
-          (value) => notes.setSubjects(
+          (value) => notes.setAllSubjects(
             value.cast<SubjectModel>(),
           ),
         );
@@ -61,9 +61,7 @@ class _SelectSubjectPageState extends State<SelectSubjectPage> {
                   onTap: () {
                     final selectedSubject =
                         notes.getUniversitySubjects[index].subject;
-
                     note.setSubject(selectedSubject);
-
                     context.go("/addnote");
                   },
                   subtitle: Text(subjectInfo.subjectCode),

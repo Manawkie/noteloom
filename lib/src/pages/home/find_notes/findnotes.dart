@@ -31,6 +31,7 @@ class _MyWidgetState extends State<MyWidget> {
         filterResults();
       });
     });
+    GoRouter.of(context).refresh();
   }
 
   @override
@@ -78,7 +79,7 @@ class _MyWidgetState extends State<MyWidget> {
     return Consumer<QueryNotesProvider>(builder: (context, notes, child) {
       if (notes.universityNotes.isEmpty) {
         Database.getAllNotes().then((allNotes) {
-          notes.setNotes(allNotes.cast<NoteModel>());
+          notes.setUniversityNotes(allNotes.cast<NoteModel>());
         });
 
         if (kDebugMode) {
@@ -100,7 +101,7 @@ class _MyWidgetState extends State<MyWidget> {
 
       void onRefresh() async {
         final getAllNotes = await Database.getAllNotes();
-        notes.setNotes(getAllNotes);
+        notes.setUniversityNotes(getAllNotes);
       }
 
       _allNotes = context.read<QueryNotesProvider>().getUniversityNotes;

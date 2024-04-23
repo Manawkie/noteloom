@@ -4,22 +4,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:school_app/src/utils/cache.dart';
 
 import 'package:school_app/src/utils/models.dart';
 import 'package:school_app/src/utils/sharedprefs.dart';
-
-Future functionWithTryCatchFirebase(Future Function() function) async {
-  try {
-    final result = await function();
-    return result;
-  } on FirebaseAuthException catch (e) {
-    if (kDebugMode) {
-      print(e);
-    }
-  }
-}
 
 class Auth {
   static final auth = FirebaseAuth.instance;
@@ -65,9 +53,11 @@ class Auth {
   }
 
   Future<void> signOut() async {
-    functionWithTryCatchFirebase(() async {
+    try {
       await auth.signOut();
-    });
+    } catch (e) {
+      if (kDebugMode) print(e);
+    }
   }
 }
 
@@ -257,7 +247,6 @@ class Database {
     String? summary,
   ) async {
     final storagePath = await Storage.addFile(fileName, fileBytes);
-
     final newNote = NoteModel(
       name: fileName,
       schoolId: Auth.schoolDomain,
@@ -275,11 +264,11 @@ class Database {
             fromFirestore: NoteModel.fromFirestore,
             toFirestore: (model, __) => model.toFirestore())
         .add(newNote);
-    
+
     return newNote;
   }
 
-  static Future<void> setRecents(String resultpath) async {
+  static Future<List<String>> setRecents(String resultpath) async {
     final user = db
         .collection('users')
         .withConverter(
@@ -289,17 +278,18 @@ class Database {
         .doc(Auth.currentUser!.uid);
 
     final recents = await user.get().then((snap) => snap.data()?.recents) ?? [];
-
-    if (recents.contains(resultpath)) {
-      return;
-    }
-    if (recents.length > 10) {
+    if (recents.length >= 10) {
       recents.removeAt(0);
     }
-    recents.add(resultpath);
+    if (!recents.contains(resultpath)) {
+      recents.add(resultpath);
+      user.update({"recents": recents});
+    }
 
-    user.update({"recents": recents});
+    return recents;
   }
+
+  // notes
 
   static Future<List<NoteModel>> getAllNotes() async {
     final allNotes = <NoteModel>[];
@@ -338,15 +328,31 @@ class Database {
         await userSaves.add(saveData);
       }
     } else {
-      await userSaves
-          .where("noteid", isEqualTo: note.id)
-          .get()
-          .then((snap) async {
-        final dataId = snap.docs.first.id;
-        await userSaves.doc(dataId).delete();
-      });
+      final getSavedNoteData =
+          await userSaves.where("noteid", isEqualTo: note.id).get();
+      final dataIds = getSavedNoteData.docs;
+      if (dataIds.isNotEmpty) {
+        await userSaves.doc(dataIds.first.id).delete();
+      }
     }
   }
+
+  static Future<void> editNote(NoteModel note) async {
+    await db
+        .collection("notes")
+        .withConverter(
+            fromFirestore: NoteModel.fromFirestore,
+            toFirestore: (model, _) => model.toFirestore())
+        .doc(note.id)
+        .update(note.toFirestore());
+  }
+
+  static Future<void> deleteNote(NoteModel note) async {
+    await Storage.deleteFile(note.storagePath);
+    await db.collection("notes").doc(note.id).delete();
+  }
+
+  // saved notes
 
   static Future<List<SavedNoteModel>> getAllSavedNotes() async {
     final savedNoteIds = <SavedNoteModel>[];
@@ -373,8 +379,6 @@ class Database {
       },
     );
 
-    print(savedNoteIds);
-
     return savedNoteIds;
   }
 
@@ -396,8 +400,55 @@ class Database {
     return true;
   }
 
-  static Future<Stream> getLikes(NoteModel note) async {
-    return db.collection('notes').doc(note.id).collection('likes').snapshots();
+  // like
+
+  static Stream<bool> isNoteLiked(NoteModel note) {
+    final streamNote = db
+        .collection('notes')
+        .withConverter(
+            fromFirestore: NoteModel.fromFirestore,
+            toFirestore: (model, _) => model.toFirestore())
+        .doc(note.id)
+        .snapshots();
+
+    return streamNote.map((snapshot) =>
+        snapshot.data()?.peopleLiked?.contains(Auth.currentUser!.uid) ?? false);
+  }
+
+  static Future likeNote(NoteModel note, bool isSaved) async {
+    final dbNote = await db
+        .collection('notes')
+        .withConverter(
+            fromFirestore: NoteModel.fromFirestore,
+            toFirestore: (model, _) => model.toFirestore())
+        .doc(note.id)
+        .get();
+    
+  }
+  // subjects
+
+  static Future<List<String>> setPrioritySubejctIds(
+      String subjectId, bool isSaved) async {
+    final DocumentReference<UserModel> user = db
+        .collection("users")
+        .withConverter(
+            fromFirestore: UserModel.fromFirestore,
+            toFirestore: (model, _) => model.toMap())
+        .doc(Auth.currentUser!.uid);
+
+    final prioritySubjectIds =
+        await user.get().then((snap) => snap.data()?.prioritySubjects) ?? [];
+
+    if (isSaved) {
+      prioritySubjectIds.insert(0, subjectId);
+    } else {
+      prioritySubjectIds
+          .removeWhere((prioritizedSubject) => prioritizedSubject == subjectId);
+    }
+
+    user.update({"prioritySubjects": prioritySubjectIds});
+
+    return prioritySubjectIds;
   }
 }
 
@@ -416,24 +467,15 @@ class Storage {
       if (metadata.size == fileBytes.length) {
         throw ErrorDescription("File already exists");
       }
-      return "notes/${Auth.auth.currentUser!.uid}/$fileName";
     } finally {
       await fileRef.putData(
           fileBytes, SettableMetadata(contentType: "application/pdf"));
-
-      return 'notes/${Auth.auth.currentUser!.uid}/$fileName';
     }
+    return 'notes/${Auth.auth.currentUser!.uid}/$fileName';
   }
 
   static Future<void> deleteFile(String storagePath) async {
-    await Database.db
-        .collection("notes")
-        .where("storagePath", isEqualTo: storagePath)
-        .get()
-        .then((snapshot) {
-      snapshot.docs.first.reference.delete();
-    });
-    await storage.refFromURL(storagePath).delete();
+    await storage.ref(storagePath).delete();
   }
 
   static Future<Uint8List> getFile(String storagePath) async {

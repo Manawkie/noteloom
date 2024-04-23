@@ -30,49 +30,15 @@ class ProfilePage extends StatelessWidget {
         builder: (context, value, child) {
           final screenSize = MediaQuery.of(context).size;
           return SingleChildScrollView(
-            child: SizedBox(
-              width: screenSize.width,
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: screenSize.width,
-                    padding: EdgeInsets.symmetric(
-                        horizontal: screenSize.width / 4, vertical: 30),
-                    decoration:
-                        BoxDecoration(color: Theme.of(context).primaryColor),
-                    child: Hero(
-                      tag: Auth.currentUser!.uid,
-                      child: CircleAvatar(
-                        radius: screenSize.width / 5,
-                        backgroundImage: NetworkImage(
-                          Auth.currentUser!.photoURL ?? "",
-                        ),
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(10),
-                    child: Column(children: [
-                      Text(
-                        Auth.currentUser!.displayName ?? "",
-                        style: const TextStyle(fontSize: 20),
-                      ),
-                      Text(
-                        Auth.currentUser!.email ?? "",
-                        style: const TextStyle(fontSize: 15),
-                      ),
-                      const SizedBox(
-                        height: 50,
-                        child: Text("Notes:"),
-                      ),
-                      _renderUserNotes()
-                    ]),
-                  )
-                ],
-              ),
-            ),
-          );
+            children: [
+              Hero(
+                  tag: Auth.currentUser!.uid,
+                  child: CircleAvatar(
+                    backgroundImage: NetworkImage(Auth.currentUser!.photoURL!),
+                  ))
+            ],
+          ));
         },
       ),
     );

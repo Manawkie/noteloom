@@ -16,7 +16,7 @@ class PreviewNote extends StatefulWidget {
 class _PreviewNoteState extends State<PreviewNote> {
   @override
   Widget build(BuildContext context) {
-    return Consumer<NotesProvider>(builder: (context, addnote, child) {
+    return Consumer<NoteProvider>(builder: (context, addnote, child) {
       final bytes = addnote.readBytes;
 
       final subject = addnote.readSubject;

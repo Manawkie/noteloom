@@ -16,7 +16,7 @@ class SelectSubjectPage extends StatefulWidget {
 class _SelectSubjectPageState extends State<SelectSubjectPage> {
   @override
   Widget build(BuildContext context) {
-    return Consumer2<QueryNotesProvider, NotesProvider>(
+    return Consumer2<QueryNotesProvider, NoteProvider>(
         builder: (context, notes, note, child) {
       if (notes.universitySubjects.isEmpty) {
         Database.getAllSubjects().then(
@@ -61,8 +61,20 @@ class _SelectSubjectPageState extends State<SelectSubjectPage> {
                   onTap: () {
                     final selectedSubject =
                         notes.getUniversitySubjects[index].subject;
-                    note.setSubject(selectedSubject);
-                    context.go("/addnote");
+                    final currentNote = context.read<CurrentNoteProvider>();
+                    if (currentNote.readEditing == true) {
+                      currentNote.setNewSubject(selectedSubject);
+                    
+                      context.pop();
+                      return;
+                    } else {
+                      note.setSubject(selectedSubject);
+
+                      Provider.of<CurrentNoteProvider>(context)
+                          .setSubject(selectedSubject);
+
+                      context.go("/addnote");
+                    }
                   },
                   subtitle: Text(subjectInfo.subjectCode),
                 );

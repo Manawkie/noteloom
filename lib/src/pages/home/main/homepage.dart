@@ -1,5 +1,9 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:provider/provider.dart';
 import 'package:school_app/src/components/uicomponents.dart';
+import 'package:school_app/src/utils/providers.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -10,6 +14,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final _scrollControl = ScrollController();
+  List<String>? _recents = <String>[];
 
   bool overScrolled = false;
 
@@ -54,53 +59,65 @@ class _HomePageState extends State<HomePage> {
                     )
                   : Container(),
             ),
-            FutureBuilder(
-              future: Future.delayed(const Duration(milliseconds: 3000)),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return SliverFillRemaining(
-                    child: Container(
-                      decoration: const BoxDecoration(
-                        borderRadius: BorderRadius.vertical(
-                          top: Radius.circular(45),
-                        ),
-                        color: Colors.white,
-                      ),
-                      child: Center(
-                        child: myLoadingIndicator(),
-                      ),
+            SliverFillRemaining(
+                child: Container(
+              padding: const EdgeInsets.all(20),
+              decoration: const BoxDecoration(
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(45),
+                ),
+                color: Colors.white,
+              ),
+              child: Consumer2<UserProvider, QueryNotesProvider>(
+                  builder: (context, userdetails, allnotes, child) {
+                _recents = userdetails.readRecents;
+
+                final getAllNotes = allnotes.getUniversityNotes;
+                final getAllSubjects = allnotes.getUniversitySubjects;
+                if (getAllNotes.isEmpty || getAllSubjects.isEmpty) {
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 100),
+                    child: Column(
+                      children: [
+                        myLoadingIndicator(),
+                        Text(
+                          getAllNotes.isEmpty
+                              ? "Loading Recent Notes..."
+                              : getAllSubjects.isEmpty
+                                  ? "Loading Recent Subjects..."
+                                  : "Please wait...",
+                        )
+                      ],
                     ),
                   );
                 }
-                return SliverToBoxAdapter(
-                  child: Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: const BoxDecoration(
-                      borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(45),
-                      ),
-                      color: Colors.white,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text("Recent Notes and Subjects"),
-                        ..._buildList()
-                      ],
-                    ),
-                  ),
-                );
-              },
-            )
+
+                return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text("Recent Notes and Subjects"),
+                      ..._buildList()
+                    ]);
+              }),
+            ))
           ],
         ));
   }
 
   List<Widget> _buildList() {
-    return List.generate(
-        20,
-        (index) => ListTile(
-              title: Text("Item $index"),
-            ));
+    QueryNotesProvider notes = context.read<QueryNotesProvider>();
+    return List.generate(_recents!.length, (index) {
+      final result = _recents![index];
+
+      final type = result.split("/")[0];
+      final id = result.split("/")[1];
+
+      if (type == "notes") {
+        return noteButton(notes.findNote(id)!, context);
+      } else if (type == "subjects") {
+        return subjectButton(notes.findSubject(id)!, context);
+      }
+      return Container();
+    });
   }
 }

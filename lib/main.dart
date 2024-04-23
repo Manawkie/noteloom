@@ -15,8 +15,10 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (context) => UniversityDataProvider()),
         ChangeNotifierProvider(create: (context) => UserProvider()),
-        ChangeNotifierProvider(create: (context) => NotesProvider()),
-        ChangeNotifierProvider(create: (context) => QueryNotesProvider())
+        ChangeNotifierProvider(create: (context) => NoteProvider()),
+        ChangeNotifierProvider(create: (context) => QueryNotesProvider()),
+        ChangeNotifierProvider(create: (context) => CurrentNoteProvider())
+      
       ],
       child: const MyApp(),
     ),

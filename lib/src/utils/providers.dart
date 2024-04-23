@@ -1,5 +1,7 @@
 // get all school info on department and courses when the user is logged in
 
+import 'dart:io';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:school_app/src/utils/firebase.dart';
@@ -11,23 +13,21 @@ class UniversityDataProvider extends ChangeNotifier {
   List<Map<String, dynamic>> get readDepartmentsAndCourses =>
       _departmentsAndCourses;
 
-
   UniversityDataProvider() {
-    SharedPrefs.getDepartmentAndCourses().then((data) {
-      setDepartmentsAndCourses(data);
-    });
+    if (_departmentsAndCourses.isEmpty) {
+      SharedPrefs.getDepartmentAndCourses().then((data) {
+        setDepartmentsAndCourses(data);
+      });
+    }
   }
-  
+
   void setDepartmentsAndCourses(List<Map<String, dynamic>> data) {
     _departmentsAndCourses = data;
     notifyListeners();
   }
-
-
 }
 
 class UserProvider extends ChangeNotifier {
-  
   UserModel? _userData;
   UserModel? get readUserData => _userData;
 
@@ -37,9 +37,19 @@ class UserProvider extends ChangeNotifier {
   List<String> _savedNoteIds = [];
   List<String> get readSavedNoteIds => _savedNoteIds;
 
+  List<String> _recents = [];
+  List<String> get readRecents => _recents;
+
+  List<String> _prioritySubjects = [];
+  List<String> get readPrioritySubjects => _prioritySubjects;
+
   UserProvider() {
-    if (kDebugMode) print("Reading user data");
-    SharedPrefs.getUserData().then((data) => setUserData(data));
+    if (_userData == null) {
+      SharedPrefs.getUserData().then((data) {
+        setUserData(data);
+        setRecents(data!.recents);
+      });
+    }
   }
 
   void setUserData(UserModel? data) {
@@ -56,9 +66,17 @@ class UserProvider extends ChangeNotifier {
     _savedNoteIds = data;
     notifyListeners();
   }
+
+  void setRecents(List<String>? newRecents) {
+    print('set recents: ' + newRecents.toString());
+    final getRecents = newRecents!;
+    _recents = getRecents;
+    SharedPrefs.setRecents(_recents);
+    notifyListeners();
+  }
 }
 
-class NotesProvider extends ChangeNotifier {
+class NoteProvider extends ChangeNotifier {
   // get my notes and then set it as the value of the notes
 
   FilePickerResult? _result;
@@ -135,6 +153,62 @@ class NotesProvider extends ChangeNotifier {
   }
 }
 
+class CurrentNoteProvider extends ChangeNotifier {
+  String? name;
+  String? summary;
+
+  String? newSubject;
+  String? subject;
+  String? tag1;
+  String? tag2;
+  String? tag3;
+
+  bool editing = false;
+
+  String? get readName => name;
+  String? get readSummary => summary;
+
+  String? get readNewSubject => newSubject;
+  String? get readSubject => subject;
+  String? get readTag1 => tag1;
+  String? get readTag2 => tag2;
+  String? get readTag3 => tag3;
+  bool get readEditing => editing;
+
+  void setEditing(bool value) {
+    editing = value;
+    notifyListeners();
+  }
+
+  void setNote(
+    String notename,
+    String notesubject, {
+    String? notesummary,
+    String? notetag1,
+    String? notetag2,
+    String? notetag3,
+  }) {
+    name = notename;
+    summary = notesummary;
+    subject = notesubject;
+    tag1 = notetag1;
+    tag2 = notetag2;
+    tag3 = notetag3;
+
+    notifyListeners();
+  }
+
+  void setNewSubject(String value) {
+    newSubject = value;
+    notifyListeners();
+  }
+
+  void setSubject(String value) {
+    subject = value;
+    notifyListeners();
+  }
+}
+
 class QueryNotesProvider extends ChangeNotifier {
   List<NoteModel> universityNotes = [];
   List<SubjectModel> universitySubjects = [];
@@ -143,17 +217,21 @@ class QueryNotesProvider extends ChangeNotifier {
   List<SubjectModel> get getUniversitySubjects => universitySubjects;
 
   QueryNotesProvider() {
-    Database.getAllNotes().then(
-      (data) => setUniversityNotes(
-        data.cast<NoteModel>(),
-      ),
-    );
+    if (universityNotes.isEmpty) {
+      Database.getAllNotes().then(
+        (data) => setUniversityNotes(
+          data.cast<NoteModel>(),
+        ),
+      );
+    }
 
-    Database.getAllSubjects().then(
-      (data) => setAllSubjects(
-        data.cast<SubjectModel>(),
-      ),
-    );
+    if (universitySubjects.isEmpty) {
+      Database.getAllSubjects().then(
+        (data) => setAllSubjects(
+          data.cast<SubjectModel>(),
+        ),
+      );
+    }
   }
 
   void setUniversityNotes(List<NoteModel> data) {
@@ -167,10 +245,29 @@ class QueryNotesProvider extends ChangeNotifier {
   }
 
   NoteModel? findNote(String id) {
-    return universityNotes.firstWhere((note) => note.id == id);
+    return universityNotes.where((note) => note.id == id).firstOrNull;
+  }
+
+  void editNote(NoteModel note) {
+    final existingNoteIndex =
+        universityNotes.indexWhere((element) => element.id == note.id);
+    universityNotes[existingNoteIndex] = note;
+
+    notifyListeners();
+  }
+
+  List<NoteModel> getNotesBySubject(String subjectId) {
+    return universityNotes
+        .where((note) => note.subjectId == subjectId)
+        .toList();
+  }
+
+  void deleteNote(NoteModel note) {
+    universityNotes.removeWhere((element) => element.id == note.id);
+    notifyListeners();
   }
 
   SubjectModel? findSubject(String id) {
-    return universitySubjects.firstWhere((subject) => subject.id == id);
+    return universitySubjects.where((subject) => subject.id == id).firstOrNull;
   }
 }

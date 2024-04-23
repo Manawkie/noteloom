@@ -71,7 +71,7 @@ class _MyWidgetState extends State<MyWidget> {
       return false;
     }).toList();
 
-    _filteredResults = [...filteredSubjects, ...filteredNotes];
+    _filteredResults = [...filteredNotes, ...filteredSubjects];
   }
 
   @override
@@ -110,102 +110,59 @@ class _MyWidgetState extends State<MyWidget> {
       filterResults();
 
       return Scaffold(
+        backgroundColor: Theme.of(context).colorScheme.primary,
           body: LiquidPullToRefresh(
-              onRefresh: () async => onRefresh(),
-              child: CustomScrollView(
-                slivers: [
-                  SliverAppBar(
-                    title: TextField(
-                      style: const TextStyle(color: Colors.white),
-                      controller: _searchText,
-                      decoration: const InputDecoration(
-                        hintStyle: TextStyle(color: Colors.white),
-                        hintText: "Search Notes",
-                        fillColor: Colors.white,
-                        border: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white),
-                        ),
-                      ),
-                    ),
+        color: Theme.of(context).colorScheme.primary,
+        showChildOpacityTransition: false,
+        onRefresh: () async => onRefresh(),
+        child: CustomScrollView(
+          slivers: [
+            SliverAppBar(
+              title: TextField(
+                style: const TextStyle(color: Colors.white),
+                controller: _searchText,
+                decoration: const InputDecoration(
+                  hintStyle: TextStyle(color: Colors.white),
+                  hintText: "Search Notes",
+                  fillColor: Colors.white,
+                  border: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.white),
                   ),
-                  renderNotes(),
-                  if (!_filteredResults.any(
-                      (Results result) => result.runtimeType == SubjectModel))
-                    const SliverToBoxAdapter(
-                      child: SizedBox(
-                        height: 150,
-                        width: double.infinity,
-                        child: Center(
-                          child: Text("Can't find your subject?"),
-                        ),
-                      ),
-                    )
-                ],
-              )));
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: ColoredBox(
+                color: Colors.white,
+                child: Column(
+                  children: renderNotes(),
+                ),
+              ),
+            ), const SliverFillRemaining(
+              child: ColoredBox(color: Colors.white,),
+            )
+          ],
+        ),
+      ));
     });
   }
 
-  SliverList renderNotes() {
-    return SliverList(
-      delegate: SliverChildBuilderDelegate(
-        (context, index) {
-          final dynamic result = _filteredResults[index];
+  List<Widget> renderNotes() {
+    return List.generate(
+      _filteredResults.length,
+      (index) {
+        final dynamic result = _filteredResults[index];
 
-          if (result.runtimeType == NoteModel) {
-            return _buildNoteItem(result as NoteModel);
-          }
+        if (result.runtimeType == NoteModel) {
+          return noteButton(result as NoteModel, context);
+        }
 
-          if (result.runtimeType == SubjectModel) {
-            return _buildSubjectItem(result as SubjectModel);
-          }
+        if (result.runtimeType == SubjectModel) {
+          return subjectButton(result as SubjectModel, context);
+        }
 
-          return Container();
-        },
-        childCount: _filteredResults.length,
-      ),
-    );
-  }
-
-  Widget _buildNoteItem(NoteModel note) {
-    return GestureDetector(
-      onTap: () {
-        GoRouter.of(context).push('/note/${note.id}');
+        return Container();
       },
-      child: Container(
-        height: 150,
-        margin: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey),
-          borderRadius: BorderRadius.circular(8.0),
-        ),
-        child: Column(
-          children: [Text(note.name), Text(note.subjectId)],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSubjectItem(SubjectModel subjectModel) {
-    return GestureDetector(
-      onTap: () {
-        GoRouter.of(context).push('/subject/${subjectModel.id}');
-      },
-      child: Container(
-        height: 150,
-        margin: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey),
-          borderRadius: BorderRadius.circular(8.0),
-        ),
-        child: Center(
-          child: Column(
-            children: [
-              Text(subjectModel.subject),
-              Text(subjectModel.subjectCode)
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

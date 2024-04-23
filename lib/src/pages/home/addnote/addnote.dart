@@ -37,7 +37,7 @@ class _AddNoteState extends State<AddNote> {
   bool isUploading = false;
   @override
   void initState() {
-    final noteData = Provider.of<NotesProvider>(context, listen: false);
+    final noteData = Provider.of<NoteProvider>(context, listen: false);
 
     _nameControl = TextEditingController(text: noteData.name ?? "");
     _tag1Control = TextEditingController(text: noteData.readTag1 ?? "");
@@ -97,7 +97,7 @@ class _AddNoteState extends State<AddNote> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Consumer2<NotesProvider, QueryNotesProvider>(
+    return Consumer2<NoteProvider, QueryNotesProvider>(
         builder: (context, addnote, uni, child) {
       if (addnote.readBytes != null) {
         bytes = addnote.readBytes;
@@ -246,7 +246,7 @@ class _AddNoteState extends State<AddNote> {
                             child: SizedBox(
                                 height: 10,
                                 width: 10,
-                                child: myLoadingIndicator()))
+                                child: myLoadingIndicator(), ))
                         : ElevatedButton(
                             onPressed: () async {
                               setState(() {

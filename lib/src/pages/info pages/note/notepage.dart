@@ -90,9 +90,6 @@ class _RenderNoteState extends State<RenderNote> {
         stream: Database.isNoteLiked(widget.note),
         builder: (context, snapshot) {
           final personLiked = snapshot.data;
-
-          print(personLiked);
-
           return FutureBuilder(
               future: Future.wait([
                 Storage.getFile(widget.note.storagePath),
@@ -118,6 +115,7 @@ class _RenderNoteState extends State<RenderNote> {
 
                 if (snapshot.hasData) {
                   Database.setRecents("notes/${widget.note.id}");
+                  print("has data");
                 }
 
                 return Consumer<CurrentNoteProvider>(
@@ -162,30 +160,11 @@ class _RenderNoteState extends State<RenderNote> {
                                   ),
                                 ],
                               ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
-                                children: [
-                                  Actions(
-                                    isSaved: snapshot.data![1] as bool,
-                                    note: widget.note,
-                                    isLiked: personLiked!,
-                                  ),
-                                  Row(
-                                    children: [
-                                      const Padding(
-                                        padding:
-                                            EdgeInsets.symmetric(horizontal: 8),
-                                        child: Text("69"),
-                                      ),
-                                      IconButton(
-                                          onPressed: () {},
-                                          icon: const Icon(Icons.thumb_up))
-                                    ],
-                                  )
-                                ],
-                              )
+                              Actions(
+                                isSaved: snapshot.data![1] as bool,
+                                note: widget.note,
+                                isLiked: personLiked!,
+                              ),
                             ],
                           ),
                           SizedBox(

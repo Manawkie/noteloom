@@ -1,7 +1,5 @@
 // get all school info on department and courses when the user is logged in
 
-import 'dart:io';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:school_app/src/utils/firebase.dart';
@@ -47,13 +45,17 @@ class UserProvider extends ChangeNotifier {
     if (_userData == null) {
       SharedPrefs.getUserData().then((data) {
         setUserData(data);
-        setRecents(data!.recents);
       });
     }
   }
 
   void setUserData(UserModel? data) {
     _userData = data;
+    if (data != null) {
+      SharedPrefs.getRecentNotes().then((recents) {
+        setRecents(recents);
+      });
+    }
     notifyListeners();
   }
 
@@ -67,10 +69,9 @@ class UserProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setRecents(List<String>? newRecents) {
+  void setRecents(List<String> newRecents) {
     print('set recents: ' + newRecents.toString());
-    final getRecents = newRecents!;
-    _recents = getRecents;
+    _recents = newRecents;
     SharedPrefs.setRecents(_recents);
     notifyListeners();
   }

@@ -1,6 +1,4 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:school_app/src/components/uicomponents.dart';
 import 'package:school_app/src/utils/providers.dart';
@@ -70,8 +68,8 @@ class _HomePageState extends State<HomePage> {
               ),
               child: Consumer2<UserProvider, QueryNotesProvider>(
                   builder: (context, userdetails, allnotes, child) {
+                
                 _recents = userdetails.readRecents;
-
                 final getAllNotes = allnotes.getUniversityNotes;
                 final getAllSubjects = allnotes.getUniversitySubjects;
                 if (getAllNotes.isEmpty || getAllSubjects.isEmpty) {
@@ -95,7 +93,10 @@ class _HomePageState extends State<HomePage> {
                 return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text("Recent Notes and Subjects"),
+                      const Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        child: const Text("Recent Notes and Subjects"),
+                      ),
                       ..._buildList()
                     ]);
               }),

@@ -75,11 +75,6 @@ class _LoginState extends State<Login> {
 
     await SharedPrefs.setSavedNotes(savedNotesIds);
 
-    // get all of the user's recent notes and subjects
-    // await SharedPrefs.getRecents();
-
-    // get all of the user's priority subjects
-    // await SharedPrefs.getPrioritySubjects();
 
     // get all of the user's own notes();
     // await SharedPrefs.getSelfNotes();

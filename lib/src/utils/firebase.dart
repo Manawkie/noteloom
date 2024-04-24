@@ -423,7 +423,6 @@ class Database {
             toFirestore: (model, _) => model.toFirestore())
         .doc(note.id)
         .get();
-    
   }
   // subjects
 

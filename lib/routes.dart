@@ -1,4 +1,3 @@
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -120,7 +119,9 @@ class Routes {
               GoRoute(
                 path: "editNote",
                 name: "editNote",
-                builder: (context, state) =>  EditNotePage(noteId: state.pathParameters['id']!,),
+                builder: (context, state) => EditNotePage(
+                  noteId: state.pathParameters['id']!,
+                ),
               )
             ]),
         GoRoute(
@@ -142,11 +143,19 @@ class Routes {
                 name: "subjectNotes",
                 builder: (context, state) {
                   String subjectStubCode = state.pathParameters['stub']!;
-
+                  
                   return SubjectNotesPage(
                       subjectId: state.pathParameters['id']!);
                 },
-              )
+              ),
+              // GoRoute(
+              //     path: "discussions",
+              //     name: "discussions",
+              //     builder: (context, state) {
+              //       String subjectId = state.pathParameters['id']!;
+
+              //       return Messages(subjectId: subjecId);
+              //     })
             ])
       ],
       errorBuilder: (context, state) {

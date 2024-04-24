@@ -139,10 +139,9 @@ class Routes {
             },
             routes: [
               GoRoute(
-                path: "subjectnotes/:stub",
+                path: "subjectnotes",
                 name: "subjectNotes",
                 builder: (context, state) {
-                  String subjectStubCode = state.pathParameters['stub']!;
                   
                   return SubjectNotesPage(
                       subjectId: state.pathParameters['id']!);

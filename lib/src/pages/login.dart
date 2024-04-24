@@ -72,12 +72,7 @@ class _LoginState extends State<Login> {
     for (var note in savedNotes) {
       savedNotesIds.add(note.noteid);
     }
-
     await SharedPrefs.setSavedNotes(savedNotesIds);
-
-
-    // get all of the user's own notes();
-    // await SharedPrefs.getSelfNotes();
 
     if (mounted) context.go("/setup");
   }

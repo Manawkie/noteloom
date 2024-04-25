@@ -75,6 +75,11 @@ class UserProvider extends ChangeNotifier {
     SharedPrefs.setRecents(_recents);
     notifyListeners();
   }
+
+  void setPrioritySubjects(List<String> prioritySubjects) {
+    _prioritySubjects = prioritySubjects;
+    notifyListeners();
+  }
 }
 
 class NoteProvider extends ChangeNotifier {

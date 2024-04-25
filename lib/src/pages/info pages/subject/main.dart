@@ -87,3 +87,18 @@ class _RenderSubjectPageState extends State<RenderSubjectPage> {
         });
   }
 }
+
+class Messages extends StatefulWidget {
+  const Messages({super.key, required this.id});
+  final String id;
+
+  @override
+  State<Messages> createState() => _MessagesState();
+}
+
+class _MessagesState extends State<Messages> {
+  @override
+  Widget build(BuildContext context) {
+    return const Placeholder();
+  }
+}

@@ -268,7 +268,7 @@ class Database {
     return newNote;
   }
 
-  static Future<List<String>> setRecents(String resultpath) async {
+  static Future<List<String>> addRecents(String resultpath) async {
     final user = db
         .collection('users')
         .withConverter(

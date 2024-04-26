@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:school_app/src/utils/firebase.dart';
 import 'package:school_app/src/utils/models.dart';
 import 'package:school_app/src/utils/providers.dart';
 import 'package:school_app/src/utils/sharedprefs.dart';
@@ -15,14 +16,28 @@ class SubjectPage extends StatefulWidget {
 
 class _SubjectPageState extends State<SubjectPage> {
   @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      
+      final userData = context.read<UserProvider>();
+
+      Database.addRecents("subjects/${widget.subjectId}");
+      userData.addRecents("subjects/${widget.subjectId}");
+    });
+  }
+
+  void onExit() {
+    context.go('/home');
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new),
-          onPressed: () {
-            context.go('/home');
-          },
+          onPressed: () {},
         ),
       ),
       body: Consumer<QueryNotesProvider>(builder: (context, notes, child) {
@@ -76,7 +91,7 @@ class _RenderSubjectPageState extends State<RenderSubjectPage> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: Future.wait([SharedPrefs.isSubjectSaved(widget.subject.id)]),
+      future: Future.wait([SharedPrefs.isSubjectPriority(widget.subject.id)]),
       builder: (context, snapshot) {
         return Container();
       },

@@ -41,69 +41,66 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Theme.of(context).colorScheme.primary,
         body: CustomScrollView(
-          slivers: [
-            SliverAppBar(
-              title: !overScrolled ? const Text("Hello") : null,
-              backgroundColor: Theme.of(context).primaryColor,
-              expandedHeight: 150,
-              flexibleSpace: !overScrolled
-                  ? const FlexibleSpaceBar(
-                      title: Text(
-                        "Welcome to Note Loom!",
-                        style: TextStyle(fontSize: 20, color: Colors.white),
-                      ),
-                    )
-                  : Container(),
-            ),
-            SliverToBoxAdapter(
-                child: Container(
-              padding: const EdgeInsets.all(20),
-              decoration: const BoxDecoration(
-                borderRadius: BorderRadius.vertical(
-                  top: Radius.circular(45),
-                ),
-                color: Colors.white,
-              ),
-              child: Consumer2<UserProvider, QueryNotesProvider>(
-                  builder: (context, userdetails, allnotes, child) {
-
-                _recents = userdetails.readRecents;
-                final getAllNotes = allnotes.getUniversityNotes;
-                final getAllSubjects = allnotes.getUniversitySubjects;
-                if (getAllNotes.isEmpty || getAllSubjects.isEmpty) {
-                  return Padding(
-                    padding: const EdgeInsets.only(top: 100),
-                    child: Column(
-                      children: [
-                        myLoadingIndicator(),
-                        Text(
-                          getAllNotes.isEmpty
-                              ? "Loading Recent Notes..."
-                              : getAllSubjects.isEmpty
-                                  ? "Loading Recent Subjects..."
-                                  : "Please wait...",
-                        )
-                      ],
-                    ),
-                  );
-                }
-
-                return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+      slivers: [
+        SliverAppBar(
+          title: overScrolled ? const Text("Hello") : null,
+          backgroundColor: Theme.of(context).primaryColor,
+          expandedHeight: 150,
+          flexibleSpace: !overScrolled
+              ? const FlexibleSpaceBar(
+                  title: Text(
+                    "Welcome to Note Loom!",
+                    style: TextStyle(fontSize: 20, color: Colors.white),
+                  ),
+                )
+              : Container(),
+        ),
+        SliverToBoxAdapter(
+          child: Container(
+            padding: const EdgeInsets.all(12),
+            child: Consumer2<UserProvider, QueryNotesProvider>(
+                builder: (context, userdetails, allnotes, child) {
+              _recents = userdetails.readRecents;
+              final getAllNotes = allnotes.getUniversityNotes;
+              final getAllSubjects = allnotes.getUniversitySubjects;
+              if (getAllNotes.isEmpty || getAllSubjects.isEmpty) {
+                return Padding(
+                  padding: const EdgeInsets.only(top: 100),
+                  child: Column(
                     children: [
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 10),
-                        child: Text("Recent Notes and Subjects"),
-                      ),
-                      ..._buildList()
-                    ]);
-              }),
-            )), if (_recents != null && _recents!.length < 3 )
-            SliverFillRemaining(child: ColoredBox(color: Colors.white,),)
-          ],
-        ));
+                      myLoadingIndicator(),
+                      Text(
+                        getAllNotes.isEmpty
+                            ? "Loading Recent Notes..."
+                            : getAllSubjects.isEmpty
+                                ? "Loading Recent Subjects..."
+                                : "Please wait...",
+                      )
+                    ],
+                  ),
+                );
+              }
+
+              return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text("Recent Notes and Subjects:"),
+                    ..._buildList(),
+                    _recents!.isEmpty
+                        ? const SizedBox(
+                          height: 200,
+                          child: Center(
+                              child: Text("No recent notes or subjects"),
+                            ),
+                        )
+                        : Container()
+                  ]);
+            }),
+          ),
+        )
+      ],
+    ));
   }
 
   List<Widget> _buildList() {

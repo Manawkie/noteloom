@@ -5,7 +5,6 @@ import 'package:school_app/src/utils/models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SharedPrefs {
-
   // ==== deps and courses to [{dep: [course, course, ...], dep: [course, course, ...]}]
   static Future<List<Map<String, dynamic>>> getDepartmentAndCourses() async {
     final sf = await SharedPreferences.getInstance();
@@ -78,7 +77,6 @@ class SharedPrefs {
     sf.setString("savedNotes", jsonEncode(notes));
   }
 
-
   static Future<List<String>> addSavedNote(NoteModel note, bool isSaved) async {
     final notesList = await getSavedNotes();
 
@@ -108,38 +106,20 @@ class SharedPrefs {
 
   // ========= subjects
 
-  static Future<List<String>> getSavedSubjects() async {
+  static Future<List<String>> getPrioritySubjects() async {
     final savedSubjects = await getUserData()
         .then((userData) => userData?.prioritySubjects ?? <String>[]);
-
     return savedSubjects;
   }
 
-  static Future<bool> isSubjectSaved(String subjectId) async {
+  static Future<void> setPrioritySubjects(List<String> prioritySubjects) async {
+    final userData = await getUserData();
+    userData?.prioritySubjects = prioritySubjects;
+    setUserData(userData!);
+  }
+
+  static Future<bool> isSubjectPriority(String subjectId) async {
     final userData = await getUserData();
     return userData?.prioritySubjects?.contains(subjectId) ?? false;
-  }
-
-  static Future<List<String>?> getPrioritySubjects() async {
-    final sf = await SharedPreferences.getInstance();
-    final prioritySubjects = sf.getString("prioritySubjects");
-
-    if (prioritySubjects == null) {
-      final user = await getUserData();
-      final List<String>? savedPrioritySubjects = user!.prioritySubjects;
-      setPrioritySubjects(savedPrioritySubjects ?? []);
-      return savedPrioritySubjects;
-    }
-
-    final List<String> decodedData =
-        jsonDecode(prioritySubjects).cast<String>();
-    return decodedData;
-  }
-
-  static Future<List<String>?> setPrioritySubjects(
-      List<String> subjects) async {
-    final sf = await SharedPreferences.getInstance();
-    sf.setString("savedSubjects", jsonEncode(subjects));
-    return subjects;
   }
 }

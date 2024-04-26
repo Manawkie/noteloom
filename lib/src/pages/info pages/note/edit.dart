@@ -7,7 +7,6 @@ import 'package:school_app/src/components/uicomponents.dart';
 import 'package:school_app/src/utils/firebase.dart';
 import 'package:school_app/src/utils/models.dart';
 import 'package:school_app/src/utils/providers.dart';
-import 'package:school_app/src/utils/sharedprefs.dart';
 
 class EditNotePage extends StatefulWidget {
   const EditNotePage({super.key, required this.noteId});

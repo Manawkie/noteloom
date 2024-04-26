@@ -79,7 +79,7 @@ class _RenderNoteState extends State<RenderNote> {
 
       final userData = context.read<UserProvider>();
 
-      Database.setRecents("notes/${widget.note.id}");
+      Database.addRecents("notes/${widget.note.id}");
       userData.addRecents("notes/${widget.note.id}");
     });
 

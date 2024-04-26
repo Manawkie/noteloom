@@ -402,7 +402,7 @@ class Database {
 
   // like
 
-  static Stream<bool> isNoteLiked(NoteModel note) {
+  static Stream<DocumentSnapshot<NoteModel>> noteStream(NoteModel note) {
     final streamNote = db
         .collection('notes')
         .withConverter(
@@ -411,18 +411,30 @@ class Database {
         .doc(note.id)
         .snapshots();
 
-    return streamNote.map((snapshot) =>
-        snapshot.data()?.peopleLiked?.contains(Auth.currentUser!.uid) ?? false);
+    return streamNote;
   }
 
-  static Future likeNote(NoteModel note, bool isSaved) async {
-    final dbNote = await db
+  static Future likeNote(NoteModel note, bool isLiked) async {
+    final dbNote = db
         .collection('notes')
         .withConverter(
             fromFirestore: NoteModel.fromFirestore,
             toFirestore: (model, _) => model.toFirestore())
-        .doc(note.id)
-        .get();
+        .doc(note.id);
+
+    await db.runTransaction((transaction) async {
+      final noteSnap = await transaction.get(dbNote);
+
+      final peopleLiked = noteSnap.data()!.peopleLiked ?? [];
+      if (isLiked) {
+        peopleLiked.add(Auth.auth.currentUser!.uid);
+      } else {
+        peopleLiked.remove(Auth.auth.currentUser!.uid);
+      }
+
+
+      transaction.update(dbNote, {"peopleLiked": peopleLiked});
+    });
   }
   // subjects
 

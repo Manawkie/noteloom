@@ -7,6 +7,7 @@ import 'package:school_app/src/pages/home/addnote/selectsubject.dart';
 import 'package:school_app/src/pages/home/profile/profile.dart';
 import 'package:school_app/src/pages/info%20pages/note/edit.dart';
 import 'package:school_app/src/pages/info%20pages/note/notepage.dart';
+import 'package:school_app/src/pages/info%20pages/subject/chat_page.dart';
 import 'package:school_app/src/pages/info%20pages/subject/main.dart';
 import 'package:school_app/src/pages/info%20pages/subject/subjectnotes.dart';
 import 'package:school_app/src/pages/login.dart';
@@ -147,14 +148,14 @@ class Routes {
                       subjectId: state.pathParameters['id']!);
                 },
               ),
-              // GoRoute(
-              //     path: "discussions",
-              //     name: "discussions",
-              //     builder: (context, state) {
-              //       String subjectId = state.pathParameters['id']!;
+              GoRoute(
+                  path: "discussions",
+                  name: "discussions",
+                  builder: (context, state) {
+                    String subjectId = state.pathParameters['id']!;
 
-              //       return Messages(subjectId: subjecId);
-              //     })
+                    return ChatPage(subjectId: subjectId);
+                  })
             ])
       ],
       errorBuilder: (context, state) {

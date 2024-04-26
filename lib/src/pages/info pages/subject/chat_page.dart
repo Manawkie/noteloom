@@ -1,20 +1,19 @@
-import "package:cloud_firestore/cloud_firestore.dart";
-import "package:firebase_auth/firebase_auth.dart";
 import "package:flutter/material.dart";
+import "package:provider/provider.dart";
 import "package:school_app/src/pages/info%20pages/subject/chat_service.dart";
+import "package:school_app/src/pages/info%20pages/subject/messages.dart";
 import "package:school_app/src/pages/info%20pages/subject/text_field.dart";
+import "package:school_app/src/utils/firebase.dart";
+import "package:school_app/src/utils/models.dart";
+import "package:school_app/src/utils/providers.dart";
 
 class ChatPage extends StatefulWidget {
-  final String senderId;
-  final String message;
   final String subjectId;
 
   const ChatPage({
     super.key,
-    required this.senderId,
-    required this.message,
     required this.subjectId,
-    });
+  });
 
   @override
   State<ChatPage> createState() => _ChatPageState();
@@ -23,75 +22,81 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   final TextEditingController _messsageController = TextEditingController();
   final ChatService _chatService = ChatService();
-  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  late UserProvider _user;
 
-  void sendMessage() async {
-
-    //only send message if theres something to send
-    if (_messsageController.text.isNotEmpty) {
-        await _chatService.sendMessage(widget.senderId, widget.message, widget.subjectId);
-
-    //delete the message after sending
-        _messsageController.clear();
-    }
+  @override
+  void initState() {
+    _user = context.read<UserProvider>();
+    super.initState();
   }
 
+  void sendMessage() async {
+    //only send message if theres something to send
+    if (_messsageController.text.isNotEmpty) {
+      await _chatService.sendMessage(_user.readUserData!.username,
+          _messsageController.text, widget.subjectId);
+
+      //delete the message after sending
+      _messsageController.clear();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.subjectId),),
-      body: Column(
-        children: [
-          // messages
-          Expanded(
-            child: _buildMessagelist(),
+      appBar: AppBar(
+        title: Text(widget.subjectId),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+        child: Column(
+          children: [
+            // messages
+            Expanded(
+              child: _buildMessagelist(),
             ),
-
-          // user input
+            // user input
             _buildMessageInput(),
-        ],),
+          ],
+        ),
+      ),
     );
   }
+
   // build message list
-  Widget _buildMessagelist()  {
+  Widget _buildMessagelist() {
     return StreamBuilder(
-      stream: _chatService.getMessages(widget.senderId, widget.subjectId),
-      builder: (context, snapshot)  {
-        if (snapshot.hasError)  {
+      stream: _chatService.getMessages(Auth.currentUser!.uid, widget.subjectId),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
           return Text('error${snapshot.error}');
         }
 
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Text('Loading..');
+          return const Text('Loading...');
         }
 
         return ListView(
-          children: 
-          snapshot.data!.docs
-          .map((document) => _buildMessageItem(document))
-          .toList(),
-
-
+          children: snapshot.data!.docs
+              .map((document) => _buildMessageItem(document.data()))
+              .toList(),
         );
       },
     );
   }
-  // build message item
-  Widget _buildMessageItem(DocumentSnapshot document) {
-    Map<String, dynamic> data = document.data() as Map<String, dynamic>;
 
+  // build message item
+  Widget _buildMessageItem(MessageModel message) {
     //alignment of the messages if the u r the sender then its in right else left
-    var alignment = (data['senderId'] == _firebaseAuth.currentUser!.uid)
-      ? Alignment.centerRight
-      : Alignment.centerLeft;
+    var alignment = (message.senderId == Auth.currentUser!.uid)
+        ? Alignment.centerRight
+        : Alignment.centerLeft;
 
     return Container(
       alignment: alignment,
       child: Column(
-        children: [
-          Text(data['sender'])
-        ],),
+        children: [Text(message.senderUsername), Text(message.message)],
+      ),
     );
   }
 
@@ -100,21 +105,19 @@ class _ChatPageState extends State<ChatPage> {
     return Row(
       children: [
         // text field
-          Expanded(
+        Expanded(
             child: MyTextField(
-              controller: _messsageController,
-              hintText: 'Enter message',
-              obscureText: false,
-          )
-        ),
+          controller: _messsageController,
+          hintText: 'Enter message',
+          obscureText: false,
+        )),
         // send button
         IconButton(
-          onPressed: sendMessage,
-           icon: const Icon(
-            Icons.arrow_upward,
-            size: 40,
-            )
-          ),
+            onPressed: sendMessage,
+            icon: const Icon(
+              Icons.arrow_upward,
+              size: 40,
+            )),
       ],
     );
   }

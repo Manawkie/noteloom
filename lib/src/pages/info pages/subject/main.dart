@@ -18,24 +18,19 @@ class _SubjectPageState extends State<SubjectPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Subject"),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new),
+          onPressed: () {
+            context.go('/home');
+          },
+        ),
       ),
       body: Consumer<QueryNotesProvider>(builder: (context, notes, child) {
         SubjectModel? subject = notes.findSubject(widget.subjectId);
 
         if (subject == null) {
-          return Scaffold(
-            appBar: AppBar(
-              leading: IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new),
-                onPressed: () {
-                  context.go('/home');
-                },
-              ),
-            ),
-            body: const Center(
-              child: Text("Subject not found."),
-            ),
+          return const Center(
+            child: Text("Subject not found."),
           );
         }
 
@@ -81,24 +76,10 @@ class _RenderSubjectPageState extends State<RenderSubjectPage> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-        future: Future.wait([SharedPrefs.isSubjectSaved(widget.subject)]),
-        builder: (context, snapshot) {
-          return Container();
-        });
-  }
-}
-
-class Messages extends StatefulWidget {
-  const Messages({super.key, required this.id});
-  final String id;
-
-  @override
-  State<Messages> createState() => _MessagesState();
-}
-
-class _MessagesState extends State<Messages> {
-  @override
-  Widget build(BuildContext context) {
-    return const Placeholder();
+      future: Future.wait([SharedPrefs.isSubjectSaved(widget.subject)]),
+      builder: (context, snapshot) {
+        return Container();
+      },
+    );
   }
 }

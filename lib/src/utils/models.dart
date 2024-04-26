@@ -238,7 +238,7 @@ class NoteModel extends Results {
         storagePath: data?['storagePath'],
         tags: data?['tags'].cast<String>(),
         summary: data?['summary'],
-        peopleLiked: data?['liked']?.cast<String>());
+        peopleLiked: data?['peopleLiked']?.cast<String>());
 
     return note;
   }
@@ -270,14 +270,14 @@ class MessageModel {
   String? id;
   String message;
   String senderId;
-  String receiverId;
-  String timestamp;
+  String senderUsername;
+  Timestamp timestamp;
 
   MessageModel(
       {this.id,
       required this.message,
       required this.senderId,
-      required this.receiverId,
+      required this.senderUsername,
       required this.timestamp});
 
   factory MessageModel.fromFirestore(
@@ -289,17 +289,16 @@ class MessageModel {
         id: id,
         message: data?['message'],
         senderId: data?['senderId'],
-        receiverId: data?['receiverId'],
+        senderUsername: data?['senderUsername'],
         timestamp: data?['timestamp']);
     return message;
   }
 
   Map<String, dynamic> toFirestore() {
     return {
-      "id": id,
       "message": message,
       "senderId": senderId,
-      "receiverId": receiverId,
+      "senderUsername": senderUsername,
       "timestamp": timestamp,
     };
   }

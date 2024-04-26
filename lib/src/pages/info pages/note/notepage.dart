@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -56,8 +57,13 @@ class RenderNote extends StatefulWidget {
 }
 
 class _RenderNoteState extends State<RenderNote> {
+  final _key = GlobalKey<SfPdfViewerState>();
+  late PdfViewerController _controller;
+
   @override
   void initState() {
+    _controller = PdfViewerController(
+    );
     final currentNote =
         Provider.of<CurrentNoteProvider>(context, listen: false);
 
@@ -86,109 +92,105 @@ class _RenderNoteState extends State<RenderNote> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder(
-        stream: Database.isNoteLiked(widget.note),
+    return FutureBuilder(
+        future: Future.wait([
+          Storage.getFile(widget.note.storagePath),
+          SharedPrefs.isNoteSaved(widget.note),
+        ]),
         builder: (context, snapshot) {
-          final personLiked = snapshot.data;
-          return FutureBuilder(
-              future: Future.wait([
-                Storage.getFile(widget.note.storagePath),
-                SharedPrefs.isNoteSaved(widget.note),
-              ]),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Scaffold(
-                    body: Center(
-                      child: myLoadingIndicator(),
-                    ),
-                  );
-                }
-                final userData =
-                    Provider.of<UserProvider>(context, listen: false);
-                bool isOwned = false;
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Scaffold(
+              body: Center(
+                child: myLoadingIndicator(),
+              ),
+            );
+          }
+          final userData = Provider.of<UserProvider>(context, listen: false);
+          bool isOwned = false;
 
-                final allSavedNotes = userData.readSavedNoteIds;
+          final allSavedNotes = userData.readSavedNoteIds;
 
-                if (widget.note.author == userData.readUserData!.username) {
-                  isOwned = true;
-                }
+          if (widget.note.author == userData.readUserData!.username) {
+            isOwned = true;
+          }
 
-                if (snapshot.hasData) {
-                  Database.setRecents("notes/${widget.note.id}");
-                  print("has data");
-                }
+          if (snapshot.hasData) {
+            Database.setRecents("notes/${widget.note.id}");
+          }
 
-                return Consumer<CurrentNoteProvider>(
-                    builder: (context, currentNote, child) {
-                  return Scaffold(
-                    appBar: AppBar(
-                      leading: IconButton(
-                        icon: const Icon(Icons.arrow_back_ios_new),
-                        onPressed: () async {
-                          onExit(allSavedNotes);
-                          context.pop();
+          return Consumer<CurrentNoteProvider>(
+              builder: (context, currentNote, child) {
+            return Scaffold(
+              appBar: AppBar(
+                leading: IconButton(
+                  icon: const Icon(Icons.arrow_back_ios_new),
+                  onPressed: () async {
+                    onExit(allSavedNotes);
+                    context.pop();
+                  },
+                ),
+                actions: [
+                  if (isOwned)
+                    IconButton(
+                        onPressed: () {
+                          context.pushNamed("editNote", pathParameters: {
+                            "id": widget.note.id!,
+                          });
                         },
-                      ),
-                      actions: [
-                        if (isOwned)
-                          IconButton(
-                              onPressed: () {
-                                context.pushNamed("editNote", pathParameters: {
-                                  "id": widget.note.id!,
-                                });
-                              },
-                              icon: const Icon(Icons.edit))
+                        icon: const Icon(Icons.edit))
+                ],
+              ),
+              body: Padding(
+                padding: const EdgeInsets.all(10),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              currentNote.name ?? "",
+                              style: const TextStyle(fontSize: 20),
+                            ),
+                            Text(
+                              currentNote.subject ?? "",
+                            ),
+                          ],
+                        ),
+                        Actions(
+                          isSaved: snapshot.data![1] as bool,
+                          note: widget.note,
+                        ),
                       ],
                     ),
-                    body: Padding(
-                      padding: const EdgeInsets.all(10),
+                    SizedBox(
+                      width: double.infinity,
                       child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    currentNote.name ?? "",
-                                    style: const TextStyle(fontSize: 20),
-                                  ),
-                                  Text(
-                                    currentNote.subject ?? "",
-                                  ),
-                                ],
-                              ),
-                              Actions(
-                                isSaved: snapshot.data![1] as bool,
-                                note: widget.note,
-                                isLiked: personLiked!,
-                              ),
-                            ],
+                          Text(
+                            currentNote.summary ?? "",
+                            textAlign: TextAlign.start,
                           ),
-                          SizedBox(
-                            width: double.infinity,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  currentNote.summary ?? "",
-                                  textAlign: TextAlign.start,
-                                ),
-                                Text("@${widget.note.author}"),
-                              ],
-                            ),
-                          ),
-                          Flexible(
-                              child: SfPdfViewer.memory(
-                                  snapshot.data?[0] as Uint8List))
+                          Text("@${widget.note.author}"),
                         ],
                       ),
                     ),
-                  );
-                });
-              });
+                    Flexible(
+                        child: SfPdfViewer.memory(
+                      snapshot.data?[0] as Uint8List,
+                      key: _key,
+                      enableTextSelection: true,
+                      controller: _controller,
+                    ))
+                  ],
+                ),
+              ),
+            );
+          });
         });
   }
 }
@@ -198,12 +200,10 @@ class Actions extends StatefulWidget {
     super.key,
     required this.isSaved,
     required this.note,
-    required this.isLiked,
   });
 
   final bool isSaved;
   final NoteModel note;
-  final bool isLiked;
 
   @override
   State<Actions> createState() => _ActionsState();
@@ -216,15 +216,8 @@ class _ActionsState extends State<Actions> {
   @override
   void initState() {
     isSaved = widget.isSaved;
-    isLiked = widget.isLiked;
     super.initState();
   }
-
-  // @override
-  // void didChangeDependencies() {
-  //   isSaved = widget.isSaved;
-  //   super.didChangeDependencies();
-  // }
 
   void saveNote() {
     setState(() {
@@ -236,32 +229,59 @@ class _ActionsState extends State<Actions> {
   void likeNote() {
     setState(() {
       isLiked = !isLiked;
-      Database.likeNote(widget.note, isSaved);
+      Database.likeNote(widget.note, isLiked);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: [
-        IconButton(
-            icon: Icon(
-              Icons.bookmark,
-              color: isSaved ? Theme.of(context).colorScheme.primary : null,
-            ),
-            onPressed: saveNote),
-        Row(
-          children: [
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8),
-              child: Text("69"),
-            ),
-            IconButton(onPressed: likeNote, icon: const Icon(Icons.thumb_up))
-          ],
-        )
-      ],
-    );
+    return StreamBuilder<DocumentSnapshot<NoteModel>>(
+        stream: Database.noteStream(widget.note),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting &&
+              !snapshot.hasData) {
+            return Center(
+              child: myLoadingIndicator(),
+            );
+          }
+
+          isLiked = snapshot.data!
+                  .data()!
+                  .peopleLiked
+                  ?.contains(Auth.currentUser!.uid) ??
+              false;
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              IconButton(
+                  icon: Icon(
+                    Icons.bookmark,
+                    color:
+                        isSaved ? Theme.of(context).colorScheme.primary : null,
+                  ),
+                  onPressed: saveNote),
+              Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: Text(
+                        snapshot.data?.data()?.peopleLiked?.length.toString() ??
+                            "0"),
+                  ),
+                  IconButton(
+                      onPressed: likeNote,
+                      icon: Icon(
+                        Icons.thumb_up,
+                        color: isLiked
+                            ? Theme.of(context).colorScheme.primary
+                            : null,
+                      ))
+                ],
+              )
+            ],
+          );
+        });
   }
 }

@@ -432,7 +432,6 @@ class Database {
         peopleLiked.remove(Auth.auth.currentUser!.uid);
       }
 
-
       transaction.update(dbNote, {"peopleLiked": peopleLiked});
     });
   }
@@ -478,7 +477,7 @@ class Storage {
       if (metadata.size == fileBytes.length) {
         throw ErrorDescription("File already exists");
       }
-    } finally {
+    } catch (e) {
       await fileRef.putData(
           fileBytes, SettableMetadata(contentType: "application/pdf"));
     }

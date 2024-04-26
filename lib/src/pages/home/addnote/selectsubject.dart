@@ -64,13 +64,14 @@ class _SelectSubjectPageState extends State<SelectSubjectPage> {
                     final currentNote = context.read<CurrentNoteProvider>();
                     if (currentNote.readEditing == true) {
                       currentNote.setNewSubject(selectedSubject);
-                    
+
                       context.pop();
                       return;
                     } else {
                       note.setSubject(selectedSubject);
 
-                      Provider.of<CurrentNoteProvider>(context)
+                      context
+                          .read<CurrentNoteProvider>()
                           .setSubject(selectedSubject);
 
                       context.go("/addnote");

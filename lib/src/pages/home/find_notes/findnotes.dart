@@ -8,14 +8,14 @@ import 'package:school_app/src/utils/firebase.dart';
 import 'package:school_app/src/utils/models.dart';
 import 'package:school_app/src/utils/providers.dart';
 
-class MyWidget extends StatefulWidget {
-  const MyWidget({super.key});
+class SearchPage extends StatefulWidget {
+  const SearchPage({super.key});
 
   @override
-  State<MyWidget> createState() => _MyWidgetState();
+  State<SearchPage> createState() => _SearchPageState();
 }
 
-class _MyWidgetState extends State<MyWidget> {
+class _SearchPageState extends State<SearchPage> {
   TextEditingController _searchText = TextEditingController();
 
   List<NoteModel> _allNotes = [];

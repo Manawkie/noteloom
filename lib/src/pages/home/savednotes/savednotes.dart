@@ -17,11 +17,8 @@ class _SavedNotesPageState extends State<SavedNotesPage> {
   Widget build(BuildContext context) {
     return Consumer2<UserProvider, QueryNotesProvider>(
         builder: (consumer, userdata, notes, child) {
+        
       
-        SharedPrefs.getSavedNotes()
-            .then((savedNotes) => userdata.setSavedNoteIds(savedNotes));
-      
-
       if (userdata.readSavedNoteIds.isEmpty) {
         return const Scaffold(
           body: Center(

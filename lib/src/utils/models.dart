@@ -1,18 +1,19 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:school_app/src/utils/firebase.dart';
 
 class UserModel {
-  final String id;
+  final String? id;
   final String username;
-  String name;
+  final String name;
   final String email;
   final String universityId;
-  final String? department;
-  final String? course;
-  final List<String>? recents;
-  final List<String>? prioritySubjects;
+  String? department;
+  String? course;
+  List<String>? recents;
+  List<String>? prioritySubjects;
 
   UserModel(
-      {required this.id,
+      {this.id,
       required this.email,
       required this.name,
       required this.universityId,
@@ -35,35 +36,39 @@ class UserModel {
         universityId: data?['universityId'],
         course: data?['course'],
         department: data?['department'],
-        recents: data?['recents']?.cast<String>(),
-        prioritySubjects: data?['prioritySubjects']?.cast<String>());
+        recents: data?['recents']?.cast<String>() ?? [],
+        prioritySubjects: data?['prioritySubjects']?.cast<String>() ?? []);
     return fromFirebase;
   }
 
-  factory UserModel.fromMap(Map<String, dynamic> data) {
+  factory UserModel.fromMap(Map<String, dynamic>? data) {
     return UserModel(
-        id: data['id'],
-        email: data['email'],
-        username: data['username'],
-        name: data['name'],
-        universityId: data['universityId'],
-        course: data['course'],
-        department: data['department'],
-        recents: data['recents']?.cast<String>(),
-        prioritySubjects: data['prioritySubjects']?.cast<String>());
+        id: data?['id'] ?? Auth.currentUser!.uid,
+        email: data?['email'],
+        username: data?['username'],
+        name: data?['name'],
+        universityId: data?['universityId'],
+        course: data?['course'],
+        department: data?['department'],
+        recents: data?['recents']?.cast<String>() ?? [],
+        prioritySubjects: data?['prioritySubjects']?.cast<String>() ?? []);
   }
 
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> toFirestore() {
     return {
-      "id": id,
       "email": email,
       "username": username,
       "name": name,
       "universityId": universityId,
       if (department != null) "department": department,
       if (course != null) "course": course,
-      if (recents != null) "recents": recents
+      if (recents != null) "recents": recents,
+      if (prioritySubjects != null) "prioritySubjects": prioritySubjects
     };
+  }
+
+  void setRecents(List<String> newRecents) {
+    recents = newRecents;
   }
 }
 
@@ -139,9 +144,11 @@ class DepartmentModel {
 class CourseModel {
   final String id;
   final String name;
-  final List<DocumentReference>? subjects;
 
-  CourseModel({required this.id, required this.name, this.subjects});
+  CourseModel({
+    required this.id,
+    required this.name,
+  });
 
   factory CourseModel.fromFirestore(
       DocumentSnapshot<Map<String, dynamic>> snapshot, options) {
@@ -149,15 +156,15 @@ class CourseModel {
     final id = snapshot.id;
 
     final course = CourseModel(
-        id: id,
-        name: data?['name'],
-        subjects: data?['subjects'].cast<DocumentReference>());
+      id: id,
+      name: data?['name'],
+    );
 
     return course;
   }
 
   Map<String, dynamic> toFirestore() {
-    return {"name": name, if (subjects != null) "subjects": subjects};
+    return {"name": name};
   }
 }
 

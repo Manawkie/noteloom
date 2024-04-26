@@ -76,7 +76,7 @@ class _RenderSubjectPageState extends State<RenderSubjectPage> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: Future.wait([SharedPrefs.isSubjectSaved(widget.subject)]),
+      future: Future.wait([SharedPrefs.isSubjectSaved(widget.subject.id)]),
       builder: (context, snapshot) {
         return Container();
       },

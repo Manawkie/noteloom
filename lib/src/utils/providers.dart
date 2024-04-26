@@ -7,6 +7,8 @@ import 'package:school_app/src/utils/models.dart';
 import 'package:school_app/src/utils/sharedprefs.dart';
 
 class UniversityDataProvider extends ChangeNotifier {
+  // data looks like this:
+  // [{dep : [course, course, course], {dep: [course, course, course]}]
   List<Map<String, dynamic>> _departmentsAndCourses = [];
   List<Map<String, dynamic>> get readDepartmentsAndCourses =>
       _departmentsAndCourses;
@@ -29,56 +31,79 @@ class UserProvider extends ChangeNotifier {
   UserModel? _userData;
   UserModel? get readUserData => _userData;
 
-  List<SavedNoteModel> _savedNotes = [];
-  List<SavedNoteModel> get readSavedNotes => _savedNotes;
-
   List<String> _savedNoteIds = [];
   List<String> get readSavedNoteIds => _savedNoteIds;
 
-  List<String> _recents = [];
-  List<String> get readRecents => _recents;
+  List<String> get readRecents => _userData?.recents ?? [];
 
-  List<String> _prioritySubjects = [];
-  List<String> get readPrioritySubjects => _prioritySubjects;
+  List<String> get readPrioritySubjects => _userData?.prioritySubjects ?? [];
 
   UserProvider() {
     if (_userData == null) {
       SharedPrefs.getUserData().then((data) {
-        setUserData(data);
+        if (data != null) setUserData(data);
+        if (data != null) setRecents(data.recents ?? []);
+      });
+      SharedPrefs.getSavedNotes().then((data) {
+        setSavedNoteIds(data);
       });
     }
   }
 
-  void setUserData(UserModel? data) {
+  void setUserData(UserModel data) {
     _userData = data;
-    if (data != null) {
-      SharedPrefs.getRecentNotes().then((recents) {
-        setRecents(recents);
-      });
+    SharedPrefs.setUserData(data);
+    notifyListeners();
+  }
+
+  void setSavedNoteIds(List<String> newSavedNoteIds) {
+    _savedNoteIds = newSavedNoteIds;
+    print("Saved notes: $_savedNoteIds");
+    SharedPrefs.setSavedNotes(newSavedNoteIds);
+    notifyListeners();
+  }
+
+  void addSavedNoteId(String noteId) {
+    if (!_savedNoteIds.contains(noteId)) {
+      _savedNoteIds.add(noteId);
+      SharedPrefs.setSavedNotes(_savedNoteIds);
+      notifyListeners();
     }
+  }
+
+  void removeSavedNoteId(String noteId) {
+    _savedNoteIds.remove(noteId);
+    SharedPrefs.setSavedNotes(readSavedNoteIds);
     notifyListeners();
   }
 
-  void setSavedNotes(List<SavedNoteModel> data) {
-    _savedNotes = data;
+  void setRecents(List<String> newRecents) async {
+    _userData?.setRecents(newRecents);
+    SharedPrefs.setRecents(newRecents);
     notifyListeners();
   }
 
-  void setSavedNoteIds(List<String> data) {
-    _savedNoteIds = data;
+  void addRecents(String recent) {
+    if (!_userData!.recents!.contains(recent)) {
+      print("recents: $recent");
+      _userData?.recents?.add(recent);
+      SharedPrefs.setRecents(readRecents);
+      notifyListeners();
+    }
+  }
+
+  void setPrioritySubjectIds(List<String> prioritySubjects) {
+    _userData!.prioritySubjects = prioritySubjects;
+    SharedPrefs.setPrioritySubjects(prioritySubjects);
     notifyListeners();
   }
 
-  void setRecents(List<String> newRecents) {
-    print('set recents: ' + newRecents.toString());
-    _recents = newRecents;
-    SharedPrefs.setRecents(_recents);
-    notifyListeners();
-  }
-
-  void setPrioritySubjects(List<String> prioritySubjects) {
-    _prioritySubjects = prioritySubjects;
-    notifyListeners();
+  void addPrioritySubjectIds(String newPrioritySubject) {
+    if (!_userData!.prioritySubjects!.contains(newPrioritySubject)) {
+      _userData?.prioritySubjects?.add(newPrioritySubject);
+      SharedPrefs.setPrioritySubjects(readPrioritySubjects);
+      notifyListeners();
+    }
   }
 }
 

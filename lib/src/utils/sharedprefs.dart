@@ -5,6 +5,8 @@ import 'package:school_app/src/utils/models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SharedPrefs {
+
+  // ==== deps and courses to [{dep: [course, course, ...], dep: [course, course, ...]}]
   static Future<List<Map<String, dynamic>>> getDepartmentAndCourses() async {
     final sf = await SharedPreferences.getInstance();
 
@@ -26,6 +28,8 @@ class SharedPrefs {
     sf.setString("depsAndCourses", jsonEncode(list));
   }
 
+  // ==== user data
+
   static Future<UserModel?> getUserData() async {
     final sf = await SharedPreferences.getInstance();
     final userData = sf.getString("userData");
@@ -39,22 +43,16 @@ class SharedPrefs {
     }
 
     final Map<String, dynamic> decodedData = jsonDecode(userData);
-
     return UserModel.fromMap(decodedData);
   }
 
-  static Future<UserModel?> setUserData(UserModel? user) async {
+  static Future<UserModel?> setUserData(UserModel user) async {
     final sf = await SharedPreferences.getInstance();
-    if (user != null) {
-      sf.setString("userData", jsonEncode(user.toMap()));
-      return user;
-    }
-
-    sf.setString("userData", "");
-    return null;
+    sf.setString("userData", jsonEncode(user.toFirestore()));
+    return user;
   }
 
-  // ========= notes
+  // ==== notes
 
   static Future<List<String>> getSavedNotes() async {
     final sf = await SharedPreferences.getInstance();
@@ -67,17 +65,12 @@ class SharedPrefs {
       for (var savedNote in dbSavedNotes) {
         savedNoteIds.add(savedNote.id!);
       }
+      setSavedNotes(savedNoteIds);
       return savedNoteIds;
     }
 
-    final List decodedData = jsonDecode(savedNotes);
+    final List<dynamic> decodedData = jsonDecode(savedNotes);
     return decodedData.cast<String>();
-  }
-
-  static Future<void> onDeleteNoteFromSaved(String noteId) async {
-    final notesList = await getSavedNotes();
-    notesList.remove(noteId);
-    setSavedNotes(notesList);
   }
 
   static Future<void> setSavedNotes(List<String> notes) async {
@@ -85,14 +78,6 @@ class SharedPrefs {
     sf.setString("savedNotes", jsonEncode(notes));
   }
 
-  static Future<bool> isNoteSaved(NoteModel note) async {
-    final notesList = await getSavedNotes();
-    if (notesList.contains(note.id)) {
-      return true;
-    } else {
-      return false;
-    }
-  }
 
   static Future<List<String>> addSavedNote(NoteModel note, bool isSaved) async {
     final notesList = await getSavedNotes();
@@ -107,44 +92,54 @@ class SharedPrefs {
     return await getSavedNotes();
   }
 
-  static Future<List<String>> getRecentNotes() async {
-    final sf = await SharedPreferences.getInstance();
-    final recentNotes = sf.getString("recentNotes");
+  // recent notes and subjects
 
-    if (recentNotes == null) {
-      final user = await getUserData();
-      final List<String> recentIds = user!.recents ?? [];
-      setRecents(recentIds);
-      return recentIds;
-    }
-    final List decodedData = jsonDecode(recentNotes);
-    return decodedData.cast<String>();
+  static Future<List<String>> getRecentNotes() async {
+    final userNotes =
+        await getUserData().then((user) => user?.recents ?? <String>[]);
+    return userNotes;
   }
 
   static Future<void> setRecents(List<String> notes) async {
-    final sf = await SharedPreferences.getInstance();
-    sf.setString("recentNotes", jsonEncode(notes));
+    final userData = await getUserData();
+    userData?.recents = notes;
+    setUserData(userData!);
   }
 
   // ========= subjects
 
-  static Future<List<String>?> getSavedSubjects() async {
-    final sf = await SharedPreferences.getInstance();
-    final savedSubjects = sf.getString("savedSubjects");
+  static Future<List<String>> getSavedSubjects() async {
+    final savedSubjects = await getUserData()
+        .then((userData) => userData?.prioritySubjects ?? <String>[]);
 
-    if (savedSubjects == null) {
-      final UserModel? user = await Database.getUser();
+    return savedSubjects;
+  }
+
+  static Future<bool> isSubjectSaved(String subjectId) async {
+    final userData = await getUserData();
+    return userData?.prioritySubjects?.contains(subjectId) ?? false;
+  }
+
+  static Future<List<String>?> getPrioritySubjects() async {
+    final sf = await SharedPreferences.getInstance();
+    final prioritySubjects = sf.getString("prioritySubjects");
+
+    if (prioritySubjects == null) {
+      final user = await getUserData();
       final List<String>? savedPrioritySubjects = user!.prioritySubjects;
+      setPrioritySubjects(savedPrioritySubjects ?? []);
       return savedPrioritySubjects;
     }
 
-    final List<String> decodedData = jsonDecode(savedSubjects).cast<String>();
+    final List<String> decodedData =
+        jsonDecode(prioritySubjects).cast<String>();
     return decodedData;
   }
 
-  static Future<bool> isSubjectSaved(SubjectModel subject) async {
-    final savedSubjectIdList = await getSavedSubjects();
-    if (savedSubjectIdList!.contains(subject.id)) {}
-    return false;
+  static Future<List<String>?> setPrioritySubjects(
+      List<String> subjects) async {
+    final sf = await SharedPreferences.getInstance();
+    sf.setString("savedSubjects", jsonEncode(subjects));
+    return subjects;
   }
 }

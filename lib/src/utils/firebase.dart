@@ -89,7 +89,7 @@ class Database {
         .collection("/users")
         .withConverter(
             fromFirestore: UserModel.fromFirestore,
-            toFirestore: (user, _) => user.toMap())
+            toFirestore: (user, _) => user.toFirestore())
         .doc(Auth.auth.currentUser!.uid)
         .get()
         .then(
@@ -107,7 +107,7 @@ class Database {
         .collection("users")
         .withConverter(
             fromFirestore: UserModel.fromFirestore,
-            toFirestore: (model, _) => model.toMap())
+            toFirestore: (model, _) => model.toFirestore())
         .get()
         .then(
       (QuerySnapshot<UserModel> snap) {
@@ -232,7 +232,7 @@ class Database {
         .collection("users")
         .withConverter(
             fromFirestore: UserModel.fromFirestore,
-            toFirestore: (model, _) => model.toMap())
+            toFirestore: (model, _) => model.toFirestore())
         .doc(user.id)
         .set(user);
 
@@ -273,7 +273,7 @@ class Database {
         .collection('users')
         .withConverter(
           fromFirestore: UserModel.fromFirestore,
-          toFirestore: (model, _) => model.toMap(),
+          toFirestore: (model, _) => model.toFirestore(),
         )
         .doc(Auth.currentUser!.uid);
 
@@ -443,7 +443,7 @@ class Database {
         .collection("users")
         .withConverter(
             fromFirestore: UserModel.fromFirestore,
-            toFirestore: (model, _) => model.toMap())
+            toFirestore: (model, _) => model.toFirestore())
         .doc(Auth.currentUser!.uid);
 
     final prioritySubjectIds =

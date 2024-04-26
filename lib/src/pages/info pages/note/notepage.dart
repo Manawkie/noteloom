@@ -62,12 +62,13 @@ class _RenderNoteState extends State<RenderNote> {
 
   @override
   void initState() {
-    _controller = PdfViewerController(
-    );
+    _controller = PdfViewerController();
     final currentNote =
         Provider.of<CurrentNoteProvider>(context, listen: false);
 
     Future.microtask(() {
+      // set current note
+
       if (currentNote.readEditing == false) {
         currentNote.setNote(widget.note.name, widget.note.subjectId,
             notesummary: widget.note.summary,
@@ -75,6 +76,11 @@ class _RenderNoteState extends State<RenderNote> {
             notetag2: widget.note.tags?[1],
             notetag3: widget.note.tags?[2]);
       }
+
+      final userData = context.read<UserProvider>();
+
+      Database.setRecents("notes/${widget.note.id}");
+      userData.addRecents("notes/${widget.note.id}");
     });
 
     super.initState();
@@ -95,7 +101,8 @@ class _RenderNoteState extends State<RenderNote> {
     return FutureBuilder(
         future: Future.wait([
           Storage.getFile(widget.note.storagePath),
-          SharedPrefs.isNoteSaved(widget.note),
+          SharedPrefs.getSavedNotes()
+              .then((savednotes) => savednotes.contains(widget.note.id)),
         ]),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -112,10 +119,6 @@ class _RenderNoteState extends State<RenderNote> {
 
           if (widget.note.author == userData.readUserData!.username) {
             isOwned = true;
-          }
-
-          if (snapshot.hasData) {
-            Database.setRecents("notes/${widget.note.id}");
           }
 
           return Consumer<CurrentNoteProvider>(
@@ -222,6 +225,12 @@ class _ActionsState extends State<Actions> {
   void saveNote() {
     setState(() {
       isSaved = !isSaved;
+      final userData = context.read<UserProvider>();
+      if (isSaved) {
+        userData.addSavedNoteId(widget.note.id!);
+      } else {
+        userData.removeSavedNoteId(widget.note.id!);
+      }
       SharedPrefs.addSavedNote(widget.note, isSaved);
     });
   }

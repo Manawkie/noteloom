@@ -98,7 +98,7 @@ class _PageWithDrawerState extends State<PageWithDrawer>
 
   final List<Widget> _pages = [
     const HomePage(),
-    const MyWidget(),
+    const SearchPage(),
     const SavedNotesPage(),
     const PrioritySubjects(),
   ];

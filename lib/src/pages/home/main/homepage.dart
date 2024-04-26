@@ -45,9 +45,9 @@ class _HomePageState extends State<HomePage> {
         body: CustomScrollView(
           slivers: [
             SliverAppBar(
-              title: overScrolled ? const Text("Hello") : null,
+              title: !overScrolled ? const Text("Hello") : null,
               backgroundColor: Theme.of(context).primaryColor,
-              expandedHeight: 200,
+              expandedHeight: 150,
               flexibleSpace: !overScrolled
                   ? const FlexibleSpaceBar(
                       title: Text(
@@ -57,7 +57,7 @@ class _HomePageState extends State<HomePage> {
                     )
                   : Container(),
             ),
-            SliverFillRemaining(
+            SliverToBoxAdapter(
                 child: Container(
               padding: const EdgeInsets.all(20),
               decoration: const BoxDecoration(
@@ -68,7 +68,7 @@ class _HomePageState extends State<HomePage> {
               ),
               child: Consumer2<UserProvider, QueryNotesProvider>(
                   builder: (context, userdetails, allnotes, child) {
-                
+
                 _recents = userdetails.readRecents;
                 final getAllNotes = allnotes.getUniversityNotes;
                 final getAllSubjects = allnotes.getUniversitySubjects;
@@ -94,13 +94,14 @@ class _HomePageState extends State<HomePage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                        child: const Text("Recent Notes and Subjects"),
+                        padding: EdgeInsets.symmetric(horizontal: 10),
+                        child: Text("Recent Notes and Subjects"),
                       ),
                       ..._buildList()
                     ]);
               }),
-            ))
+            )), if (_recents != null && _recents!.length < 3 )
+            SliverFillRemaining(child: ColoredBox(color: Colors.white,),)
           ],
         ));
   }

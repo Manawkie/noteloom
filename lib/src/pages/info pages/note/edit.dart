@@ -95,7 +95,9 @@ class _EditNotePageState extends State<EditNotePage> {
 
     context.read<QueryNotesProvider>().deleteNote(editedNote);
     Database.deleteNote(editedNote);
-    SharedPrefs.onDeleteNoteFromSaved(editedNote.id!);
+
+    // remove from recents
+    // remove from saved notes
     context.pop();
   }
 

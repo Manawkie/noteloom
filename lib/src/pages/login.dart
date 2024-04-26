@@ -39,10 +39,8 @@ class _LoginState extends State<Login> {
   Future getStarted() async {
     //// University Information
 
-    final notesProvider =
-        Provider.of<QueryNotesProvider>(context, listen: false);
-
-    final userInfo = Provider.of<UserProvider>(context, listen: false);
+    final notesProvider = context.read<QueryNotesProvider>();
+    final userInfo = context.read<UserProvider>();
 
     // override all set deps and courses
     // [{dep : [course, course, course], {dep: [course, course, course]}}]
@@ -54,25 +52,35 @@ class _LoginState extends State<Login> {
     // override all set subjects
 
     // [Subject, Subject...]
-    final List<SubjectModel> allSubjects = await Database.getAllSubjects();
-    notesProvider.setAllSubjects(allSubjects);
+    await Database.getAllSubjects().then((allSubjects) {
+      notesProvider.setAllSubjects(allSubjects);
+    });
 
     //// User's information
 
     // override user data with the new user
-    await Database.getUser().then((value) async {
-      userInfo.setUserData(value);
+    // with the data,
+    //   set provider's user data
+    //   set recents
+    //   set priority subjects
+    await Database.getUser().then((UserModel? userData) async {
+      if (userData != null) {
+        userInfo.setUserData(userData);
+        userInfo.setRecents(userData.recents ?? []);
+        userInfo.setPrioritySubjectIds(userData.prioritySubjects ?? []);
+      }
     });
+    // saved notes are saved in a subcollection in firebase
+    // so we need to do things separately
+    // get all of the user's saved notes
 
-    // get all of the user's saved likes
-    final savedNotes = await Database.getAllSavedNotes();
-    userInfo.setSavedNotes(savedNotes);
-
-    List<String> savedNotesIds = [];
-    for (var note in savedNotes) {
-      savedNotesIds.add(note.noteid);
-    }
-    await SharedPrefs.setSavedNotes(savedNotesIds);
+    await Database.getAllSavedNotes().then((savedNotes) async {
+      List<String> savedNotesIds = [];
+      for (var note in savedNotes) {
+        savedNotesIds.add(note.noteid);
+      }
+      userInfo.setSavedNoteIds(savedNotesIds);
+    });
 
     if (mounted) context.go("/setup");
   }

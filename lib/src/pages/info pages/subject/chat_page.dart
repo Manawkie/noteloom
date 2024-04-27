@@ -1,7 +1,6 @@
 import "package:flutter/material.dart";
 import "package:provider/provider.dart";
 import "package:school_app/src/pages/info%20pages/subject/chat_service.dart";
-import "package:school_app/src/pages/info%20pages/subject/messages.dart";
 import "package:school_app/src/pages/info%20pages/subject/text_field.dart";
 import "package:school_app/src/utils/firebase.dart";
 import "package:school_app/src/utils/models.dart";

@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
-import 'package:school_app/src/utils/cache.dart';
 
 import 'package:school_app/src/utils/models.dart';
 import 'package:school_app/src/utils/sharedprefs.dart';
@@ -83,8 +82,6 @@ class Database {
   }
 
   static Future<UserModel?> getUser() async {
-    if (kDebugMode) print("Getting user data from database");
-
     final userFromDatabase = await db
         .collection("/users")
         .withConverter(
@@ -299,6 +296,8 @@ class Database {
         .withConverter(
             fromFirestore: NoteModel.fromFirestore,
             toFirestore: (model, _) => model.toFirestore())
+        .limit(100)
+        .where("schoolId", isEqualTo: Auth.schoolDomain)
         .get()
         .then((snapshot) {
       for (var note in snapshot.docs) {
@@ -307,6 +306,48 @@ class Database {
     });
 
     return allNotes;
+  }
+
+  static Future<List<NoteModel>> searchNotes(
+      String search, List<String> priorityIds) async {
+    final searchNotes = <NoteModel>[];
+
+    final priorityQuery = db
+        .collection("notes")
+        .withConverter(
+            fromFirestore: NoteModel.fromFirestore,
+            toFirestore: (model, _) => model.toFirestore())
+        .where("__docIdIn", arrayContainsAny: priorityIds);
+
+    int maxRandomNotes = 100 - priorityIds.length;
+
+    if (maxRandomNotes < 20) {
+      maxRandomNotes = 20;
+    }
+
+    await priorityQuery.get().then((snapshot) {
+      for (var note in snapshot.docs) {
+        searchNotes.add(note.data());
+      }
+    });
+
+
+    await db
+        .collection("notes")
+        .withConverter(
+            fromFirestore: NoteModel.fromFirestore,
+            toFirestore: (model, _) => model.toFirestore())
+        .limit(maxRandomNotes)
+        .where("schoolId", isEqualTo: Auth.schoolDomain)
+        .where("__docIdIn", whereNotIn: priorityIds)
+        .get()
+        .then((snapshot) {
+      for (var note in snapshot.docs) {
+        searchNotes.add(note.data());
+      }
+    });
+
+    return searchNotes;
   }
 
   static Future saveNote(NoteModel note, bool saved) async {
@@ -489,19 +530,8 @@ class Storage {
   }
 
   static Future<Uint8List> getFile(String storagePath) async {
-    final Uint8List? cachedFile = await CachedData.getCachedFile(storagePath);
-
-    if (cachedFile != null) {
-      return cachedFile;
-    }
-
     final noteRef = storage.ref(storagePath);
     final bytes = await noteRef.getData();
-
-    if (bytes != null) {
-      await CachedData.setCachedFile(storagePath, bytes);
-    }
-
     return bytes!;
   }
 }

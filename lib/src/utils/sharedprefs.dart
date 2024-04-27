@@ -36,6 +36,7 @@ class SharedPrefs {
     if (userData == null) {
       final user = await Database.getUser();
       if (user == null) {
+        await setUserData(null);
         return null;
       }
       return await setUserData(user);
@@ -45,9 +46,9 @@ class SharedPrefs {
     return UserModel.fromMap(decodedData);
   }
 
-  static Future<UserModel?> setUserData(UserModel user) async {
+  static Future<UserModel?> setUserData(UserModel? user) async {
     final sf = await SharedPreferences.getInstance();
-    sf.setString("userData", jsonEncode(user.toFirestore()));
+    sf.setString("userData", jsonEncode(user?.toFirestore()));
     return user;
   }
 

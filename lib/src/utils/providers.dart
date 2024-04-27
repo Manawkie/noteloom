@@ -85,7 +85,7 @@ class UserProvider extends ChangeNotifier {
 
   void addRecents(String recent) {
     if (!_userData!.recents!.contains(recent)) {
-      if (_userData!.recents!.length >= 10 ) {
+      if (_userData!.recents!.length >= 10) {
         _userData!.recents!.removeAt(0);
       }
       _userData?.recents?.add(recent);
@@ -285,6 +285,15 @@ class QueryNotesProvider extends ChangeNotifier {
     final existingNoteIndex =
         universityNotes.indexWhere((element) => element.id == note.id);
     universityNotes[existingNoteIndex] = note;
+    notifyListeners();
+  }
+
+  void requeryNotes(String searchResult, List<String> priorityIds) async {
+    final newNotes = await Database.searchNotes(searchResult, priorityIds);
+    universityNotes = {...newNotes, ...universityNotes}.toList();
+    for (var note in universityNotes) {
+      print(note.name);
+    }
     notifyListeners();
   }
 

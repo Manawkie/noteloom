@@ -17,6 +17,7 @@ import 'package:school_app/src/pages/settings/settings.dart';
 import 'package:school_app/src/utils/firebase.dart';
 import 'package:school_app/src/pages/intro_page.dart';
 import 'package:school_app/src/pages/setup.dart';
+import 'package:school_app/src/utils/sharedprefs.dart';
 
 class Routes {
   static final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -174,7 +175,7 @@ class Routes {
             return "/";
           }
 
-          return Database.getUser().then((user) {
+          return SharedPrefs.getUserData().then((user) {
             if (user != null) {
               return "/home";
             }

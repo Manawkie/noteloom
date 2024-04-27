@@ -105,6 +105,7 @@ class _HomePageState extends State<HomePage> {
 
   List<Widget> _buildList() {
     QueryNotesProvider notes = context.read<QueryNotesProvider>();
+    if (_recents == null) return <Widget>[];
     return List.generate(_recents!.length, (index) {
       final result = _recents![index];
 
@@ -112,9 +113,11 @@ class _HomePageState extends State<HomePage> {
       final id = result.split("/")[1];
 
       if (type == "notes") {
-        return noteButton(notes.findNote(id)!, context);
+        final displayedNote =  notes.findNote(id);
+        if (displayedNote != null) return noteButton(displayedNote, context);
       } else if (type == "subjects") {
-        return subjectButton(notes.findSubject(id)!, context);
+        final displayedSubject = notes.findSubject(id);
+        if (displayedSubject != null) return subjectButton(displayedSubject, context);
       }
       return Container();
     });

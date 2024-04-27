@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 
-
-// temporary only
-
 class MyTextField extends StatelessWidget {
   final TextEditingController controller;
   final String hintText;

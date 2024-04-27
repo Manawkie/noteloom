@@ -41,7 +41,8 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   void filterResults() {
-    final filteredNotes = _allNotes.where((note) {
+    // filtering name
+    final filteredNames = _allNotes.where((note) {
       if (note.name.toLowerCase().contains(_searchText.text.toLowerCase())) {
         return true;
       }
@@ -71,7 +72,18 @@ class _SearchPageState extends State<SearchPage> {
       return false;
     }).toList();
 
-    _filteredResults = [...filteredNotes, ...filteredSubjects];
+    final filteredTags = _allNotes.where((note) {
+      if (note.tags?.contains(_searchText.text.toLowerCase()) ?? false) {
+        return true;
+      }
+      return false;
+    }).toList();
+
+    _filteredResults = {
+      ...filteredNames,
+      ...filteredSubjects,
+      ...filteredTags,
+    }.toList();
   }
 
   @override
@@ -104,46 +116,67 @@ class _SearchPageState extends State<SearchPage> {
         notes.setUniversityNotes(getAllNotes);
       }
 
-      _allNotes = context.read<QueryNotesProvider>().getUniversityNotes;
-      _allSubjects = context.read<QueryNotesProvider>().getUniversitySubjects;
+      _allNotes = notes.getUniversityNotes;
+      _allSubjects = notes.getUniversitySubjects;
 
       filterResults();
 
+      final UserProvider userData = context.watch<UserProvider>();
+      final recentNotes = userData.readRecents.map((recent) {
+        if (recent.startsWith("notes/")) {
+          return recent.split("notes/")[1];
+        }
+        return "";
+      }).toList();
+      final priorityNoteIds =
+          {...userData.readSavedNoteIds, ...recentNotes}.toList();
+
       return Scaffold(
-        backgroundColor: Theme.of(context).colorScheme.primary,
+          backgroundColor: Theme.of(context).colorScheme.primary,
           body: LiquidPullToRefresh(
-        color: Theme.of(context).colorScheme.primary,
-        showChildOpacityTransition: false,
-        onRefresh: () async => onRefresh(),
-        child: CustomScrollView(
-          slivers: [
-            SliverAppBar(
-              title: TextField(
-                style: const TextStyle(color: Colors.white),
-                controller: _searchText,
-                decoration: const InputDecoration(
-                  hintStyle: TextStyle(color: Colors.white),
-                  hintText: "Search Notes",
-                  fillColor: Colors.white,
-                  border: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.white),
+            color: Theme.of(context).colorScheme.primary,
+            showChildOpacityTransition: false,
+            onRefresh: () async => onRefresh(),
+            child: CustomScrollView(
+              slivers: [
+                SliverAppBar(
+                  title: TextField(
+                    onSubmitted: (string) async {
+                      if (kDebugMode) print(string);
+                      if (string == "") {
+                        notes.setUniversityNotes(await Database.getAllNotes());
+                      } else {
+                        notes.requeryNotes(string, priorityNoteIds);
+                      }
+                    },
+                    style: const TextStyle(color: Colors.white),
+                    controller: _searchText,
+                    decoration: const InputDecoration(
+                      hintStyle: TextStyle(color: Colors.white),
+                      hintText: "Search Notes",
+                      fillColor: Colors.white,
+                      border: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
-            SliverToBoxAdapter(
-              child: ColoredBox(
-                color: Colors.white,
-                child: Column(
-                  children: renderNotes(),
+                SliverToBoxAdapter(
+                  child: ColoredBox(
+                    color: Colors.white,
+                    child: Column(
+                      children: renderNotes(),
+                    ),
+                  ),
                 ),
-              ),
-            ), const SliverFillRemaining(
-              child: ColoredBox(color: Colors.white,),
-            )
-          ],
-        ),
-      ));
+                const SliverFillRemaining(
+                  child: ColoredBox(
+                    color: Colors.white,
+                  ),
+                )
+              ],
+            ),
+          ));
     });
   }
 

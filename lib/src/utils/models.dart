@@ -9,7 +9,7 @@ class UserModel {
   final String universityId;
   String? department;
   String? course;
-  List<String>? recents;
+  List<String> recents;
   List<String>? prioritySubjects;
 
   UserModel(
@@ -20,7 +20,7 @@ class UserModel {
       required this.username,
       this.course,
       this.department,
-      this.recents,
+      required this.recents,
       this.prioritySubjects});
 
   factory UserModel.fromFirestore(
@@ -36,7 +36,7 @@ class UserModel {
         universityId: data?['universityId'],
         course: data?['course'],
         department: data?['department'],
-        recents: data?['recents']?.cast<String>() ?? [],
+        recents: data?['recents']?.cast<String>() ?? <String>[],
         prioritySubjects: data?['prioritySubjects']?.cast<String>() ?? []);
     return fromFirebase;
   }
@@ -50,7 +50,7 @@ class UserModel {
         universityId: data?['universityId'],
         course: data?['course'],
         department: data?['department'],
-        recents: data?['recents']?.cast<String>() ?? [],
+        recents: data?['recents'].cast<String>() ?? <String>[],
         prioritySubjects: data?['prioritySubjects']?.cast<String>() ?? []);
   }
 

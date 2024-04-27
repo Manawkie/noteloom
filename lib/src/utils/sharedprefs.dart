@@ -33,8 +33,9 @@ class SharedPrefs {
     final sf = await SharedPreferences.getInstance();
     final userData = sf.getString("userData");
 
-    if (userData == null) {
+    if (userData == "null" || userData == "" || userData == null) {
       final user = await Database.getUser();
+      print(user);
       if (user == null) {
         await setUserData(null);
         return null;
@@ -42,13 +43,18 @@ class SharedPrefs {
       return await setUserData(user);
     }
 
-    final Map<String, dynamic> decodedData = jsonDecode(userData);
-    return UserModel.fromMap(decodedData);
+    try {
+      final Map<String, dynamic> decodedData = jsonDecode(userData);
+      return UserModel.fromMap(decodedData);
+    } on TypeError catch (e) {
+      print(e);
+      return null;
+    }
   }
 
   static Future<UserModel?> setUserData(UserModel? user) async {
     final sf = await SharedPreferences.getInstance();
-    sf.setString("userData", jsonEncode(user?.toFirestore()));
+    sf.setString("userData", jsonEncode(user?.toFirestore() ?? ""));
     return user;
   }
 

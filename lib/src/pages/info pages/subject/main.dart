@@ -19,7 +19,6 @@ class _SubjectPageState extends State<SubjectPage> {
   void initState() {
     super.initState();
     Future.microtask(() {
-      
       final userData = context.read<UserProvider>();
 
       Database.addRecents("subjects/${widget.subjectId}");
@@ -37,7 +36,9 @@ class _SubjectPageState extends State<SubjectPage> {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new),
-          onPressed: () {},
+          onPressed: () {
+            context.pop();
+          },
         ),
       ),
       body: Consumer<QueryNotesProvider>(builder: (context, notes, child) {

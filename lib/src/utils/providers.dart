@@ -42,7 +42,8 @@ class UserProvider extends ChangeNotifier {
     if (_userData == null) {
       SharedPrefs.getUserData().then((data) {
         if (data != null) setUserData(data);
-        if (data != null) setRecents(data.recents ?? []);
+        if (data != null) setRecents(data.recents);
+
       });
       SharedPrefs.getSavedNotes().then((data) {
         setSavedNoteIds(data);
@@ -84,11 +85,11 @@ class UserProvider extends ChangeNotifier {
   }
 
   void addRecents(String recent) {
-    if (!_userData!.recents!.contains(recent)) {
-      if (_userData!.recents!.length >= 10) {
-        _userData!.recents!.removeAt(0);
+    if (!_userData!.recents.contains(recent)) {
+      if (_userData!.recents.length >= 10) {
+        _userData!.recents.removeAt(0);
       }
-      _userData?.recents?.add(recent);
+      _userData?.recents.add(recent);
       SharedPrefs.setRecents(readRecents);
       notifyListeners();
     }

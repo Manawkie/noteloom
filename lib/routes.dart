@@ -144,7 +144,6 @@ class Routes {
                 path: "subjectnotes",
                 name: "subjectNotes",
                 builder: (context, state) {
-                  
                   return SubjectNotesPage(
                       subjectId: state.pathParameters['id']!);
                 },
@@ -178,8 +177,9 @@ class Routes {
           return SharedPrefs.getUserData().then((user) {
             if (user != null) {
               return "/home";
+            } else {
+              return null;
             }
-            return null;
           });
         }
 

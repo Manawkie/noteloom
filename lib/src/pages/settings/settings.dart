@@ -110,7 +110,8 @@ class _SetupFormState extends State<SetupForm> {
           ? null
           : _selectedDepartment;
 
-      Database.createUser(_username.text, department, _selectedCourse);
+      context.read<UserProvider>().setUserData( await
+          Database.createUser(_username.text, department, _selectedCourse));
     }
   }
 

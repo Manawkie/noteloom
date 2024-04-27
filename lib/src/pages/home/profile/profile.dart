@@ -28,7 +28,6 @@ class ProfilePage extends StatelessWidget {
       ),
       body: Consumer<UserProvider>(
         builder: (context, value, child) {
-          final screenSize = MediaQuery.of(context).size;
           return SingleChildScrollView(
               child: Column(
             children: [

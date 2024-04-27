@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
-
+import 'package:google_sign_in/google_sign_in.dart' as googleAuth;
 import 'package:school_app/src/utils/models.dart';
 import 'package:school_app/src/utils/sharedprefs.dart';
 
@@ -15,20 +15,28 @@ class Auth {
 
   static String get schoolDomain => currentUser!.email!.split("@")[1];
 
-  static final googleProvider = GoogleAuthProvider();
+  static final GoogleAuthProvider googleProvider = GoogleAuthProvider();
 
   static Future<void> googleSignIn() async {
-    googleProvider.addScope("email");
-    googleProvider.addScope("profile");
-
     late User? userCred;
     if (kIsWeb) {
       userCred =
           await auth.signInWithPopup(googleProvider).then((cred) => cred.user);
     } else {
+      final googleAuth.GoogleSignInAccount? googleUser =
+          await googleAuth.GoogleSignIn().signIn();
+
+      final googleAuth.GoogleSignInAuthentication? googleUserAuth =
+          await googleUser?.authentication;
+
+      final cred = GoogleAuthProvider.credential(
+        accessToken: googleUserAuth?.accessToken,
+        idToken: googleUserAuth?.idToken,
+      );
+
       userCred = await auth
-          .signInWithProvider(googleProvider)
-          .then((cred) => cred.user);
+          .signInWithCredential(cred)
+          .then((usercred) => usercred.user);
     }
 
     try {
@@ -39,6 +47,7 @@ class Auth {
   }
 
   static Future<bool> isUserValid(User? user) async {
+    // check if the user is a student of any of the universities
     final schoolDomains = await Database.getUniversities().then((value) => value
         .map(
           (data) => data.id,
@@ -192,9 +201,6 @@ class Database {
 
   static Future<List<SubjectModel>> getAllSubjects() async {
     final subjects = <SubjectModel>[];
-
-    if (kDebugMode) print("Getting all subjects");
-
     await db
         .collection("subjects")
         .withConverter(
@@ -210,7 +216,7 @@ class Database {
     return subjects;
   }
 
-  static Future<void> createUser(
+  static Future<UserModel> createUser(
     String username,
     String? department,
     String? course,
@@ -223,6 +229,7 @@ class Database {
       username: username,
       department: department,
       course: course,
+      recents: [],
     );
 
     await db
@@ -233,7 +240,7 @@ class Database {
         .doc(user.id)
         .set(user);
 
-    SharedPrefs.setUserData(user);
+    return user;
   }
 
   static Future<NoteModel> submitFile(
@@ -330,7 +337,6 @@ class Database {
         searchNotes.add(note.data());
       }
     });
-
 
     await db
         .collection("notes")

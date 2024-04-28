@@ -51,7 +51,7 @@ class UserModel {
         course: data?['course'],
         department: data?['department'],
         recents: data?['recents'].cast<String>() ?? <String>[],
-        prioritySubjects: data?['prioritySubjects']?.cast<String>() ?? []);
+        prioritySubjects: data?['prioritySubjects'].cast<String>() ?? []);
   }
 
   Map<String, dynamic> toFirestore() {
@@ -62,13 +62,17 @@ class UserModel {
       "universityId": universityId,
       if (department != null) "department": department,
       if (course != null) "course": course,
-      if (recents != null) "recents": recents,
+      "recents": recents,
       if (prioritySubjects != null) "prioritySubjects": prioritySubjects
     };
   }
 
   void setRecents(List<String> newRecents) {
     recents = newRecents;
+  }
+
+  void setPrioritySubjects(List<String> newPrioritySubjects) {
+    prioritySubjects = newPrioritySubjects;
   }
 }
 

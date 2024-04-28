@@ -39,11 +39,14 @@ class UserProvider extends ChangeNotifier {
   List<String> get readPrioritySubjects => _userData?.prioritySubjects ?? [];
 
   UserProvider() {
+    print(_userData?.toFirestore());
+    print("Please work");
     if (_userData == null) {
       SharedPrefs.getUserData().then((data) {
-        if (data != null) setUserData(data);
-        if (data != null) setRecents(data.recents);
-
+        if (data != null) {
+          setUserData(data);
+          setPrioritySubjectIds(data.prioritySubjects ?? []);
+        }
       });
       SharedPrefs.getSavedNotes().then((data) {
         setSavedNoteIds(data);
@@ -51,7 +54,7 @@ class UserProvider extends ChangeNotifier {
     }
   }
 
-  void setUserData(UserModel data) {
+  void setUserData(UserModel? data) {
     _userData = data;
     SharedPrefs.setUserData(data);
     notifyListeners();
@@ -59,7 +62,6 @@ class UserProvider extends ChangeNotifier {
 
   void setSavedNoteIds(List<String> newSavedNoteIds) {
     _savedNoteIds = newSavedNoteIds;
-    print("Saved notes: $_savedNoteIds");
     SharedPrefs.setSavedNotes(newSavedNoteIds);
     notifyListeners();
   }
@@ -79,34 +81,50 @@ class UserProvider extends ChangeNotifier {
   }
 
   void setRecents(List<String> newRecents) async {
-    _userData?.setRecents(newRecents);
+    _userData!.setRecents(newRecents);
     SharedPrefs.setRecents(newRecents);
     notifyListeners();
   }
 
   void addRecents(String recent) {
+    if (_userData == null) return;
     if (!_userData!.recents.contains(recent)) {
       if (_userData!.recents.length >= 10) {
         _userData!.recents.removeAt(0);
       }
       _userData?.recents.add(recent);
       SharedPrefs.setRecents(readRecents);
-      notifyListeners();
     }
+    notifyListeners();
   }
 
   void setPrioritySubjectIds(List<String> prioritySubjects) {
-    _userData!.prioritySubjects = prioritySubjects;
+    print(prioritySubjects);
+    print('WAAAAA');
+    print(_userData?.toFirestore());
+
+    _userData?.setPrioritySubjects(prioritySubjects);
     SharedPrefs.setPrioritySubjects(prioritySubjects);
     notifyListeners();
   }
 
-  void addPrioritySubjectIds(String newPrioritySubject) {
+  void addPrioritySubjectId(String newPrioritySubject) {
     if (!_userData!.prioritySubjects!.contains(newPrioritySubject)) {
       _userData?.prioritySubjects?.add(newPrioritySubject);
       SharedPrefs.setPrioritySubjects(readPrioritySubjects);
-      notifyListeners();
+      print("adding...");
+      print(_userData?.toFirestore());
     }
+    notifyListeners();
+  }
+
+  void removePrioritySubjectId(String prioritySubjectId) {
+    _userData!.prioritySubjects?.remove(prioritySubjectId);
+    SharedPrefs.setPrioritySubjects(readPrioritySubjects);
+    print("removing...");
+    print(_userData?.toFirestore());
+
+    notifyListeners();
   }
 }
 

@@ -35,6 +35,7 @@ DropdownButtonFormField myButtonFormField(
     required Function(dynamic value) onChanged}) {
   return DropdownButtonFormField(
       value: value,
+      isExpanded: true,
       items: items
           .map((e) => DropdownMenuItem(
                 value: e,
@@ -81,7 +82,7 @@ Widget noteButton(NoteModel note, BuildContext context) {
       height: 150,
       margin: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-color: Colors.white,
+        color: Colors.white,
         border: Border.all(color: Colors.grey),
         borderRadius: BorderRadius.circular(8.0),
       ),

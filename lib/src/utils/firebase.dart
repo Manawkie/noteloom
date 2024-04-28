@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart' as googleAuth;
 import 'package:school_app/src/utils/models.dart';
 import 'package:school_app/src/utils/sharedprefs.dart';
+import 'package:school_app/src/utils/util_functions.dart';
 
 class Auth {
   static final auth = FirebaseAuth.instance;
@@ -61,11 +62,7 @@ class Auth {
   }
 
   Future<void> signOut() async {
-    try {
-      await auth.signOut();
-    } catch (e) {
-      if (kDebugMode) print(e);
-    }
+    await auth.signOut();
   }
 }
 
@@ -178,8 +175,6 @@ class Database {
     List<Map<String, List<String>>> listDepartmentAndCourses = [];
     final departments = await getDepartments();
 
-    if (kDebugMode) print("Getting departments and courses");
-
     for (var department in departments) {
       final List<String> courses = await Database.db
           .collection("universities")
@@ -222,15 +217,15 @@ class Database {
     String? course,
   ) async {
     final user = UserModel(
-      id: Auth.auth.currentUser!.uid,
-      email: Auth.auth.currentUser!.email!,
-      name: Auth.auth.currentUser!.displayName!,
-      universityId: Auth.schoolDomain,
-      username: username,
-      department: department,
-      course: course,
-      recents: [],
-    );
+        id: Auth.auth.currentUser!.uid,
+        email: Auth.auth.currentUser!.email!,
+        name: Auth.auth.currentUser!.displayName!,
+        universityId: Auth.schoolDomain,
+        username: username,
+        department: department,
+        course: course,
+        recents: [],
+        prioritySubjects: []);
 
     await db
         .collection("users")
@@ -369,7 +364,7 @@ class Database {
         .withConverter(
             fromFirestore: SavedNoteModel.fromFirestore,
             toFirestore: (model, _) => model.toFirestore());
-
+    print("saving note");
     if (saved) {
       if (!await isNoteSaved(note)) {
         await userSaves.add(saveData);
@@ -461,7 +456,7 @@ class Database {
     return streamNote;
   }
 
-  static Future likeNote(NoteModel note, bool isLiked) async {
+  static Future<void> likeNote(NoteModel note, bool isLiked) async {
     final dbNote = db
         .collection('notes')
         .withConverter(

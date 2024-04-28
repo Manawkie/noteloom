@@ -22,7 +22,7 @@ class SharedPrefs {
   }
 
   static Future<void> setDepartmentAndCourses(
-      List<Map<String, List<String>>> list) async {
+      List<Map<String, List<String>>>? list) async {
     final sf = await SharedPreferences.getInstance();
     sf.setString("depsAndCourses", jsonEncode(list));
   }
@@ -34,8 +34,9 @@ class SharedPrefs {
     final userData = sf.getString("userData");
 
     if (userData == "null" || userData == "" || userData == null) {
+      print("user data is null");
       final user = await Database.getUser();
-      print(user);
+
       if (user == null) {
         await setUserData(null);
         return null;
@@ -121,12 +122,31 @@ class SharedPrefs {
 
   static Future<void> setPrioritySubjects(List<String> prioritySubjects) async {
     final userData = await getUserData();
-    userData?.prioritySubjects = prioritySubjects;
-    setUserData(userData!);
+    userData?.setPrioritySubjects(prioritySubjects);
+    setUserData(userData);
   }
 
   static Future<bool> isSubjectPriority(String subjectId) async {
     final userData = await getUserData();
     return userData?.prioritySubjects?.contains(subjectId) ?? false;
+  }
+
+  static Future<void> resetData() async {
+    final sf = await SharedPreferences.getInstance();
+    UserModel? user = await getUserData();
+    List<Map<String, dynamic>>? depsAndCourses =
+        await getDepartmentAndCourses();
+    if (user!.universityId != Auth.schoolDomain) {
+      depsAndCourses = null;
+    }
+
+    if (user.id != Auth.currentUser!.uid) {
+      user = null;
+    }
+
+    sf.clear();
+    await setUserData(user);
+    await setDepartmentAndCourses(
+        depsAndCourses?.cast<Map<String, List<String>>>());
   }
 }

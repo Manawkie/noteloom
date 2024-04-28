@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:school_app/src/components/uicomponents.dart';
 import 'package:school_app/src/utils/firebase.dart';
 import 'package:school_app/src/utils/models.dart';
 import 'package:school_app/src/utils/providers.dart';
@@ -20,7 +21,6 @@ class _SubjectPageState extends State<SubjectPage> {
     super.initState();
     Future.microtask(() {
       final userData = context.read<UserProvider>();
-
       Database.addRecents("subjects/${widget.subjectId}");
       userData.addRecents("subjects/${widget.subjectId}");
     });
@@ -37,7 +37,7 @@ class _SubjectPageState extends State<SubjectPage> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new),
           onPressed: () {
-            context.pop();
+            context.go('/home');
           },
         ),
       ),
@@ -50,32 +50,7 @@ class _SubjectPageState extends State<SubjectPage> {
           );
         }
 
-        return Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ButtonBar(
-                alignment: MainAxisAlignment.center,
-                children: [
-                  TextButton(
-                      onPressed: () {
-                        context.goNamed("subjectNotes", pathParameters: {
-                          "id": widget.subjectId,
-                        });
-                      },
-                      child: const Text("View Subject Notes")),
-                  TextButton(
-                      onPressed: () {
-                        context.goNamed("discussions", pathParameters: {
-                          "id": widget.subjectId,
-                        });
-                      },
-                      child: const Text("View Subject Dissussions"))
-                ],
-              )
-            ],
-          ),
-        );
+        return RenderSubjectPage(subject: subject);
       }),
     );
   }
@@ -84,6 +59,7 @@ class _SubjectPageState extends State<SubjectPage> {
 class RenderSubjectPage extends StatefulWidget {
   const RenderSubjectPage({super.key, required this.subject});
   final SubjectModel subject;
+
   @override
   State<RenderSubjectPage> createState() => _RenderSubjectPageState();
 }
@@ -94,8 +70,96 @@ class _RenderSubjectPageState extends State<RenderSubjectPage> {
     return FutureBuilder(
       future: Future.wait([SharedPrefs.isSubjectPriority(widget.subject.id)]),
       builder: (context, snapshot) {
-        return Container();
+
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return  Center(
+            child: myLoadingIndicator()
+          );
+        }
+
+        bool isPriority = snapshot.data?[0] ?? false;
+        print("isPriority: $isPriority");
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Actions(
+              isPriority: isPriority,
+              subject: widget.subject,
+            ),
+            ButtonBar(
+              alignment: MainAxisAlignment.center,
+              children: [
+                TextButton(
+                    onPressed: () {
+                      context.goNamed("subjectNotes", pathParameters: {
+                        "id": widget.subject.id,
+                      });
+                    },
+                    child: const Text("View Subject Notes")),
+                TextButton(
+                    onPressed: () {
+                      context.goNamed("discussions", pathParameters: {
+                        "id": widget.subject.id,
+                      });
+                    },
+                    child: const Text("View Subject Dissussions"))
+              ],
+            )
+          ],
+        );
       },
     );
+  }
+}
+
+class Actions extends StatefulWidget {
+  const Actions({
+    super.key,
+    required this.isPriority,
+    required this.subject,
+  });
+  final bool isPriority;
+  final SubjectModel subject;
+
+  @override
+  State<Actions> createState() => _ActionsState();
+}
+
+class _ActionsState extends State<Actions> {
+  bool isPriority = false;
+
+  @override
+  void initState() {
+    isPriority = widget.isPriority;
+    super.initState();
+  }
+
+  void togglePriority() {
+    setState(() {
+      isPriority = !isPriority;
+    });
+    final userData = context.read<UserProvider>();
+
+    if (isPriority) {
+      userData.addPrioritySubjectId(widget.subject.id);
+    } else {
+      userData.removePrioritySubjectId(widget.subject.id);
+    }
+  }
+
+  @override
+  void dispose() {
+
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+        onPressed: togglePriority,
+        icon: Icon(
+          Icons.bookmark,
+          color: isPriority ? Theme.of(context).colorScheme.primary : null,
+        ));
   }
 }

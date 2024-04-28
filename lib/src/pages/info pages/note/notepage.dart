@@ -151,17 +151,21 @@ class _RenderNoteState extends State<RenderNote> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              currentNote.name ?? "",
-                              style: const TextStyle(fontSize: 20),
-                            ),
-                            Text(
-                              currentNote.subject ?? "",
-                            ),
-                          ],
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                currentNote.name ?? "",
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                ),
+                              ),
+                              Text(
+                                currentNote.subject ?? "",
+                              ),
+                            ],
+                          ),
                         ),
                         Actions(
                           isSaved: snapshot.data![1] as bool,
@@ -235,11 +239,21 @@ class _ActionsState extends State<Actions> {
     });
   }
 
-  void likeNote() {
+  void likeNote() async {
     setState(() {
       isLiked = !isLiked;
-      Database.likeNote(widget.note, isLiked);
     });
+    await Database.likeNote(widget.note, isLiked);
+  }
+
+  @override
+  void dispose() {
+    print(isSaved);
+    print(widget.isSaved);
+    if (widget.isSaved != isSaved) {
+      Database.saveNote(widget.note, isSaved);
+    }
+    super.dispose();
   }
 
   @override

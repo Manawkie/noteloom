@@ -8,6 +8,7 @@ import 'package:school_app/src/utils/models.dart';
 import 'package:school_app/src/utils/providers.dart';
 import 'package:school_app/src/utils/firebase.dart';
 import 'package:school_app/src/utils/sharedprefs.dart';
+import 'package:school_app/src/utils/util_functions.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key, required this.universityName});
@@ -37,51 +38,7 @@ class _LoginState extends State<Login> {
   }
 
   Future getStarted() async {
-    //// University Information
-
-    final notesProvider = context.read<QueryNotesProvider>();
-    final userInfo = context.read<UserProvider>();
-
-    // override all set deps and courses
-    // [{dep : [course, course, course], {dep: [course, course, course]}}]
-
-    final List<Map<String, List<String>>> departmentsAndCourses =
-        await Database.getDepartmentsAndCourses();
-    await SharedPrefs.setDepartmentAndCourses(departmentsAndCourses);
-
-    // override all set subjects
-
-    // [Subject, Subject...]
-    await Database.getAllSubjects().then((allSubjects) {
-      notesProvider.setAllSubjects(allSubjects);
-    });
-
-    //// User's information
-
-    // override user data with the new user
-    // with the data,
-    //   set provider's user data
-    //   set recents
-    //   set priority subjects
-    await Database.getUser().then((UserModel? userData) async {
-      if (userData != null) {
-        userInfo.setUserData(userData);
-        userInfo.setRecents(userData.recents ?? []);
-        userInfo.setPrioritySubjectIds(userData.prioritySubjects ?? []);
-      }
-    });
-    // saved notes are saved in a subcollection in firebase
-    // so we need to do things separately
-    // get all of the user's saved notes
-
-    await Database.getAllSavedNotes().then((savedNotes) async {
-      List<String> savedNotesIds = [];
-      for (var note in savedNotes) {
-        savedNotesIds.add(note.noteid);
-      }
-      userInfo.setSavedNoteIds(savedNotesIds);
-    });
-
+    await Utils.logIn(context);
     if (mounted) context.go("/setup");
   }
 

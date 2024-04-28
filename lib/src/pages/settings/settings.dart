@@ -109,66 +109,73 @@ class _SetupFormState extends State<SetupForm> {
       final department = _selectedDepartment == "Select a Department"
           ? null
           : _selectedDepartment;
-
+      final course = _selectedCourse == "Select a Department first"
+          ? null
+          : _selectedCourse;
       context.read<UserProvider>().setUserData( await
-          Database.createUser(_username.text, department, _selectedCourse));
+          Database.createUser(_username.text, department, course));
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(20),
       child: Form(
         key: _formKey,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            TextFormField(
-              decoration: InputDecoration(
-                hintText: Auth.currentUser!.email,
-                enabled: false,
-              ),
-            ),
-            usernameField(_username, (value) {
-              if (value!.isEmpty) {
-                return "This field is required.";
-              }
-              if (_takenUsernames.contains(value)) {
-                return "This username is already taken.";
-              }
-              return null;
-            }),
-            myButtonFormField(
-                value: _selectedDepartment,
-                items: _departments,
-                onChanged: (value) {
-                  setState(() {
-                    _selectedDepartment = value;
-                    _selectedCourse = _courses.first;
-                    _filteredCourses.clear();
-                    _filteredCourses.add(_courses.first);
-                    resetCourses();
-                  });
+        child: Center(
+          child: SizedBox(
+            height: MediaQuery.of(context).size.height * 0.5,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                TextFormField(
+                  decoration: InputDecoration(
+                    hintText: Auth.currentUser!.email,
+                    enabled: false,
+                  ),
+                ),
+                usernameField(_username, (value) {
+                  if (value!.isEmpty) {
+                    return "This field is required.";
+                  }
+                  if (_takenUsernames.contains(value)) {
+                    return "This username is already taken.";
+                  }
+                  return null;
                 }),
-            if (_filteredCourses.isNotEmpty)
-              myButtonFormField(
-                  value: _selectedCourse,
-                  items: _filteredCourses,
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedCourse = value;
-                    });
-                  }),
-            ElevatedButton(
-                onPressed: () async {
-                  await Auth.auth.signOut().then((_) {
-                    GoRouter.of(context).go("/");
-                  });
-                },
-                child: const Text("Log out")),
-            ElevatedButton(onPressed: _saveData, child: const Text("Save"))
-          ],
+                myButtonFormField(
+                    value: _selectedDepartment,
+                    items: _departments,
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedDepartment = value;
+                        _selectedCourse = _courses.first;
+                        _filteredCourses.clear();
+                        _filteredCourses.add(_courses.first);
+                        resetCourses();
+                      });
+                    }),
+                if (_filteredCourses.isNotEmpty)
+                  myButtonFormField(
+                      value: _selectedCourse,
+                      items: _filteredCourses,
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedCourse = value;
+                        });
+                      }),
+                ElevatedButton(
+                    onPressed: () async {
+                      await Auth.auth.signOut().then((_) {
+                        GoRouter.of(context).go("/");
+                      });
+                    },
+                    child: const Text("Log out")),
+                ElevatedButton(onPressed: _saveData, child: const Text("Save"))
+              ],
+            ),
+          ),
         ),
       ),
     );

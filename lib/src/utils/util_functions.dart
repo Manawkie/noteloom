@@ -41,11 +41,7 @@ class Utils {
     //   set recents
     //   set priority subjects
     await Database.getUser().then((UserModel? userData) async {
-      if (kDebugMode) {
-        print(userData?.id);
-        print(userData?.email);
-        print(userData?.username);
-      }
+  
 
       if (userData != null) {
         userInfo.setUserData(userData);

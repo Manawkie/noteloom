@@ -175,18 +175,17 @@ class CourseModel {
 abstract class Results {}
 
 class SubjectModel extends Results {
-  String id;
+  String? id;
   String subject;
   String subjectCode;
   String? universityId;
-  List<String>? courseId;
 
   SubjectModel(
-      {required this.id,
+      {this.id,
       required this.subject,
       required this.subjectCode,
-      this.universityId,
-      this.courseId});
+      required this.universityId,
+      });
 
   factory SubjectModel.fromFirestore(
       DocumentSnapshot<Map<String, dynamic>> snapshot, options) {
@@ -198,14 +197,13 @@ class SubjectModel extends Results {
         subject: data?['subject'],
         subjectCode: data?['subject code'],
         universityId: data?['universityId'],
-        courseId: data?['courseId']?.cast<String>());
+    );
   }
   Map<String, dynamic> toFirestore() {
     return {
       "subject": subject,
       "subject code": subjectCode,
       if (universityId != null) "universityId": universityId,
-      if (courseId != null) "courseId": courseId
     };
   }
 }

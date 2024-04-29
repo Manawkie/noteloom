@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:school_app/src/utils/firebase.dart';
 import 'package:school_app/src/utils/models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -34,7 +35,6 @@ class SharedPrefs {
     final userData = sf.getString("userData");
 
     if (userData == "null" || userData == "" || userData == null) {
-      print("user data is null");
       final user = await Database.getUser();
 
       if (user == null) {
@@ -48,7 +48,7 @@ class SharedPrefs {
       final Map<String, dynamic> decodedData = jsonDecode(userData);
       return UserModel.fromMap(decodedData);
     } on TypeError catch (e) {
-      print(e);
+      if (kDebugMode) print(e);
       return null;
     }
   }

@@ -117,3 +117,37 @@ Widget subjectButton(SubjectModel subjectModel, BuildContext context) {
     ),
   );
 }
+
+SearchBar mySearchBar(
+  BuildContext context,
+  SearchController controller,
+  String hintText,
+  void Function() onSearch,
+) {
+  return SearchBar(
+      controller: controller,
+      hintText: hintText,
+      elevation: MaterialStatePropertyAll(0),
+      shape: const MaterialStatePropertyAll(RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(8)))),
+      trailing: [
+        Tooltip(
+          message: "Clear search",
+          child: IconButton(
+            icon: const Icon(Icons.clear),
+            onPressed: () {
+              controller.clear();
+            },
+          ),
+        ),
+        IconButton(onPressed: onSearch, icon: Icon(Icons.refresh_rounded))
+      ],
+      hintStyle: MaterialStatePropertyAll(
+        const TextStyle(color: Colors.white, fontSize: 16),
+      ),
+      textStyle: const MaterialStatePropertyAll(
+        const TextStyle(color: Colors.white, fontSize: 16),
+      ),
+      backgroundColor:
+          MaterialStatePropertyAll(Theme.of(context).primaryColor));
+}

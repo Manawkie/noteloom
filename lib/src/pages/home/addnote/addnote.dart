@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:school_app/src/components/uicomponents.dart';
 import 'package:school_app/src/utils/firebase.dart';
-import 'package:school_app/src/utils/models.dart';
 import 'package:school_app/src/utils/providers.dart';
 
 class AddNote extends StatefulWidget {
@@ -79,11 +78,14 @@ class _AddNoteState extends State<AddNote> {
     }
   }
 
-  Future _submitFile(BuildContext context,NoteProvider note, QueryNotesProvider uni) async {
+  Future _submitFile(
+      BuildContext context, NoteProvider note, QueryNotesProvider uni) async {
     final theme = Theme.of(context);
+
     setState(() {
       isUploading = true;
     });
+
     try {
       if (_subject == "Select a Subject" || !subjects.contains(_subject)) {
         throw ErrorDescription("Please select a Subject first");
@@ -110,7 +112,6 @@ class _AddNoteState extends State<AddNote> {
           );
           final newList = uni.getUniversityNotes;
           newList.add(newNote);
-
           uni.setUniversityNotes(newList);
         }
       }
@@ -128,21 +129,21 @@ class _AddNoteState extends State<AddNote> {
       );
     }
   }
+
   void clearFields(NoteProvider note) {
-        note.clearFields();
-        result = null;
-        bytes = null;
-        _nameControl.text = note.readName!;
-        _summaryControl.text = note.readSummary!;
-        _subject = note.subject ?? "Select a Subject";
-        _tag1Control.text = note.readTag1!;
-        _tag2Control.text = note.readTag2!;
-        _tag3Control.text = note.readTag3!;
-      }
+    note.clearFields();
+    result = null;
+    bytes = null;
+    _nameControl.text = note.readName!;
+    _summaryControl.text = note.readSummary!;
+    _subject = note.subject ?? "Select a Subject";
+    _tag1Control.text = note.readTag1!;
+    _tag2Control.text = note.readTag2!;
+    _tag3Control.text = note.readTag3!;
+  }
 
   @override
   Widget build(BuildContext context) {
-
     return Consumer2<NoteProvider, QueryNotesProvider>(
         builder: (context, note, uni, child) {
       if (note.readBytes != null) {
@@ -182,8 +183,6 @@ class _AddNoteState extends State<AddNote> {
           bytes = null;
         });
       }
-
-      
 
       return Scaffold(
         appBar: AppBar(
@@ -285,7 +284,8 @@ class _AddNoteState extends State<AddNote> {
                               child: myLoadingIndicator(),
                             ))
                         : ElevatedButton(
-                            onPressed: () async => _submitFile(context, note, uni),
+                            onPressed: () async =>
+                                _submitFile(context, note, uni),
                             child: const Text("Post")),
                     IconButton(
                       onPressed: () => clearFields(note),

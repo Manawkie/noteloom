@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:go_router/go_router.dart';
+import 'package:school_app/src/pages/addsubject.dart';
 import 'package:school_app/src/pages/home/addnote/layout.dart';
 import 'package:school_app/src/pages/home/addnote/selectsubject.dart';
 import 'package:school_app/src/pages/home/profile/profile.dart';
@@ -27,136 +28,150 @@ class Routes {
       navigatorKey: _rootNavigatorKey,
       routes: [
         GoRoute(
-            name: "intro",
-            path: "/",
-            pageBuilder: (_, __) => CustomTransitionPage(
-                key: __.pageKey,
-                transitionDuration: const Duration(milliseconds: 1000),
-                child: const IntroPage(),
-                transitionsBuilder: (_, anim, __, child) =>
-                    fadeTransition(_, anim, __, child))),
+          name: "intro",
+          path: "/",
+          pageBuilder: (_, __) => CustomTransitionPage(
+            key: __.pageKey,
+            transitionDuration: const Duration(milliseconds: 1000),
+            child: const IntroPage(),
+            transitionsBuilder: (_, anim, __, child) =>
+                fadeTransition(_, anim, __, child),
+          ),
+        ),
         GoRoute(
-            name: "login",
-            path: "/login/:universityName",
-            pageBuilder: (context, state) {
-              String universityName = state.pathParameters['universityName']!;
-              return CustomTransitionPage(
-                  key: state.pageKey,
-                  transitionDuration: const Duration(milliseconds: 800),
-                  reverseTransitionDuration: const Duration(milliseconds: 800),
-                  child: Login(
-                    universityName: universityName,
-                  ),
-                  transitionsBuilder: (_, __, ___, child) =>
-                      fromBottomTransition(_, __, __, child));
-            }),
+          name: "login",
+          path: "/login/:universityName",
+          pageBuilder: (context, state) {
+            String universityName = state.pathParameters['universityName']!;
+            return CustomTransitionPage(
+              key: state.pageKey,
+              transitionDuration: const Duration(milliseconds: 800),
+              reverseTransitionDuration: const Duration(milliseconds: 800),
+              child: Login(
+                universityName: universityName,
+              ),
+              transitionsBuilder: (_, __, ___, child) =>
+                  fromBottomTransition(_, __, __, child),
+            );
+          },
+        ),
         GoRoute(
-            name: "setup",
-            path: "/setup",
-            pageBuilder: (context, state) => CustomTransitionPage(
+          name: "setup",
+          path: "/setup",
+          pageBuilder: (context, state) => CustomTransitionPage(
+            key: state.pageKey,
+            transitionDuration: const Duration(milliseconds: 500),
+            reverseTransitionDuration: const Duration(milliseconds: 500),
+            child: const Setup(),
+            transitionsBuilder: (_, __, ___, child) =>
+                fromRightTransition(_, __, __, child),
+          ),
+        ),
+        GoRoute(
+          path: "/home",
+          pageBuilder: (context, state) => CustomTransitionPage(
+              key: state.pageKey,
+              transitionDuration: const Duration(milliseconds: 1000),
+              child: const PageWithDrawer(),
+              transitionsBuilder: (_, anim, __, child) =>
+                  fadeTransition(_, anim, __, child)),
+          routes: [
+            GoRoute(
+              path: "profile",
+              builder: (context, state) => const ProfilePage(),
+            ),
+            GoRoute(
+              path: "settings",
+              pageBuilder: (context, state) => CustomTransitionPage(
                 key: state.pageKey,
                 transitionDuration: const Duration(milliseconds: 500),
-                reverseTransitionDuration: const Duration(milliseconds: 500),
-                child: const Setup(),
-                transitionsBuilder: (_, __, ___, child) =>
-                    fromRightTransition(_, __, __, child))),
-        GoRoute(
-            path: "/home",
-            pageBuilder: (context, state) => CustomTransitionPage(
-                key: state.pageKey,
-                transitionDuration: const Duration(milliseconds: 1000),
-                child: const PageWithDrawer(),
+                child: const SettingsPage(),
                 transitionsBuilder: (_, anim, __, child) =>
-                    fadeTransition(_, anim, __, child)),
-            routes: [
-              GoRoute(
-                path: "profile",
-                builder: (context, state) => const ProfilePage(),
+                    fromRightTransition(_, anim, __, child),
+                maintainState: true,
               ),
-              GoRoute(
-                path: "settings",
-                pageBuilder: (context, state) => CustomTransitionPage(
-                  key: state.pageKey,
-                  transitionDuration: const Duration(milliseconds: 500),
-                  child: const SettingsPage(),
-                  transitionsBuilder: (_, anim, __, child) =>
-                      fromRightTransition(_, anim, __, child),
-                  maintainState: true,
-                ),
-              ),
-            ]),
+            ),
+          ],
+        ),
         GoRoute(
-            name: "addnote",
-            path: "/addnote",
-            pageBuilder: (context, state) => CustomTransitionPage(
-                transitionDuration: const Duration(milliseconds: 500),
-                child: const AddNoteLayout(),
-                transitionsBuilder: (_, anim, __, child) =>
-                    fromBottomTransition(_, anim, __, child)),
-            routes: [
-              GoRoute(
-                path: "selectsubject",
-                builder: (context, state) => const SelectSubjectPage(),
-              )
-            ]),
+          name: "addnote",
+          path: "/addnote",
+          pageBuilder: (context, state) => CustomTransitionPage(
+              transitionDuration: const Duration(milliseconds: 500),
+              child: const AddNoteLayout(),
+              transitionsBuilder: (_, anim, __, child) =>
+                  fromBottomTransition(_, anim, __, child)),
+          routes: [
+            GoRoute(
+              path: "selectsubject",
+              builder: (context, state) => const SelectSubjectPage(),
+            ),
+          ],
+        ),
+        GoRoute(
+          name: "addsubject",
+          path: "/addSubject",
+          builder: (context, state) => const AddSubject(),
+        ),
 
         // notes proper
 
         GoRoute(
-            path: "/note/:id",
-            name: "notepage",
-            pageBuilder: (context, state) {
-              String id = state.pathParameters['id']!;
-              return CustomTransitionPage(
+          path: "/note/:id",
+          name: "notepage",
+          pageBuilder: (context, state) {
+            String id = state.pathParameters['id']!;
+            return CustomTransitionPage(
+              key: state.pageKey,
+              transitionDuration: const Duration(milliseconds: 500),
+              child: NotePage(
+                id: id,
+              ),
+              transitionsBuilder: (_, anim, __, child) =>
+                  fromRightTransition(_, anim, __, child),
+            );
+          },
+          routes: [
+            GoRoute(
+              path: "editNote",
+              name: "editNote",
+              builder: (context, state) => EditNotePage(
+                noteId: state.pathParameters['id']!,
+              ),
+            )
+          ],
+        ),
+        GoRoute(
+          path: "/subject/:id",
+          pageBuilder: (context, state) {
+            String id = state.pathParameters['id']!;
+            return CustomTransitionPage(
                 key: state.pageKey,
                 transitionDuration: const Duration(milliseconds: 500),
-                child: NotePage(
-                  id: id,
+                child: SubjectPage(
+                  subjectId: id,
                 ),
                 transitionsBuilder: (_, anim, __, child) =>
-                    fromRightTransition(_, anim, __, child),
-              );
-            },
-            routes: [
-              GoRoute(
-                path: "editNote",
-                name: "editNote",
-                builder: (context, state) => EditNotePage(
-                  noteId: state.pathParameters['id']!,
-                ),
-              )
-            ]),
-        GoRoute(
-            path: "/subject/:id",
-            pageBuilder: (context, state) {
-              String id = state.pathParameters['id']!;
-              return CustomTransitionPage(
-                  key: state.pageKey,
-                  transitionDuration: const Duration(milliseconds: 500),
-                  child: SubjectPage(
-                    subjectId: id,
-                  ),
-                  transitionsBuilder: (_, anim, __, child) =>
-                      fromRightTransition(_, anim, __, child));
-            },
-            routes: [
-              GoRoute(
-                path: "subjectnotes",
-                name: "subjectNotes",
+                    fromRightTransition(_, anim, __, child));
+          },
+          routes: [
+            GoRoute(
+              path: "subjectnotes",
+              name: "subjectNotes",
+              builder: (context, state) {
+                return SubjectNotesPage(subjectId: state.pathParameters['id']!);
+              },
+            ),
+            GoRoute(
+                path: "discussions",
+                name: "discussions",
                 builder: (context, state) {
-                  return SubjectNotesPage(
-                      subjectId: state.pathParameters['id']!);
-                },
-              ),
-              GoRoute(
-                  path: "discussions",
-                  name: "discussions",
-                  builder: (context, state) {
-                    String subjectId = state.pathParameters['id']!;
+                  String subjectId = state.pathParameters['id']!;
 
-                    return ChatPage(subjectId: subjectId);
-                  })
-            ])
+                  return ChatPage(subjectId: subjectId);
+                })
+          ],
+        )
       ],
       errorBuilder: (context, state) {
         if (kDebugMode) print(state.error);

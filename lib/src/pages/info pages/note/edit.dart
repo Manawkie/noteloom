@@ -73,7 +73,7 @@ class _EditNotePageState extends State<EditNotePage> {
     // reset notemodel
 
     final universityNotes =
-        Provider.of<QueryNotesProvider>(context, listen: false).universityNotes;
+        Provider.of<QueryNotesProvider>(context, listen: false).getUniversityNotes;
 
     NoteModel editedNote =
         universityNotes.where((note) => note.id == widget.noteId).first;
@@ -87,7 +87,7 @@ class _EditNotePageState extends State<EditNotePage> {
 
   void deleteNote() {
     final universityNotes =
-        Provider.of<QueryNotesProvider>(context, listen: false).universityNotes;
+        Provider.of<QueryNotesProvider>(context, listen: false).getUniversityNotes;
 
     NoteModel editedNote =
         universityNotes.where((note) => note.id == widget.noteId).first;

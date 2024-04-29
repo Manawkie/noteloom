@@ -18,7 +18,7 @@ class _SelectSubjectPageState extends State<SelectSubjectPage> {
   Widget build(BuildContext context) {
     return Consumer2<QueryNotesProvider, NoteProvider>(
         builder: (context, notes, note, child) {
-      if (notes.universitySubjects.isEmpty) {
+      if (notes.getUniversitySubjects.isEmpty) {
         Database.getAllSubjects().then(
           (value) => notes.setAllSubjects(
             value.cast<SubjectModel>(),
@@ -54,7 +54,7 @@ class _SelectSubjectPageState extends State<SelectSubjectPage> {
             SliverList(
                 delegate: SliverChildBuilderDelegate(
               (context, index) {
-                final subjectInfo = notes.universitySubjects[index];
+                final subjectInfo = notes.getUniversitySubjects[index];
 
                 return ListTile(
                   title: Text(subjectInfo.subject),
@@ -80,7 +80,7 @@ class _SelectSubjectPageState extends State<SelectSubjectPage> {
                   subtitle: Text(subjectInfo.subjectCode),
                 );
               },
-              childCount: notes.universitySubjects.length,
+              childCount: notes.getUniversitySubjects.length,
             )),
           ],
         ),

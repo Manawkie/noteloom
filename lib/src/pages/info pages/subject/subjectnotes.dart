@@ -76,6 +76,7 @@ class _SubjectNotesPageState extends State<SubjectNotesPage> {
                       ),
                     ),
                   )
+                  
                 ],
               ),
             ));

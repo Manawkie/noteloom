@@ -1,5 +1,6 @@
 // get all school info on department and courses when the user is logged in
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:school_app/src/utils/firebase.dart';
@@ -37,6 +38,18 @@ class UserProvider extends ChangeNotifier {
   List<String> get readRecents => _userData?.recents ?? [];
 
   List<String> get readPrioritySubjects => _userData?.prioritySubjects ?? [];
+
+  List<String> get userSavedNotesAndSubjects {
+    List<String> userNotes = [];
+
+    for (var recent in readRecents) {
+      if (recent.startsWith("note")) {
+        userNotes.add(recent.split("/")[1]);
+      }
+    }
+    userNotes.addAll({...readSavedNoteIds, ...readPrioritySubjects}.toList());
+    return userNotes;
+  }
 
   UserProvider() {
     print(_userData?.toFirestore());
@@ -99,10 +112,6 @@ class UserProvider extends ChangeNotifier {
   }
 
   void setPrioritySubjectIds(List<String> prioritySubjects) {
-    print(prioritySubjects);
-    print('WAAAAA');
-    print(_userData?.toFirestore());
-
     _userData?.setPrioritySubjects(prioritySubjects);
     SharedPrefs.setPrioritySubjects(prioritySubjects);
     notifyListeners();
@@ -112,8 +121,6 @@ class UserProvider extends ChangeNotifier {
     if (!_userData!.prioritySubjects!.contains(newPrioritySubject)) {
       _userData?.prioritySubjects?.add(newPrioritySubject);
       SharedPrefs.setPrioritySubjects(readPrioritySubjects);
-      print("adding...");
-      print(_userData?.toFirestore());
     }
     notifyListeners();
   }
@@ -121,8 +128,6 @@ class UserProvider extends ChangeNotifier {
   void removePrioritySubjectId(String prioritySubjectId) {
     _userData!.prioritySubjects?.remove(prioritySubjectId);
     SharedPrefs.setPrioritySubjects(readPrioritySubjects);
-    print("removing...");
-    print(_userData?.toFirestore());
 
     notifyListeners();
   }
@@ -262,72 +267,74 @@ class CurrentNoteProvider extends ChangeNotifier {
 }
 
 class QueryNotesProvider extends ChangeNotifier {
-  List<NoteModel> universityNotes = [];
-  List<SubjectModel> universitySubjects = [];
+  final streamNotes = Database.getNotesStream();
+  final streamSubjects = Database.getSubjectsStream();
 
-  List<NoteModel> get getUniversityNotes => universityNotes;
-  List<SubjectModel> get getUniversitySubjects => universitySubjects;
+  List<NoteModel> _universityNotes = [];
+  List<SubjectModel> _universitySubjects = [];
+
+  List<NoteModel> get getUniversityNotes => _universityNotes;
+  List<SubjectModel> get getUniversitySubjects => _universitySubjects;
 
   QueryNotesProvider() {
-    if (universityNotes.isEmpty) {
-      Database.getAllNotes().then(
-        (data) => setUniversityNotes(
-          data.cast<NoteModel>(),
-        ),
-      );
-    }
+    // if (_universityNotes.isEmpty) {
+    //   Database.getAllNotes().then(
+    //     (data) => setUniversityNotes(
+    //       data.cast<NoteModel>(),
+    //     ),
+    //   );
+    // }
 
-    if (universitySubjects.isEmpty) {
-      Database.getAllSubjects().then(
-        (data) => setAllSubjects(
-          data.cast<SubjectModel>(),
-        ),
-      );
-    }
+    streamNotes.listen((snap) {
+      _universityNotes = snap.docs.map((note) => note.data()).toList();
+    });
+    streamSubjects.listen((snap) {
+      _universitySubjects = snap.docs.map((subject) => subject.data()).toList();
+    });
   }
 
   void setUniversityNotes(List<NoteModel> data) {
-    universityNotes = data;
+    _universityNotes = data;
     notifyListeners();
   }
 
   void setAllSubjects(List<SubjectModel> data) {
-    universitySubjects = data;
+    _universitySubjects = data;
     notifyListeners();
   }
 
   NoteModel? findNote(String id) {
-    return universityNotes.where((note) => note.id == id).firstOrNull;
+    return _universityNotes.where((note) => note.id == id).firstOrNull;
   }
 
   void editNote(NoteModel note) {
     final existingNoteIndex =
-        universityNotes.indexWhere((element) => element.id == note.id);
-    universityNotes[existingNoteIndex] = note;
+        _universityNotes.indexWhere((element) => element.id == note.id);
+    _universityNotes[existingNoteIndex] = note;
     notifyListeners();
   }
 
   void requeryNotes(String searchResult, List<String> priorityIds) async {
     final newNotes = await Database.searchNotes(searchResult, priorityIds);
-    universityNotes = {...newNotes, ...universityNotes}.toList();
-    for (var note in universityNotes) {
+    _universityNotes = {...newNotes, ..._universityNotes}.toList();
+    for (var note in _universityNotes) {
       print(note.name);
     }
     notifyListeners();
   }
 
   List<NoteModel> getNotesBySubject(String subjectId) {
-    return universityNotes
+    return _universityNotes
         .where((note) => note.subjectId == subjectId)
         .toList();
   }
 
   void deleteNote(NoteModel note) {
-    universityNotes.removeWhere((element) => element.id == note.id);
+    _universityNotes.removeWhere((element) => element.id == note.id);
     notifyListeners();
   }
 
   SubjectModel? findSubject(String id) {
-    return universitySubjects.where((subject) => subject.id == id).firstOrNull;
+    return _universitySubjects.where((subject) => subject.id == id).firstOrNull;
   }
 }

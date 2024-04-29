@@ -68,7 +68,7 @@ class _RenderSubjectPageState extends State<RenderSubjectPage> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: Future.wait([SharedPrefs.isSubjectPriority(widget.subject.id)]),
+      future: Future.wait([SharedPrefs.isSubjectPriority(widget.subject.id!)]),
       builder: (context, snapshot) {
 
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -92,14 +92,14 @@ class _RenderSubjectPageState extends State<RenderSubjectPage> {
                 TextButton(
                     onPressed: () {
                       context.goNamed("subjectNotes", pathParameters: {
-                        "id": widget.subject.id,
+                        "id": widget.subject.id!,
                       });
                     },
                     child: const Text("View Subject Notes")),
                 TextButton(
                     onPressed: () {
                       context.goNamed("discussions", pathParameters: {
-                        "id": widget.subject.id,
+                        "id": widget.subject.id!,
                       });
                     },
                     child: const Text("View Subject Dissussions"))
@@ -141,9 +141,9 @@ class _ActionsState extends State<Actions> {
     final userData = context.read<UserProvider>();
 
     if (isPriority) {
-      userData.addPrioritySubjectId(widget.subject.id);
+      userData.addPrioritySubjectId(widget.subject.id!);
     } else {
-      userData.removePrioritySubjectId(widget.subject.id);
+      userData.removePrioritySubjectId(widget.subject.id!);
     }
   }
 

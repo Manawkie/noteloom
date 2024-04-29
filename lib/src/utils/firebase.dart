@@ -290,6 +290,16 @@ class Database {
 
   // notes
 
+  static Stream<QuerySnapshot<NoteModel>> getNotesStream() {
+    return db
+        .collection("notes")
+        .withConverter(
+          fromFirestore: NoteModel.fromFirestore,
+          toFirestore: (model, _) => model.toFirestore(),
+        )
+        .snapshots();
+  }
+
   static Future<List<NoteModel>> getAllNotes() async {
     final allNotes = <NoteModel>[];
 
@@ -319,7 +329,7 @@ class Database {
         .withConverter(
             fromFirestore: NoteModel.fromFirestore,
             toFirestore: (model, _) => model.toFirestore())
-        .where("__docIdIn", arrayContainsAny: priorityIds);
+        .where("__name__", arrayContainsAny: priorityIds);
 
     int maxRandomNotes = 100 - priorityIds.length;
 
@@ -478,6 +488,45 @@ class Database {
     });
   }
   // subjects
+
+  static Stream<QuerySnapshot<SubjectModel>> getSubjectsStream() {
+    return db
+        .collection("subjects")
+        .withConverter(
+            fromFirestore: SubjectModel.fromFirestore,
+            toFirestore: (model, _) => model.toFirestore())
+        .snapshots();
+  }
+
+  static Future<SubjectModel?> addSubject(String subjectName,
+      String subjectCode, List<SubjectModel> currentSubjectList) async {
+    if (currentSubjectList.any(
+          (subj) => subj.subject.toLowerCase() == subjectName.toLowerCase(),
+        ) ||
+        currentSubjectList.any(
+          (subj) => subj.subjectCode.toLowerCase() == subjectCode.toLowerCase(),
+        )) {
+      throw ErrorDescription("Subject already exists");
+    }
+
+    final newSubject = SubjectModel(
+        subject: subjectName,
+        subjectCode: subjectCode,
+        universityId: Auth.schoolDomain);
+
+    final submittedSubject = await db
+        .collection("subjects")
+        .withConverter(
+            fromFirestore: SubjectModel.fromFirestore,
+            toFirestore: (model, _) => model.toFirestore())
+        .add(newSubject)
+        .then((subject) {
+      newSubject.id = subject.id;
+      return newSubject;
+    });
+
+    return submittedSubject;
+  }
 
   static Future<List<String>> setPrioritySubejctIds(
       String subjectId, bool isSaved) async {

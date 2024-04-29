@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:provider/provider.dart';
@@ -17,6 +18,7 @@ class SearchPage extends StatefulWidget {
 
 class _SearchPageState extends State<SearchPage> {
   TextEditingController _searchText = TextEditingController();
+  SearchController _searchController = SearchController();
 
   List<NoteModel> _allNotes = [];
   List<SubjectModel> _allSubjects = [];
@@ -25,12 +27,20 @@ class _SearchPageState extends State<SearchPage> {
   @override
   void initState() {
     _searchText = TextEditingController();
-    super.initState();
+    _searchController = SearchController();
     _searchText.addListener(() {
       setState(() {
         filterResults();
       });
     });
+
+    _searchController.addListener(() {
+      setState(() {
+        filterResults();
+      });
+    });
+
+    super.initState();
     GoRouter.of(context).refresh();
   }
 
@@ -43,13 +53,15 @@ class _SearchPageState extends State<SearchPage> {
   void filterResults() {
     // filtering name
     final filteredNames = _allNotes.where((note) {
-      if (note.name.toLowerCase().contains(_searchText.text.toLowerCase())) {
+      if (note.name
+          .toLowerCase()
+          .contains(_searchController.text.toLowerCase())) {
         return true;
       }
 
       if (note.subjectId
           .toLowerCase()
-          .contains(_searchText.text.toLowerCase())) {
+          .contains(_searchController.text.toLowerCase())) {
         return true;
       }
 
@@ -59,13 +71,13 @@ class _SearchPageState extends State<SearchPage> {
     final filteredSubjects = _allSubjects.where((subject) {
       if (subject.subject
           .toLowerCase()
-          .contains(_searchText.text.toLowerCase())) {
+          .contains(_searchController.text.toLowerCase())) {
         return true;
       }
 
       if (subject.subjectCode
           .toLowerCase()
-          .contains(_searchText.text.toLowerCase())) {
+          .contains(_searchController.text.toLowerCase())) {
         return true;
       }
 
@@ -73,7 +85,7 @@ class _SearchPageState extends State<SearchPage> {
     }).toList();
 
     final filteredTags = _allNotes.where((note) {
-      if (note.tags?.contains(_searchText.text.toLowerCase()) ?? false) {
+      if (note.tags?.contains(_searchController.text.toLowerCase()) ?? false) {
         return true;
       }
       return false;
@@ -88,8 +100,9 @@ class _SearchPageState extends State<SearchPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<QueryNotesProvider>(builder: (context, notes, child) {
-      if (notes.universityNotes.isEmpty) {
+    return Consumer2<QueryNotesProvider, UserProvider>(
+        builder: (context, notes, userdata, child) {
+      if (notes.getUniversityNotes.isEmpty) {
         Database.getAllNotes().then((allNotes) {
           notes.setUniversityNotes(allNotes.cast<NoteModel>());
         });
@@ -116,20 +129,20 @@ class _SearchPageState extends State<SearchPage> {
         notes.setUniversityNotes(getAllNotes);
       }
 
+      void onSearch() async {
+        print("searching...");
+
+        if (_searchController.text != "") {
+          final newNotes = await Database.searchNotes(
+              _searchController.text, userdata.userSavedNotesAndSubjects);
+          notes.setUniversityNotes(newNotes);
+        }
+      }
+
       _allNotes = notes.getUniversityNotes;
       _allSubjects = notes.getUniversitySubjects;
 
       filterResults();
-
-      final UserProvider userData = context.watch<UserProvider>();
-      final recentNotes = userData.readRecents.map((recent) {
-        if (recent.startsWith("notes/")) {
-          return recent.split("notes/")[1];
-        }
-        return "";
-      }).toList();
-      final priorityNoteIds =
-          {...userData.readSavedNoteIds, ...recentNotes}.toList();
 
       return Scaffold(
           backgroundColor: Theme.of(context).colorScheme.primary,
@@ -138,28 +151,33 @@ class _SearchPageState extends State<SearchPage> {
             showChildOpacityTransition: false,
             onRefresh: () async => onRefresh(),
             child: CustomScrollView(
+              physics: BouncingScrollPhysics(
+                  parent: AlwaysScrollableScrollPhysics()),
               slivers: [
                 SliverAppBar(
-                  title: TextField(
-                    onSubmitted: (string) async {
-                      if (kDebugMode) print(string);
-                      if (string == "") {
-                        notes.setUniversityNotes(await Database.getAllNotes());
-                      } else {
-                        notes.requeryNotes(string, priorityNoteIds);
-                      }
-                    },
-                    style: const TextStyle(color: Colors.white),
-                    controller: _searchText,
-                    decoration: const InputDecoration(
-                      hintStyle: TextStyle(color: Colors.white),
-                      hintText: "Search Notes",
-                      fillColor: Colors.white,
-                      border: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.white),
-                      ),
-                    ),
-                  ),
+                  title: mySearchBar(context, _searchController,
+                      "Search Note or Subject", onSearch),
+
+                  // title: TextField(
+                  //   onSubmitted: (string) async {
+                  //     if (kDebugMode) print(string);
+                  //     if (string == "") {
+                  //       notes.setUniversityNotes(await Database.getAllNotes());
+                  //     } else {
+                  //       notes.requeryNotes(string, priorityNoteIds);
+                  //     }
+                  //   },
+                  //   style: const TextStyle(color: Colors.white),
+                  //   controller: _searchText,
+                  //   decoration: const InputDecoration(
+                  //     hintStyle: TextStyle(color: Colors.white),
+                  //     hintText: "Search Notes",
+                  //     fillColor: Colors.white,
+                  //     border: UnderlineInputBorder(
+                  //       borderSide: BorderSide(color: Colors.white),
+                  //     ),
+                  //   ),
+                  // ),
                 ),
                 SliverToBoxAdapter(
                   child: ColoredBox(
@@ -169,15 +187,48 @@ class _SearchPageState extends State<SearchPage> {
                     ),
                   ),
                 ),
+                if (!_filteredResults
+                    .any((result) => result.runtimeType == SubjectModel))
+                  SliverToBoxAdapter(
+                    child: noSubjectButton(),
+                  ),
                 const SliverFillRemaining(
+                  fillOverscroll: true,
                   child: ColoredBox(
                     color: Colors.white,
                   ),
-                )
+                ),
               ],
             ),
           ));
     });
+  }
+
+  ColoredBox noSubjectButton() {
+    return ColoredBox(
+      color: Colors.white,
+      child: GestureDetector(
+        onTap: () => context.go("/addSubject"),
+        child: Container(
+          width: double.infinity,
+          height: 150,
+          margin: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(color: Colors.grey),
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+          child: const Center(
+            child: Column(
+              children: [
+                Text("Can't find your subject?"),
+                Text("Add a subject here")
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   List<Widget> renderNotes() {

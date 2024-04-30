@@ -127,7 +127,7 @@ SearchBar mySearchBar(
   return SearchBar(
       controller: controller,
       hintText: hintText,
-      elevation: MaterialStatePropertyAll(0),
+      elevation: const MaterialStatePropertyAll(0),
       shape: const MaterialStatePropertyAll(RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(8)))),
       trailing: [
@@ -140,13 +140,13 @@ SearchBar mySearchBar(
             },
           ),
         ),
-        IconButton(onPressed: onSearch, icon: Icon(Icons.refresh_rounded))
+        IconButton(onPressed: onSearch, icon: const Icon(Icons.refresh_rounded))
       ],
-      hintStyle: MaterialStatePropertyAll(
-        const TextStyle(color: Colors.white, fontSize: 16),
+      hintStyle: const MaterialStatePropertyAll(
+        TextStyle(color: Colors.white, fontSize: 16),
       ),
       textStyle: const MaterialStatePropertyAll(
-        const TextStyle(color: Colors.white, fontSize: 16),
+         TextStyle(color: Colors.white, fontSize: 16),
       ),
       backgroundColor:
           MaterialStatePropertyAll(Theme.of(context).primaryColor));

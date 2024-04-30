@@ -3,11 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'package:go_router/go_router.dart';
 import 'package:loading_indicator/loading_indicator.dart';
-import 'package:provider/provider.dart';
-import 'package:school_app/src/utils/models.dart';
-import 'package:school_app/src/utils/providers.dart';
 import 'package:school_app/src/utils/firebase.dart';
-import 'package:school_app/src/utils/sharedprefs.dart';
 import 'package:school_app/src/utils/util_functions.dart';
 
 class Login extends StatefulWidget {

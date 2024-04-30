@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:provider/provider.dart';
@@ -130,7 +129,10 @@ class _SearchPageState extends State<SearchPage> {
       }
 
       void onSearch() async {
-        print("searching...");
+        if (kDebugMode) {
+          print("searching...");
+        }
+
 
         if (_searchController.text != "") {
           final newNotes = await Database.searchNotes(
@@ -151,7 +153,7 @@ class _SearchPageState extends State<SearchPage> {
             showChildOpacityTransition: false,
             onRefresh: () async => onRefresh(),
             child: CustomScrollView(
-              physics: BouncingScrollPhysics(
+              physics: const BouncingScrollPhysics(
                   parent: AlwaysScrollableScrollPhysics()),
               slivers: [
                 SliverAppBar(

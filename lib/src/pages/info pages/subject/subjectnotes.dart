@@ -17,7 +17,6 @@ class SubjectNotesPage extends StatefulWidget {
 
 class _SubjectNotesPageState extends State<SubjectNotesPage> {
   late TextEditingController _searchText;
-  final List<NoteModel> _subjectNotes = [];
   final List<NoteModel> _filteredNotes = [];
 
   @override

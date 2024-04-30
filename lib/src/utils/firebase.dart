@@ -4,10 +4,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
-import 'package:google_sign_in/google_sign_in.dart' as googleAuth;
+import 'package:google_sign_in/google_sign_in.dart' as googleauth;
 import 'package:school_app/src/utils/models.dart';
 import 'package:school_app/src/utils/sharedprefs.dart';
-import 'package:school_app/src/utils/util_functions.dart';
 
 class Auth {
   static final auth = FirebaseAuth.instance;
@@ -24,10 +23,10 @@ class Auth {
       userCred =
           await auth.signInWithPopup(googleProvider).then((cred) => cred.user);
     } else {
-      final googleAuth.GoogleSignInAccount? googleUser =
-          await googleAuth.GoogleSignIn().signIn();
+      final googleauth.GoogleSignInAccount? googleUser =
+          await googleauth.GoogleSignIn().signIn();
 
-      final googleAuth.GoogleSignInAuthentication? googleUserAuth =
+      final googleauth.GoogleSignInAuthentication? googleUserAuth =
           await googleUser?.authentication;
 
       final cred = GoogleAuthProvider.credential(
@@ -374,7 +373,9 @@ class Database {
         .withConverter(
             fromFirestore: SavedNoteModel.fromFirestore,
             toFirestore: (model, _) => model.toFirestore());
-    print("saving note");
+    if (kDebugMode) {
+      print("saving note");
+    }
     if (saved) {
       if (!await isNoteSaved(note)) {
         await userSaves.add(saveData);

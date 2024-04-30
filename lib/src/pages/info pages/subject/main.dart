@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -78,7 +79,10 @@ class _RenderSubjectPageState extends State<RenderSubjectPage> {
         }
 
         bool isPriority = snapshot.data?[0] ?? false;
-        print("isPriority: $isPriority");
+        if (kDebugMode) {
+          print("isPriority: $isPriority");
+        }
+
         return Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

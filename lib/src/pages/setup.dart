@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:school_app/src/components/uicomponents.dart';
+import 'package:school_app/src/utils/models.dart';
 import 'package:school_app/src/utils/providers.dart';
 import 'package:school_app/src/utils/firebase.dart';
 import 'package:school_app/src/utils/sharedprefs.dart';
@@ -91,9 +92,11 @@ class _SetupFormState extends State<SetupForm> {
       final course = _selectedCourse == "Select a Department first"
           ? null
           : _selectedCourse;
-      context.read<UserProvider>().setUserData(
-          await Database.createUser(_username.text, department, course));
-      GoRouter.of(context).refresh();
+      await Database.createUser(_username.text, department, course).then((UserModel user) {
+        context.read<UserProvider>().setUserData(user);
+        GoRouter.of(context).refresh();
+      });
+
     }
   }
 

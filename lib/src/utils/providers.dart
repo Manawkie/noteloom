@@ -1,6 +1,5 @@
 // get all school info on department and courses when the user is logged in
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:school_app/src/utils/firebase.dart';
@@ -52,8 +51,11 @@ class UserProvider extends ChangeNotifier {
   }
 
   UserProvider() {
-    print(_userData?.toFirestore());
-    print("Please work");
+    if (kDebugMode) {
+      print(_userData?.toFirestore());
+      print("Please work");
+    }
+
     if (_userData == null) {
       SharedPrefs.getUserData().then((data) {
         if (data != null) {
@@ -318,7 +320,9 @@ class QueryNotesProvider extends ChangeNotifier {
     final newNotes = await Database.searchNotes(searchResult, priorityIds);
     _universityNotes = {...newNotes, ..._universityNotes}.toList();
     for (var note in _universityNotes) {
-      print(note.name);
+      if (kDebugMode) {
+        print(note.name);
+      }
     }
     notifyListeners();
   }

@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
@@ -8,18 +7,11 @@ import 'package:school_app/src/utils/firebase.dart';
 import 'package:school_app/src/utils/models.dart';
 import 'package:school_app/src/utils/providers.dart';
 
-class AddSubject extends StatefulWidget {
-  const AddSubject({super.key});
-
-  @override
-  State<AddSubject> createState() => _AddSubjectState();
-}
-
 class _AddSubjectState extends State<AddSubject> {
   final _formKey = GlobalKey<FormState>();
 
-  TextEditingController _subjectNameController = TextEditingController();
-  TextEditingController _subjectCodeController = TextEditingController();
+  final TextEditingController _subjectNameController = TextEditingController();
+  final TextEditingController _subjectCodeController = TextEditingController();
   bool isSubmitting = false;
 
   late List<SubjectModel> listFromDB;
@@ -117,4 +109,11 @@ class _AddSubjectState extends State<AddSubject> {
           );
         });
   }
+}
+
+class AddSubject extends StatefulWidget {
+  const AddSubject({super.key});
+
+  @override
+  State<AddSubject> createState() => _AddSubjectState();
 }

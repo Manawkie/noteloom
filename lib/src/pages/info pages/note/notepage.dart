@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -248,8 +246,11 @@ class _ActionsState extends State<Actions> {
 
   @override
   void dispose() {
-    print(isSaved);
-    print(widget.isSaved);
+    if (kDebugMode) {
+      print(widget.isSaved);
+      print(isSaved);
+    }
+
     if (widget.isSaved != isSaved) {
       Database.saveNote(widget.note, isSaved);
     }

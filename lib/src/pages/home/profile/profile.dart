@@ -43,7 +43,7 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
-  Widget _renderUserNotes() {
-    return Container();
-  }
+  // Widget _renderUserNotes() {
+  //   return Container();
+  // }
 }

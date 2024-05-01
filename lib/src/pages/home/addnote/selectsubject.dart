@@ -20,7 +20,7 @@ class _SelectSubjectPageState extends State<SelectSubjectPage> {
         builder: (context, notes, note, child) {
       if (notes.getUniversitySubjects.isEmpty) {
         Database.getAllSubjects().then(
-          (value) => notes.setAllSubjects(
+          (value) => notes.setUniversitySubjects(
             value.cast<SubjectModel>(),
           ),
         );

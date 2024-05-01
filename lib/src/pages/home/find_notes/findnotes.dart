@@ -50,50 +50,29 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   void filterResults() {
-    // filtering name
+    final lowerSearchText = _searchController.text.toLowerCase();
+
     final filteredNames = _allNotes.where((note) {
-      if (note.name
-          .toLowerCase()
-          .contains(_searchController.text.toLowerCase())) {
-        return true;
-      }
+      // filtering name
+      if (note.name.toLowerCase().contains(lowerSearchText)) return true;
+      if (note.subjectId.toLowerCase().contains(lowerSearchText)) return true;
+      // filter by author
 
-      if (note.subjectId
-          .toLowerCase()
-          .contains(_searchController.text.toLowerCase())) {
-        return true;
-      }
-
+      if (note.author.toLowerCase().contains(lowerSearchText)) return true;
+      // filter by tags
+      if (note.tags?.contains(lowerSearchText) ?? false) return true;
       return false;
     }).toList();
 
     final filteredSubjects = _allSubjects.where((subject) {
-      if (subject.subject
-          .toLowerCase()
-          .contains(_searchController.text.toLowerCase())) {
-        return true;
-      }
+      if (subject.subject.toLowerCase().contains(lowerSearchText)) return true;
 
-      if (subject.subjectCode
-          .toLowerCase()
-          .contains(_searchController.text.toLowerCase())) {
-        return true;
-      }
-
-      return false;
-    }).toList();
-
-    final filteredTags = _allNotes.where((note) {
-      if (note.tags?.contains(_searchController.text.toLowerCase()) ?? false) {
-        return true;
-      }
-      return false;
+      return subject.subjectCode.toLowerCase().contains(lowerSearchText);
     }).toList();
 
     _filteredResults = {
       ...filteredNames,
       ...filteredSubjects,
-      ...filteredTags,
     }.toList();
   }
 
@@ -128,19 +107,6 @@ class _SearchPageState extends State<SearchPage> {
         notes.setUniversityNotes(getAllNotes);
       }
 
-      void onSearch() async {
-        if (kDebugMode) {
-          print("searching...");
-        }
-
-
-        if (_searchController.text != "") {
-          final newNotes = await Database.searchNotes(
-              _searchController.text, userdata.userSavedNotesAndSubjects);
-          notes.setUniversityNotes(newNotes);
-        }
-      }
-
       _allNotes = notes.getUniversityNotes;
       _allSubjects = notes.getUniversitySubjects;
 
@@ -157,29 +123,8 @@ class _SearchPageState extends State<SearchPage> {
                   parent: AlwaysScrollableScrollPhysics()),
               slivers: [
                 SliverAppBar(
-                  title: mySearchBar(context, _searchController,
-                      "Search Note or Subject", onSearch),
-
-                  // title: TextField(
-                  //   onSubmitted: (string) async {
-                  //     if (kDebugMode) print(string);
-                  //     if (string == "") {
-                  //       notes.setUniversityNotes(await Database.getAllNotes());
-                  //     } else {
-                  //       notes.requeryNotes(string, priorityNoteIds);
-                  //     }
-                  //   },
-                  //   style: const TextStyle(color: Colors.white),
-                  //   controller: _searchText,
-                  //   decoration: const InputDecoration(
-                  //     hintStyle: TextStyle(color: Colors.white),
-                  //     hintText: "Search Notes",
-                  //     fillColor: Colors.white,
-                  //     border: UnderlineInputBorder(
-                  //       borderSide: BorderSide(color: Colors.white),
-                  //     ),
-                  //   ),
-                  // ),
+                  title: mySearchBar(
+                      context, _searchController, "Search Note or Subject"),
                 ),
                 SliverToBoxAdapter(
                   child: ColoredBox(
@@ -196,6 +141,7 @@ class _SearchPageState extends State<SearchPage> {
                   ),
                 const SliverFillRemaining(
                   fillOverscroll: true,
+                  hasScrollBody: false,
                   child: ColoredBox(
                     color: Colors.white,
                   ),

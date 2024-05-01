@@ -16,15 +16,16 @@ class Auth {
   static String get schoolDomain => currentUser!.email!.split("@")[1];
 
   static final GoogleAuthProvider googleProvider = GoogleAuthProvider();
+  static final googleSignIn = googleauth.GoogleSignIn();
 
-  static Future<void> googleSignIn() async {
+  static Future<void> signIn() async {
     late User? userCred;
     if (kIsWeb) {
       userCred =
           await auth.signInWithPopup(googleProvider).then((cred) => cred.user);
     } else {
       final googleauth.GoogleSignInAccount? googleUser =
-          await googleauth.GoogleSignIn().signIn();
+          await googleSignIn.signIn();
 
       final googleauth.GoogleSignInAuthentication? googleUserAuth =
           await googleUser?.authentication;
@@ -60,8 +61,9 @@ class Auth {
     }
   }
 
-  Future<void> signOut() async {
+  static Future<void> signOut() async {
     await auth.signOut();
+    await googleSignIn.signOut();
   }
 }
 

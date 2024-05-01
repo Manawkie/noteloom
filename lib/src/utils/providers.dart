@@ -279,19 +279,14 @@ class QueryNotesProvider extends ChangeNotifier {
   List<SubjectModel> get getUniversitySubjects => _universitySubjects;
 
   QueryNotesProvider() {
-    // if (_universityNotes.isEmpty) {
-    //   Database.getAllNotes().then(
-    //     (data) => setUniversityNotes(
-    //       data.cast<NoteModel>(),
-    //     ),
-    //   );
-    // }
-
     streamNotes.listen((snap) {
-      _universityNotes = snap.docs.map((note) => note.data()).toList();
+      setUniversityNotes(snap.docs.map((note) => note.data()).toList());
+      print(getUniversityNotes.length);
     });
     streamSubjects.listen((snap) {
-      _universitySubjects = snap.docs.map((subject) => subject.data()).toList();
+      setUniversitySubjects(
+          snap.docs.map((subject) => subject.data()).toList());
+      print(_universitySubjects.length);
     });
   }
 
@@ -300,7 +295,7 @@ class QueryNotesProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setAllSubjects(List<SubjectModel> data) {
+  void setUniversitySubjects(List<SubjectModel> data) {
     _universitySubjects = data;
     notifyListeners();
   }

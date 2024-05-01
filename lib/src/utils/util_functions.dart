@@ -29,7 +29,7 @@ class Utils {
 
     // [Subject, Subject...]
     await Database.getAllSubjects().then((allSubjects) {
-      notesProvider.setAllSubjects(allSubjects);
+      notesProvider.setUniversitySubjects(allSubjects);
     });
 
     //// User's information

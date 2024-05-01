@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:school_app/src/components/uicomponents.dart';
+import 'package:school_app/src/utils/models.dart';
 import 'package:school_app/src/utils/providers.dart';
 
 class PrioritySubjects extends StatefulWidget {
@@ -11,12 +12,44 @@ class PrioritySubjects extends StatefulWidget {
 }
 
 class _PrioritySubjectsState extends State<PrioritySubjects> {
+  late SearchController _searchController;
+  List<SubjectModel?> _allPrioritySubjects = [];
+  List<SubjectModel?> _filteredSubjects = [];
+
+  @override
+  void initState() {
+    _searchController = SearchController();
+    _searchController.addListener(() {
+      setState(() {
+        filterResults();
+      });
+    });
+    super.initState();
+  }
+
+  void filterResults() {
+    final lowerSearchText = _searchController.text.toLowerCase();
+
+    final filteredSubjects = _allPrioritySubjects.where((subject) {
+      if (subject == null) return false;
+
+      // filter by name, subject name, and tags
+      if (subject.subject.toLowerCase().contains(lowerSearchText) ||
+          subject.subjectCode.toLowerCase().contains(lowerSearchText)) {
+        return true;
+      }
+
+      return false;
+    });
+
+    _filteredSubjects = filteredSubjects.toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer2<UserProvider, QueryNotesProvider>(
         builder: (context, userdata, notes, child) {
       final userPrioritySubjects = userdata.readPrioritySubjects;
-      final allSubjects = notes.getUniversitySubjects;
 
       if (userPrioritySubjects.isEmpty) {
         return const Center(
@@ -26,35 +59,28 @@ class _PrioritySubjectsState extends State<PrioritySubjects> {
         );
       }
 
+      _allPrioritySubjects = userPrioritySubjects
+          .map((subjectId) => notes.findSubject(subjectId))
+          .toList();
+
+      filterResults();
+
       return Scaffold(
         appBar: AppBar(
-          title: const TextField(
-            style: TextStyle(color: Colors.white),
-            decoration: InputDecoration(
-              hintStyle: TextStyle(color: Colors.white),
-              hintText: "Search Subjects",
-              fillColor: Colors.white,
-              border: UnderlineInputBorder(
-                borderSide: BorderSide(color: Colors.white),
-              ),
-            ),
-          ),
-        ),
+            title: mySearchBar(
+                context, _searchController, "Search your Subjects")),
         body: ListView.builder(
-          itemCount: userPrioritySubjects.length,
-          itemBuilder: (context, index) {
-          final subject = allSubjects.cast<dynamic>().firstWhere(
-              (subject) => subject.id == userPrioritySubjects[index],
-              orElse: () => null);
+            itemCount: _filteredSubjects.length,
+            itemBuilder: (context, index) {
+              final subject = _filteredSubjects[index];
+              if (subject == null) {
+                return const Center(
+                  child: Text("Subject not found"),
+                );
+              }
 
-          if (subject == null) {
-            return const Center(
-              child: Text("Subject not found"),
-            );
-          }
-
-          return subjectButton(subject, context);
-        }),
+              return subjectButton(subject, context);
+            }),
       );
     });
   }

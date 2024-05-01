@@ -1,7 +1,7 @@
 import "package:flutter/material.dart";
 import "package:provider/provider.dart";
+import "package:school_app/src/components/uicomponents.dart";
 import "package:school_app/src/pages/info%20pages/subject/chat_service.dart";
-import "package:school_app/src/pages/info%20pages/subject/text_field.dart";
 import "package:school_app/src/utils/firebase.dart";
 import "package:school_app/src/utils/models.dart";
 import "package:school_app/src/utils/providers.dart";
@@ -42,24 +42,27 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.subjectId),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-        child: Column(
-          children: [
-            // messages
-            Expanded(
-              child: _buildMessagelist(),
-            ),
-            // user input
-            _buildMessageInput(),
-          ],
+    return Consumer<QueryNotesProvider>(builder: (context, querynotes, child) {
+      final currentSubject = querynotes.findSubject(widget.subjectId);
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(currentSubject?.subject ?? " "),
         ),
-      ),
-    );
+        body: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: Column(
+            children: [
+              // messages
+              Expanded(
+                child: _buildMessagelist(),
+              ),
+              // user input
+              _buildMessageInput(),
+            ],
+          ),
+        ),
+      );
+    });
   }
 
   // build message list
@@ -70,7 +73,6 @@ class _ChatPageState extends State<ChatPage> {
         if (snapshot.hasError) {
           return Text('error${snapshot.error}');
         }
-
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Text('Loading...');
         }

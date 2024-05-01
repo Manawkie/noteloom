@@ -122,7 +122,6 @@ SearchBar mySearchBar(
   BuildContext context,
   SearchController controller,
   String hintText,
-  void Function() onSearch,
 ) {
   return SearchBar(
       controller: controller,
@@ -140,7 +139,6 @@ SearchBar mySearchBar(
             },
           ),
         ),
-        IconButton(onPressed: onSearch, icon: const Icon(Icons.refresh_rounded))
       ],
       hintStyle: const MaterialStatePropertyAll(
         TextStyle(color: Colors.white, fontSize: 16),
@@ -150,4 +148,39 @@ SearchBar mySearchBar(
       ),
       backgroundColor:
           MaterialStatePropertyAll(Theme.of(context).primaryColor));
+}
+
+
+class MyTextField extends StatelessWidget {
+  final TextEditingController controller;
+  final String hintText;
+  final bool obscureText;
+  const MyTextField({
+    super.key,
+    required this.controller,
+    required this.hintText,
+    required this.obscureText,
+    });
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: controller,
+      obscureText: obscureText,
+      decoration: InputDecoration(
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.grey.shade200)
+        ),
+        focusedBorder: const OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.white)
+
+      ),
+      fillColor: Colors.grey[400],
+      filled: true,
+      hintText: hintText,
+      hintStyle: const TextStyle(color: Colors.white),
+      )
+    );
+  }
+
 }

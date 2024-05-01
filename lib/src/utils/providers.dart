@@ -1,5 +1,7 @@
 // get all school info on department and courses when the user is logged in
 
+// ignore_for_file: prefer_interpolation_to_compose_strings
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:school_app/src/utils/firebase.dart';
@@ -142,7 +144,8 @@ class NoteProvider extends ChangeNotifier {
   Uint8List? bytes;
   String? name;
   String? summary;
-  String? subject;
+  String? subjectName;
+  String? subjectId;
   String? tag1;
   String? tag2;
   String? tag3;
@@ -151,7 +154,8 @@ class NoteProvider extends ChangeNotifier {
   Uint8List? get readBytes => bytes;
   String? get readName => name;
   String? get readSummary => summary;
-  String? get readSubject => subject;
+  String? get readSubjectName => subjectName;
+  String? get readSubjectId => subjectId;
   String? get readTag1 => tag1;
   String? get readTag2 => tag2;
   String? get readTag3 => tag3;
@@ -165,7 +169,8 @@ class NoteProvider extends ChangeNotifier {
       FilePickerResult? result,
       String filename,
       String fileSummary,
-      String fileSubject,
+      String fileSubjectName,
+      String fileSubjectId,
       String fileTags1,
       String fileTags2,
       String fileTags3) {
@@ -173,15 +178,17 @@ class NoteProvider extends ChangeNotifier {
     bytes = result?.files.single.bytes!;
     name = filename;
     summary = fileSummary;
-    subject = fileSubject;
+    subjectName = fileSubjectName;
+    subjectId = fileSubjectId;
     tag1 = fileTags1;
     tag2 = fileTags2;
     tag3 = fileTags3;
     notifyListeners();
   }
 
-  void setSubject(String subject) {
-    this.subject = subject;
+  void setSubject(String subjectId, String subjectName) {
+    subjectId = subjectId;
+    subjectName = subjectName;
     notifyListeners();
   }
 
@@ -203,7 +210,8 @@ class NoteProvider extends ChangeNotifier {
     _result = null;
     bytes = null;
     name = "";
-    subject = "Select a Subject";
+    subjectName = "Select a Subject";
+    subjectId = "";
     summary = "";
     tag1 = "";
     tag2 = "";
@@ -215,9 +223,10 @@ class NoteProvider extends ChangeNotifier {
 class CurrentNoteProvider extends ChangeNotifier {
   String? name;
   String? summary;
-
-  String? newSubject;
-  String? subject;
+  String? newSubjectName;
+  String? newSubjectId;
+  String? subjectName;
+  String? subjectId;
   String? tag1;
   String? tag2;
   String? tag3;
@@ -227,8 +236,10 @@ class CurrentNoteProvider extends ChangeNotifier {
   String? get readName => name;
   String? get readSummary => summary;
 
-  String? get readNewSubject => newSubject;
-  String? get readSubject => subject;
+  String? get readNewSubjectName => newSubjectName;
+  String? get readNewSubjectId => newSubjectId;
+  String? get readSubjectId => subjectId;
+  String? get readSubjectName => subjectName;
   String? get readTag1 => tag1;
   String? get readTag2 => tag2;
   String? get readTag3 => tag3;
@@ -241,7 +252,8 @@ class CurrentNoteProvider extends ChangeNotifier {
 
   void setNote(
     String notename,
-    String notesubject, {
+    String noteSubjectName,
+    String noteSubjectId, {
     String? notesummary,
     String? notetag1,
     String? notetag2,
@@ -249,7 +261,8 @@ class CurrentNoteProvider extends ChangeNotifier {
   }) {
     name = notename;
     summary = notesummary;
-    subject = notesubject;
+    subjectName = noteSubjectName;
+    subjectId = noteSubjectId;
     tag1 = notetag1;
     tag2 = notetag2;
     tag3 = notetag3;
@@ -257,13 +270,15 @@ class CurrentNoteProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setNewSubject(String value) {
-    newSubject = value;
+  void setNewSubject(String subjectId, String subjectName) {
+    newSubjectId = subjectId;
+    newSubjectName = subjectName;
     notifyListeners();
   }
 
-  void setSubject(String value) {
-    subject = value;
+  void setSubject(String id, String name) {
+    subjectId = id;  
+    subjectName = name;
     notifyListeners();
   }
 }
@@ -281,12 +296,10 @@ class QueryNotesProvider extends ChangeNotifier {
   QueryNotesProvider() {
     streamNotes.listen((snap) {
       setUniversityNotes(snap.docs.map((note) => note.data()).toList());
-      print(getUniversityNotes.length);
     });
     streamSubjects.listen((snap) {
       setUniversitySubjects(
           snap.docs.map((subject) => subject.data()).toList());
-      print(_universitySubjects.length);
     });
   }
 
@@ -311,18 +324,8 @@ class QueryNotesProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void requeryNotes(String searchResult, List<String> priorityIds) async {
-    final newNotes = await Database.searchNotes(searchResult, priorityIds);
-    _universityNotes = {...newNotes, ..._universityNotes}.toList();
-    for (var note in _universityNotes) {
-      if (kDebugMode) {
-        print(note.name);
-      }
-    }
-    notifyListeners();
-  }
-
   List<NoteModel> getNotesBySubject(String subjectId) {
+    
     return _universityNotes
         .where((note) => note.subjectId == subjectId)
         .toList();
@@ -335,5 +338,44 @@ class QueryNotesProvider extends ChangeNotifier {
 
   SubjectModel? findSubject(String id) {
     return _universitySubjects.where((subject) => subject.id == id).firstOrNull;
+  }
+}
+
+class MessageProvider extends ChangeNotifier {
+  String message = "";
+  MessageType messageType = MessageType.message;
+  String? noteId;
+  String? currentSubjectId;
+
+  String get readMessage => message;
+  MessageType get readMessageType => messageType;
+  String? get readNoteId => noteId;
+  String? get readCurrentSubjectId => currentSubjectId;
+
+  void setMessage(String newMessage) {
+    message = newMessage;
+    notifyListeners();
+  }
+
+  void setMessageType(MessageType newMessageType) {
+    messageType = newMessageType;
+    notifyListeners();
+  }
+
+  void setNoteId(String? newNoteId) {
+    noteId = newNoteId;
+    notifyListeners();
+  }
+
+  void setCurrentNoteId(String newSubjectId) {
+    currentSubjectId = newSubjectId;
+    notifyListeners();
+  }
+
+  void clearFields() {
+    message = "";
+    messageType = MessageType.message;
+    noteId = null;
+    notifyListeners();
   }
 }

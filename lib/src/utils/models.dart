@@ -180,12 +180,12 @@ class SubjectModel extends Results {
   String subjectCode;
   String? universityId;
 
-  SubjectModel(
-      {this.id,
-      required this.subject,
-      required this.subjectCode,
-      required this.universityId,
-      });
+  SubjectModel({
+    this.id,
+    required this.subject,
+    required this.subjectCode,
+    required this.universityId,
+  });
 
   factory SubjectModel.fromFirestore(
       DocumentSnapshot<Map<String, dynamic>> snapshot, options) {
@@ -193,10 +193,10 @@ class SubjectModel extends Results {
     final id = snapshot.id;
 
     return SubjectModel(
-        id: id,
-        subject: data?['subject'],
-        subjectCode: data?['subject code'],
-        universityId: data?['universityId'],
+      id: id,
+      subject: data?['subject'],
+      subjectCode: data?['subject code'],
+      universityId: data?['universityId'],
     );
   }
   Map<String, dynamic> toFirestore() {
@@ -214,6 +214,7 @@ class NoteModel extends Results {
   String name;
   String author;
   String subjectId;
+  String subjectName;
   String time;
   String storagePath;
   List<String?>? tags;
@@ -225,6 +226,7 @@ class NoteModel extends Results {
       required this.schoolId,
       required this.name,
       required this.subjectId,
+      required this.subjectName,
       required this.time,
       required this.storagePath,
       required this.author,
@@ -243,6 +245,7 @@ class NoteModel extends Results {
         name: data?['name'],
         author: data?['author'],
         subjectId: data?['subjectId'],
+        subjectName: data?['subjectName'],
         time: data?['time'],
         storagePath: data?['storagePath'],
         tags: data?['tags'].cast<String>(),
@@ -258,6 +261,7 @@ class NoteModel extends Results {
       "author": author,
       "schoolId": schoolId,
       "subjectId": subjectId,
+      "subjectName": subjectName,
       "time": DateTime.now().toString(),
       "storagePath": storagePath,
       if (tags != null) "tags": tags,
@@ -266,28 +270,37 @@ class NoteModel extends Results {
     };
   }
 
-  void editFields(String newName, String newSubject, String? newSummary,
-      List<String?>? newTags) {
+  void editFields(String newName, String newSubjectId, String newSubjectName,
+      String? newSummary, List<String?>? newTags) {
     name = newName;
-    subjectId = newSubject;
+    subjectId = newSubjectId;
+    subjectName = newSubjectName;
     summary = newSummary;
     tags = newTags;
   }
 }
 
+enum MessageType { message, comment }
+
 class MessageModel {
   String? id;
   String message;
   String senderId;
+  String senderUserProfileURL;
   String senderUsername;
   Timestamp timestamp;
+  MessageType messageType;
+  String? noteId;
 
   MessageModel(
       {this.id,
       required this.message,
       required this.senderId,
+      this.senderUserProfileURL = "",
       required this.senderUsername,
-      required this.timestamp});
+      required this.timestamp,
+      this.messageType = MessageType.message,
+      this.noteId});
 
   factory MessageModel.fromFirestore(
       DocumentSnapshot<Map<String, dynamic>> snapshot, _) {
@@ -298,8 +311,11 @@ class MessageModel {
         id: id,
         message: data?['message'],
         senderId: data?['senderId'],
+        senderUserProfileURL: data?['senderUserProfileURL'] ?? "",
         senderUsername: data?['senderUsername'],
-        timestamp: data?['timestamp']);
+        timestamp: data?['timestamp'],
+        messageType: data?['messageType'] != null ? MessageType.values.byName(data?['messageType']) : MessageType.message,
+        noteId: data?['noteId'] ?? "");
     return message;
   }
 
@@ -307,8 +323,11 @@ class MessageModel {
     return {
       "message": message,
       "senderId": senderId,
+      "senderUserProfileURL": senderUserProfileURL,
       "senderUsername": senderUsername,
       "timestamp": timestamp,
+      "messageType": messageType.name,
+      if (noteId != null) "noteId": noteId
     };
   }
 }

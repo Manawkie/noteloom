@@ -10,6 +10,7 @@ import 'package:school_app/src/pages/info%20pages/note/edit.dart';
 import 'package:school_app/src/pages/info%20pages/note/notepage.dart';
 import 'package:school_app/src/pages/info%20pages/subject/chat_page.dart';
 import 'package:school_app/src/pages/info%20pages/subject/main.dart';
+import 'package:school_app/src/pages/info%20pages/subject/selectnote.dart';
 import 'package:school_app/src/pages/info%20pages/subject/subjectnotes.dart';
 import 'package:school_app/src/pages/login.dart';
 import 'package:school_app/src/pages/not_found.dart';
@@ -165,11 +166,18 @@ class Routes {
             GoRoute(
                 path: "discussions",
                 name: "discussions",
-                builder: (context, state) {
-                  String subjectId = state.pathParameters['id']!;
-
-                  return ChatPage(subjectId: subjectId);
-                })
+                builder: (context, state) =>
+                    ChatPage(subjectId: state.pathParameters["id"]!),
+                routes: [
+                  GoRoute(
+                      path: "selectNote",
+                      name: "selectNote",
+                      builder: (context, state) {
+                        return SelectNotePage(
+                          subjectId: state.pathParameters['id']!,
+                        );
+                      })
+                ])
           ],
         )
       ],

@@ -28,7 +28,7 @@ class _SubjectPageState extends State<SubjectPage> {
   }
 
   void onExit() {
-    context.go('/home');
+    context.pop();
   }
 
   @override

@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:school_app/src/components/uicomponents.dart';
-import 'package:school_app/src/utils/firebase.dart';
-import 'package:school_app/src/utils/models.dart';
 import 'package:school_app/src/utils/providers.dart';
 
 class SelectSubjectPage extends StatefulWidget {
@@ -14,16 +12,32 @@ class SelectSubjectPage extends StatefulWidget {
 }
 
 class _SelectSubjectPageState extends State<SelectSubjectPage> {
+  void selectedNote(QueryNotesProvider queryNotes, NoteProvider note, int index) {
+    
+    final selectedSubject = queryNotes.getUniversitySubjects[index];
+    final currentNote = context.read<CurrentNoteProvider>();
+    
+    if (currentNote.readEditing == true) {
+      currentNote.setNewSubject(selectedSubject.id!, selectedSubject.subject);
+      context.pop();
+      return;
+    } else {
+      note.setSubject(selectedSubject.id!, selectedSubject.subject);
+      context.read<CurrentNoteProvider>().setSubject(selectedSubject.id!, selectedSubject.subject);
+      context.go("/addnote");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer2<QueryNotesProvider, NoteProvider>(
-        builder: (context, notes, note, child) {
-      if (notes.getUniversitySubjects.isEmpty) {
-        Database.getAllSubjects().then(
-          (value) => notes.setUniversitySubjects(
-            value.cast<SubjectModel>(),
-          ),
-        );
+        builder: (context, queryNotes, note, child) {
+      if (queryNotes.getUniversitySubjects.isEmpty) {
+        // Database.getAllSubjects().then(
+        //   (value) => queryNotes.setUniversitySubjects(
+        //     value.cast<SubjectModel>(),
+        //   ),
+        // );
 
         return Scaffold(
           body: Center(
@@ -54,33 +68,15 @@ class _SelectSubjectPageState extends State<SelectSubjectPage> {
             SliverList(
                 delegate: SliverChildBuilderDelegate(
               (context, index) {
-                final subjectInfo = notes.getUniversitySubjects[index];
+                final subjectInfo = queryNotes.getUniversitySubjects[index];
 
                 return ListTile(
                   title: Text(subjectInfo.subject),
-                  onTap: () {
-                    final selectedSubject =
-                        notes.getUniversitySubjects[index].subject;
-                    final currentNote = context.read<CurrentNoteProvider>();
-                    if (currentNote.readEditing == true) {
-                      currentNote.setNewSubject(selectedSubject);
-
-                      context.pop();
-                      return;
-                    } else {
-                      note.setSubject(selectedSubject);
-
-                      context
-                          .read<CurrentNoteProvider>()
-                          .setSubject(selectedSubject);
-
-                      context.go("/addnote");
-                    }
-                  },
+                  onTap: () => selectedNote(queryNotes, note, index),
                   subtitle: Text(subjectInfo.subjectCode),
                 );
               },
-              childCount: notes.getUniversitySubjects.length,
+              childCount: queryNotes.getUniversitySubjects.length,
             )),
           ],
         ),

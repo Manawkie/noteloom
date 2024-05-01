@@ -10,39 +10,32 @@ import 'package:school_app/src/utils/providers.dart';
 import 'package:school_app/src/utils/sharedprefs.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
-class NotePage extends StatefulWidget {
+class NotePage extends StatelessWidget {
   const NotePage({super.key, required this.id});
   final String id;
 
   @override
-  State<NotePage> createState() => _NotePageState();
-}
-
-class _NotePageState extends State<NotePage> {
-  @override
   Widget build(BuildContext context) {
-    return Consumer<QueryNotesProvider>(builder: (context, notes, child) {
-      NoteModel? note = notes.findNote(widget.id);
-      if (note == null) {
-        return Scaffold(
-          appBar: AppBar(
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new),
-              onPressed: () {
-                context.go('/home');
-              },
-            ),
-          ),
-          body: const Center(
-            child: Text("Note not found"),
-          ),
-        );
-      }
+    final NoteModel? note = context.read<QueryNotesProvider>().findNote(id);
 
-      return RenderNote(
-        note: note,
+    if (note == null) {
+      return Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios_new),
+            onPressed: () {
+              context.go('/home');
+            },
+          ),
+        ),
+        body: const Center(
+          child: Text("Note not found"),
+        ),
       );
-    });
+    }
+    return RenderNote(
+      note: note,
+    );
   }
 }
 
@@ -68,7 +61,7 @@ class _RenderNoteState extends State<RenderNote> {
       // set current note
 
       if (currentNote.readEditing == false) {
-        currentNote.setNote(widget.note.name, widget.note.subjectId,
+        currentNote.setNote(widget.note.name, widget.note.subjectName, widget.note.subjectId,
             notesummary: widget.note.summary,
             notetag1: widget.note.tags?[0],
             notetag2: widget.note.tags?[1],
@@ -160,7 +153,7 @@ class _RenderNoteState extends State<RenderNote> {
                                 ),
                               ),
                               Text(
-                                currentNote.subject ?? "",
+                                currentNote.subjectName ?? "",
                               ),
                             ],
                           ),
@@ -168,6 +161,8 @@ class _RenderNoteState extends State<RenderNote> {
                         Actions(
                           isSaved: snapshot.data![1] as bool,
                           note: widget.note,
+                          isLiked: widget.note.peopleLiked?.contains(Auth.currentUser!.uid) ?? false,
+                          peopleLiked: widget.note.peopleLiked?.length ?? 0,
                         ),
                       ],
                     ),
@@ -201,15 +196,17 @@ class _RenderNoteState extends State<RenderNote> {
 }
 
 class Actions extends StatefulWidget {
-  const Actions({
-    super.key,
-    required this.isSaved,
-    required this.note,
-  });
+  const Actions(
+      {super.key,
+      required this.isSaved,
+      required this.note,
+      required this.isLiked,
+      required this.peopleLiked});
 
   final bool isSaved;
   final NoteModel note;
-
+  final bool isLiked;
+  final int peopleLiked;
   @override
   State<Actions> createState() => _ActionsState();
 }
@@ -217,10 +214,13 @@ class Actions extends StatefulWidget {
 class _ActionsState extends State<Actions> {
   bool isSaved = false;
   bool isLiked = false;
+  int peopleLiked = 0;
 
   @override
   void initState() {
     isSaved = widget.isSaved;
+    isLiked = widget.isLiked;
+    peopleLiked = widget.peopleLiked;
     super.initState();
   }
 
@@ -237,75 +237,59 @@ class _ActionsState extends State<Actions> {
     });
   }
 
-  void likeNote() async {
+  void likeNote() {
     setState(() {
       isLiked = !isLiked;
+      if (isLiked) {
+        peopleLiked++;
+      } else {
+        peopleLiked--;
+      }
     });
-    await Database.likeNote(widget.note, isLiked);
   }
 
   @override
   void dispose() {
-    if (kDebugMode) {
-      print(widget.isSaved);
-      print(isSaved);
-    }
-
     if (widget.isSaved != isSaved) {
       Database.saveNote(widget.note, isSaved);
+    }
+    if (widget.isLiked != isLiked) {
+      Database.likeNote(widget.note, isLiked);
     }
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<DocumentSnapshot<NoteModel>>(
-        stream: Database.noteStream(widget.note),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting &&
-              !snapshot.hasData) {
-            return Center(
-              child: myLoadingIndicator(),
-            );
-          }
-
-          isLiked = snapshot.data!
-                  .data()!
-                  .peopleLiked
-                  ?.contains(Auth.currentUser!.uid) ??
-              false;
-
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              IconButton(
-                  icon: Icon(
-                    Icons.bookmark,
-                    color:
-                        isSaved ? Theme.of(context).colorScheme.primary : null,
-                  ),
-                  onPressed: saveNote),
-              Row(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: Text(
-                        snapshot.data?.data()?.peopleLiked?.length.toString() ??
-                            "0"),
-                  ),
-                  IconButton(
-                      onPressed: likeNote,
-                      icon: Icon(
-                        Icons.thumb_up,
-                        color: isLiked
-                            ? Theme.of(context).colorScheme.primary
-                            : null,
-                      ))
-                ],
-              )
-            ],
-          );
-        });
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        IconButton(
+          icon: Icon(
+            Icons.bookmark,
+            color: isSaved ? Theme.of(context).colorScheme.primary : null,
+          ),
+          onPressed: saveNote,
+        ),
+        Row(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 8,
+              ),
+              child: Text(peopleLiked.toString()),
+            ),
+            IconButton(
+              onPressed: likeNote,
+              icon: Icon(
+                Icons.thumb_up,
+                color: isLiked ? Theme.of(context).colorScheme.primary : null,
+              ),
+            ),
+          ],
+        )
+      ],
+    );
   }
 }

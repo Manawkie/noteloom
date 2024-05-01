@@ -242,7 +242,8 @@ class Database {
   static Future<NoteModel> submitFile(
     Uint8List fileBytes,
     String fileName,
-    String subject,
+    String subjectId,
+    String subjectName,
     List<String> tags,
     String? summary,
   ) async {
@@ -251,7 +252,8 @@ class Database {
       name: fileName,
       schoolId: Auth.schoolDomain,
       author: await SharedPrefs.getUserData().then((user) => user!.username),
-      subjectId: subject,
+      subjectId: subjectId,
+      subjectName: subjectName,
       time: DateTime.now().toString(),
       storagePath: storagePath,
       tags: tags,
@@ -297,70 +299,83 @@ class Database {
         .withConverter(
           fromFirestore: NoteModel.fromFirestore,
           toFirestore: (model, _) => model.toFirestore(),
-        )
+        ).limit(100).orderBy("time", descending: true)
         .snapshots();
   }
 
-  static Future<List<NoteModel>> getAllNotes() async {
-    final allNotes = <NoteModel>[];
-
-    await db
+  static Future<NoteModel?> getNoteById(String noteId) async {
+    final note = await db
         .collection("notes")
+        .doc(noteId)
         .withConverter(
             fromFirestore: NoteModel.fromFirestore,
             toFirestore: (model, _) => model.toFirestore())
-        .limit(100)
-        .where("schoolId", isEqualTo: Auth.schoolDomain)
         .get()
-        .then((snapshot) {
-      for (var note in snapshot.docs) {
-        allNotes.add(note.data());
-      }
-    });
+        .then((snapshot) => snapshot.data());
 
-    return allNotes;
+    return note;
   }
 
-  static Future<List<NoteModel>> searchNotes(
-      String search, List<String> priorityIds) async {
-    final searchNotes = <NoteModel>[];
+  // static Future<List<NoteModel>> getAllNotes() async {
+  //   final allNotes = <NoteModel>[];
 
-    final priorityQuery = db
-        .collection("notes")
-        .withConverter(
-            fromFirestore: NoteModel.fromFirestore,
-            toFirestore: (model, _) => model.toFirestore())
-        .where("__name__", arrayContainsAny: priorityIds);
+  //   await db
+  //       .collection("notes")
+  //       .withConverter(
+  //           fromFirestore: NoteModel.fromFirestore,
+  //           toFirestore: (model, _) => model.toFirestore())
+  //       .limit(100)
+  //       .where("schoolId", isEqualTo: Auth.schoolDomain)
+  //       .get()
+  //       .then((snapshot) {
+  //     for (var note in snapshot.docs) {
+  //       allNotes.add(note.data());
+  //     }
+  //   });
 
-    int maxRandomNotes = 100 - priorityIds.length;
+  //   return allNotes;
+  // }
 
-    if (maxRandomNotes < 20) {
-      maxRandomNotes = 20;
-    }
+  // static Future<List<NoteModel>> searchNotes(
+  //     String search, List<String> priorityIds) async {
+  //   final searchNotes = <NoteModel>[];
 
-    await priorityQuery.get().then((snapshot) {
-      for (var note in snapshot.docs) {
-        searchNotes.add(note.data());
-      }
-    });
+  //   final priorityQuery = db
+  //       .collection("notes")
+  //       .withConverter(
+  //           fromFirestore: NoteModel.fromFirestore,
+  //           toFirestore: (model, _) => model.toFirestore())
+  //       .where("__name__", arrayContainsAny: priorityIds);
 
-    await db
-        .collection("notes")
-        .withConverter(
-            fromFirestore: NoteModel.fromFirestore,
-            toFirestore: (model, _) => model.toFirestore())
-        .limit(maxRandomNotes)
-        .where("schoolId", isEqualTo: Auth.schoolDomain)
-        .where("__docIdIn", whereNotIn: priorityIds)
-        .get()
-        .then((snapshot) {
-      for (var note in snapshot.docs) {
-        searchNotes.add(note.data());
-      }
-    });
+  //   int maxRandomNotes = 100 - priorityIds.length;
 
-    return searchNotes;
-  }
+  //   if (maxRandomNotes < 20) {
+  //     maxRandomNotes = 20;
+  //   }
+
+  //   await priorityQuery.get().then((snapshot) {
+  //     for (var note in snapshot.docs) {
+  //       searchNotes.add(note.data());
+  //     }
+  //   });
+
+  //   await db
+  //       .collection("notes")
+  //       .withConverter(
+  //           fromFirestore: NoteModel.fromFirestore,
+  //           toFirestore: (model, _) => model.toFirestore())
+  //       .limit(maxRandomNotes)
+  //       .where("schoolId", isEqualTo: Auth.schoolDomain)
+  //       .where("__docIdIn", whereNotIn: priorityIds)
+  //       .get()
+  //       .then((snapshot) {
+  //     for (var note in snapshot.docs) {
+  //       searchNotes.add(note.data());
+  //     }
+  //   });
+
+  //   return searchNotes;
+  // }
 
   static Future saveNote(NoteModel note, bool saved) async {
     final saveData = SavedNoteModel(

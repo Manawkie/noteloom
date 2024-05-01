@@ -17,7 +17,8 @@ void main() async {
         ChangeNotifierProvider(create: (context) => UserProvider()),
         ChangeNotifierProvider(create: (context) => NoteProvider()),
         ChangeNotifierProvider(create: (context) => QueryNotesProvider()),
-        ChangeNotifierProvider(create: (context) => CurrentNoteProvider())
+        ChangeNotifierProvider(create: (context) => CurrentNoteProvider()),
+        ChangeNotifierProvider(create: (context) => MessageProvider())
       
       ],
       child: const MyApp(),

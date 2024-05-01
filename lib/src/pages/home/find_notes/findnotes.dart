@@ -81,13 +81,7 @@ class _SearchPageState extends State<SearchPage> {
     return Consumer2<QueryNotesProvider, UserProvider>(
         builder: (context, notes, userdata, child) {
       if (notes.getUniversityNotes.isEmpty) {
-        Database.getAllNotes().then((allNotes) {
-          notes.setUniversityNotes(allNotes.cast<NoteModel>());
-        });
-
-        if (kDebugMode) {
-          print("Getting notes");
-        }
+        
 
         return Scaffold(
           body: Center(
@@ -103,8 +97,7 @@ class _SearchPageState extends State<SearchPage> {
       }
 
       void onRefresh() async {
-        final getAllNotes = await Database.getAllNotes();
-        notes.setUniversityNotes(getAllNotes);
+        
       }
 
       _allNotes = notes.getUniversityNotes;

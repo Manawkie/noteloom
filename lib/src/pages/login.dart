@@ -50,50 +50,49 @@ class _LoginState extends State<Login> {
               body: Padding(
             padding: const EdgeInsets.all(20),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text("Log in with your"),
-                Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      color: Colors.grey.shade300),
-                  margin: const EdgeInsets.symmetric(vertical: 20),
-                  padding: const EdgeInsets.all(10),
-                  child: Text(
-                    _universityName,
-                    style: const TextStyle(
-                      fontSize: 30,
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text("Log in with your"),
+                    Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Colors.grey.shade300),
+                      margin: const EdgeInsets.symmetric(vertical: 20),
+                      padding: const EdgeInsets.all(10),
+                      child: Text(
+                        _universityName,
+                        style: const TextStyle(
+                          fontSize: 30,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
                     ),
-                    textAlign: TextAlign.center,
-                  ),
+                  ],
                 ),
-                SizedBox(
-                  width: double.infinity,
-                  child: Center(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        context.go("/");
-                      },
-                      child: const Text("Return to Home Page"),
+                ElevatedButton(
+                  onPressed: () {
+                    context.go("/");
+                  },
+                  child: const Text("Return to Home Page"),
+                ),
+                if (snapshot.data == null)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    child: Center(
+                      child: ElevatedButton(
+                        onPressed: _logIn,
+                        child: const Text("Log In"),
+                      ),
                     ),
                   ),
-                ),
                 SizedBox(
                   height: MediaQuery.of(context).size.height * 0.3,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      if (snapshot.data == null)
-                        ElevatedButton(
-                          onPressed: _logIn,
-                          child: const Text("Log In"),
-                        ),
-                      _loginState(snapshot)
-                    ],
-                  ),
+                  child: _loginState(snapshot),
                 ),
               ],
             ),
@@ -110,7 +109,7 @@ class _LoginState extends State<Login> {
     }
 
     if (snapshot.data == null) {
-      return const Text("Awaiting Log In");
+      return Container();
     }
 
     return FutureBuilder(
@@ -134,50 +133,54 @@ class _LoginState extends State<Login> {
               ],
             );
           }
-          return Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text("Welcome,"),
-                    Text(
-                      Auth.auth.currentUser!.displayName ?? "",
-                      style: const TextStyle(fontSize: 20),
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text("Welcome,"),
+                  Text(
+                    Auth.auth.currentUser!.displayName ?? "",
+                    style: const TextStyle(fontSize: 20),
+                  ),
+                ],
+              ),
+              Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
+                ElevatedButton(
+                    onPressed: getStarted,
+                    style: ButtonStyle(
+                      fixedSize: MaterialStatePropertyAll(
+                        Size(MediaQuery.of(context).size.width * 0.4, 50),
+                      ),
+                      shape: MaterialStatePropertyAll(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      backgroundColor: MaterialStatePropertyAll(
+                          Theme.of(context).colorScheme.secondary),
                     ),
+                    child: const Text(
+                      "Get Started",
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold),
+                    )),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text("Not you?"),
+                    TextButton(
+                      onPressed: () => Auth.signOut(),
+                      child: const Text("Log out"),
+                    )
                   ],
-                ),
-                Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      ElevatedButton(
-                          onPressed: getStarted,
-                          style: ButtonStyle(
-                            fixedSize: MaterialStatePropertyAll(Size(MediaQuery.of(context).size.width * 0.4, 50)),
-                              shape: MaterialStatePropertyAll(
-                                  RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12))),
-                              backgroundColor: MaterialStatePropertyAll(
-                                  Theme.of(context).colorScheme.secondary)),
-                          child: const Text(
-                            "Get Started",
-                            style: TextStyle(color: Colors.black),
-                          )),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text("Not you?"),
-                          TextButton(
-                            onPressed: () => Auth.signOut(),
-                            child: const Text("Log out"),
-                          )
-                        ],
-                      )
-                    ]),
-              ],
-            ),
+                )
+              ]),
+            ],
           );
         });
   }

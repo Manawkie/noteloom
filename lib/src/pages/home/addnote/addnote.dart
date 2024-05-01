@@ -44,8 +44,7 @@ class _AddNoteState extends State<AddNote> {
     _tag3Control = TextEditingController(text: noteData.readTag3 ?? "");
     _summaryControl = TextEditingController(text: noteData.summary ?? "");
 
-    _subject = noteData.readSubject ?? "Select a Subject";
-
+    _subject = noteData.readSubjectName ?? "Select a Subject";
     ftoast = FToast();
     ftoast.init(context);
 
@@ -96,6 +95,7 @@ class _AddNoteState extends State<AddNote> {
               bytes!,
               _nameControl.text,
               _subject,
+              note.readSubjectId!,
               [_tag1Control.text, _tag2Control.text, _tag3Control.text],
               _summaryControl.text);
           clearFields(note);
@@ -136,7 +136,7 @@ class _AddNoteState extends State<AddNote> {
     bytes = null;
     _nameControl.text = note.readName!;
     _summaryControl.text = note.readSummary!;
-    _subject = note.subject ?? "Select a Subject";
+    _subject = note.readSubjectName ?? "Select a Subject";
     _tag1Control.text = note.readTag1!;
     _tag2Control.text = note.readTag2!;
     _tag3Control.text = note.readTag3!;
@@ -153,8 +153,8 @@ class _AddNoteState extends State<AddNote> {
         result = note.readResult;
       }
 
-      if (note.readSubject != null) {
-        _subject = note.readSubject!;
+      if (note.readSubjectName != null) {
+        _subject = note.readSubjectName!;
       }
 
       if (subjects.isEmpty) {
@@ -169,6 +169,7 @@ class _AddNoteState extends State<AddNote> {
           _nameControl.text,
           _summaryControl.text,
           _subject,
+          note.readSubjectId!,
           _tag1Control.text,
           _tag2Control.text,
           _tag3Control.text,
@@ -221,7 +222,7 @@ class _AddNoteState extends State<AddNote> {
                     onPressed: () {
                       context.go("/note/selectsubject");
                     },
-                    child: Text(note.readSubject ?? "Select a Subject")),
+                    child: Text(note.readSubjectName ?? "Select a Subject")),
                 (result == null)
                     ? ElevatedButton(
                         onPressed: () async {

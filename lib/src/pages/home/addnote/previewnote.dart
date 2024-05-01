@@ -19,7 +19,7 @@ class _PreviewNoteState extends State<PreviewNote> {
     return Consumer<NoteProvider>(builder: (context, addnote, child) {
       final bytes = addnote.readBytes;
 
-      final subject = addnote.readSubject;
+      final subject = addnote.readSubjectName;
 
       if (kDebugMode) print(subject);
       

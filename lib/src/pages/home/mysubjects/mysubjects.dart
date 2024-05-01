@@ -52,9 +52,12 @@ class _PrioritySubjectsState extends State<PrioritySubjects> {
       final userPrioritySubjects = userdata.readPrioritySubjects;
 
       if (userPrioritySubjects.isEmpty) {
-        return const Center(
-          child: Text(
-            "You currently don't have any priority subjects.",
+        return const Padding(
+          padding: EdgeInsets.all(20.0),
+          child: Center(
+            child: Text(
+              "You currently don't have any priority subjects.\nTo add, search a subject and add as priority.",
+            ),
           ),
         );
       }
@@ -68,7 +71,7 @@ class _PrioritySubjectsState extends State<PrioritySubjects> {
       return Scaffold(
         appBar: AppBar(
             title: mySearchBar(
-                context, _searchController, "Search your Subjects")),
+                context, _searchController, "Search your Priority Subjects")),
         body: ListView.builder(
             itemCount: _filteredSubjects.length,
             itemBuilder: (context, index) {

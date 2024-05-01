@@ -1,63 +1,87 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:school_app/src/utils/firebase.dart';
+import 'package:school_app/src/utils/models.dart';
 import 'package:school_app/src/utils/providers.dart';
 
-enum MessageType { message, question, answer, comment }
+class UserMessage extends StatelessWidget {
+  const UserMessage({
+    super.key,
+    required this.message,
+  });
 
-class UserMessage extends StatefulWidget {
-  const UserMessage(
-      {super.key,
-      required this.username,
-      required this.name,
-      required this.userProfileURL,
-      required this.message,
-      required this.messageType,
-      this.questionId,
-      this.noteId});
+  final MessageModel message;
 
-  final String userProfileURL;
-  final String username;
-  final String name;
-  final String message;
-  final MessageType messageType;
-  final String? questionId;
-  final String? noteId;
+  Widget renderUpperBox(BuildContext context) {
+    if (message.messageType == MessageType.comment && message.noteId != null) {
+      final NoteModel? note =
+          context.read<QueryNotesProvider>().findNote(message.noteId!);
+      return GestureDetector(
+        onTap: () {
+          context.push('/note/${note.id}');
+        },
+        child: Container(
+            decoration: BoxDecoration(
+              color: Colors.grey[300],
+              borderRadius: BorderRadius.circular(10),
+            ),
+            padding: const EdgeInsets.all(5),
+            child: Text(
+              note!.name,
+              softWrap: false,
+              overflow: TextOverflow.ellipsis,
+            )),
+      );
+    }
 
-  @override
-  State<UserMessage> createState() => _UserMessageState();
-}
-
-class _UserMessageState extends State<UserMessage> {
-  late Alignment _alignment;
-
-  @override
-  void initState() {
-    final userData = context.read<UserProvider>();
-
-    final isCurrentUserMessage =
-        userData.readUserData!.username == widget.username;
-    super.initState();
-  }
-
-  Widget mainComponent() {
-    return Row(
-      children: [
-        CircleAvatar(
-          backgroundImage: NetworkImage(widget.userProfileURL),
-        ),
-        Column(
-          children: [
-            Text(widget.name),
-            Text(widget.message),
-          ],
-        )
-      ],
-    );
+    return Container();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container();
+    final isUserMessage = Auth.currentUser!.uid == message.senderId;
+    List<Widget> messageComponents = [
+      if (!isUserMessage)
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 5),
+          child: CircleAvatar(
+            backgroundImage: NetworkImage(message.senderUserProfileURL),
+          ),
+        ),
+      Flexible(
+        child: Column(
+          crossAxisAlignment:
+              isUserMessage ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+          children: [
+            if (!isUserMessage) Text(message.senderUsername),
+            if (message.messageType == MessageType.comment)
+              renderUpperBox(context),
+            Container(
+                padding: const EdgeInsets.all(10),
+                margin: EdgeInsetsDirectional.fromSTEB(
+                    isUserMessage ? 60 : 0, 0, isUserMessage ? 0 : 60, 0),
+                decoration: BoxDecoration(
+                  color: isUserMessage ? Colors.blue : Colors.grey,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  message.message,
+                  style: const TextStyle(color: Colors.white),
+                )),
+          ],
+        ),
+      )
+    ];
+
+    return Padding(
+      padding: const EdgeInsets.all(10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        mainAxisAlignment:
+            isUserMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
+        children: messageComponents,
+      ),
+    );
   }
 }

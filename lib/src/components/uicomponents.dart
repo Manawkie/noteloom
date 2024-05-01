@@ -87,7 +87,7 @@ Widget noteButton(NoteModel note, BuildContext context) {
         borderRadius: BorderRadius.circular(8.0),
       ),
       child: Column(
-        children: [Text(note.name), Text(note.subjectId), Text(note.author)],
+        children: [Text(note.name), Text(note.subjectName), Text(note.author)],
       ),
     ),
   );
@@ -133,7 +133,7 @@ SearchBar mySearchBar(
         Tooltip(
           message: "Clear search",
           child: IconButton(
-            icon: const Icon(Icons.clear),
+            icon: const Icon(Icons.clear, color: Colors.white,),
             onPressed: () {
               controller.clear();
             },
@@ -144,23 +144,23 @@ SearchBar mySearchBar(
         TextStyle(color: Colors.white, fontSize: 16),
       ),
       textStyle: const MaterialStatePropertyAll(
-         TextStyle(color: Colors.white, fontSize: 16),
+        TextStyle(color: Colors.white, fontSize: 16),
       ),
       backgroundColor:
           MaterialStatePropertyAll(Theme.of(context).primaryColor));
 }
 
-
-class MyTextField extends StatelessWidget {
+class MyMessageField extends StatelessWidget {
   final TextEditingController controller;
   final String hintText;
   final bool obscureText;
-  const MyTextField({
-    super.key,
-    required this.controller,
-    required this.hintText,
-    required this.obscureText,
-    });
+  final Function(String? text) onChanged;
+  const MyMessageField(
+      {super.key,
+      required this.controller,
+      required this.hintText,
+      required this.obscureText,
+      required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -169,18 +169,14 @@ class MyTextField extends StatelessWidget {
       obscureText: obscureText,
       decoration: InputDecoration(
         enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.grey.shade200)
-        ),
+            borderSide: BorderSide(color: Colors.grey.shade200)),
         focusedBorder: const OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.white)
-
+            borderSide: BorderSide(color: Colors.white)),
+        fillColor: Colors.grey[200],
+        filled: true,
+        hintText: hintText,
       ),
-      fillColor: Colors.grey[400],
-      filled: true,
-      hintText: hintText,
-      hintStyle: const TextStyle(color: Colors.white),
-      )
+      onChanged: onChanged,
     );
   }
-
 }

@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -26,7 +25,8 @@ class _EditNotePageState extends State<EditNotePage> {
 
   late CurrentNoteProvider currentNote;
 
-  String _subject = "";
+  String _subjectName = "";
+  String _subjectId = "";
 
   @override
   void initState() {
@@ -38,32 +38,35 @@ class _EditNotePageState extends State<EditNotePage> {
     _tag3Control = TextEditingController(text: currentNote.readTag3 ?? "");
     _summaryControl = TextEditingController(text: currentNote.summary ?? "");
 
-    _subject = currentNote.readSubject ?? "";
+    _subjectName = currentNote.readSubjectName ?? "";
+    _subjectId = currentNote.readSubjectId ?? "";
     super.initState();
 
     Future.microtask(() {
       currentNote.setEditing(true);
-      currentNote.setNewSubject(_subject);
-      if (kDebugMode) print("hehehe");
+      currentNote.setNewSubject(_subjectId, _subjectName);
     });
   }
 
   void resetFields() {
-    _nameControl.text = currentNote.name ?? "";
+    _nameControl.text = currentNote.readName ?? "";
     _tag1Control.text = currentNote.readTag1 ?? "";
     _tag2Control.text = currentNote.readTag2 ?? "";
     _tag3Control.text = currentNote.readTag3 ?? "";
     _summaryControl.text = currentNote.summary ?? "";
 
     setState(() {
-      _subject = currentNote.subject!;
+      _subjectName = currentNote.subjectName!;
+      _subjectId = currentNote.subjectId!;
     });
   }
 
   void setNote(CurrentNoteProvider noteData) {
+    final queryNotes = context.read<QueryNotesProvider>();
     noteData.setNote(
       _nameControl.text,
-      _subject,
+      _subjectName,
+      _subjectId,
       notesummary: _summaryControl.text,
       notetag1: _tag1Control.text,
       notetag2: _tag2Control.text,
@@ -72,22 +75,26 @@ class _EditNotePageState extends State<EditNotePage> {
 
     // reset notemodel
 
-    final universityNotes =
-        Provider.of<QueryNotesProvider>(context, listen: false).getUniversityNotes;
+    final universityNotes = queryNotes.getUniversityNotes;
 
     NoteModel editedNote =
         universityNotes.where((note) => note.id == widget.noteId).first;
 
-    editedNote.editFields(_nameControl.text, _subject, _summaryControl.text,
+    editedNote.editFields(
+        _nameControl.text,
+        _subjectId,
+        _subjectName,
+        _summaryControl.text,
         [_tag1Control.text, _tag2Control.text, _tag3Control.text]);
 
-    context.read<QueryNotesProvider>().editNote(editedNote);
+    queryNotes.editNote(editedNote);
     Database.editNote(editedNote);
   }
 
   void deleteNote() {
     final universityNotes =
-        Provider.of<QueryNotesProvider>(context, listen: false).getUniversityNotes;
+        Provider.of<QueryNotesProvider>(context, listen: false)
+            .getUniversityNotes;
 
     NoteModel editedNote =
         universityNotes.where((note) => note.id == widget.noteId).first;
@@ -103,7 +110,8 @@ class _EditNotePageState extends State<EditNotePage> {
   @override
   Widget build(BuildContext context) {
     return Consumer<CurrentNoteProvider>(builder: (context, note, child) {
-      _subject = note.readNewSubject ?? note.subject!;
+      _subjectName = note.readNewSubjectName ?? note.subjectName!;
+      _subjectId = note.readNewSubjectId ?? note.subjectId!;
       return Scaffold(
         appBar: AppBar(
           leading: IconButton(
@@ -122,7 +130,8 @@ class _EditNotePageState extends State<EditNotePage> {
             IconButton(
               onPressed: () {
                 resetFields();
-                note.setNewSubject(currentNote.subject!);
+                note.setNewSubject(
+                    currentNote.subjectId!, currentNote.subjectName!);
               },
               icon: const Icon(Icons.replay),
               tooltip: "Reset Fields",
@@ -157,7 +166,7 @@ class _EditNotePageState extends State<EditNotePage> {
               onPressed: () {
                 context.push("/addnote/selectsubject");
               },
-              child: Text(_subject)),
+              child: Text(_subjectName)),
           myFormField(
             label: "Tag 1",
             controller: _tag1Control,

@@ -1,5 +1,3 @@
-import 'dart:js_interop';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:school_app/src/components/uicomponents.dart';
@@ -16,7 +14,7 @@ class SavedNotesPage extends StatefulWidget {
 class _SavedNotesPageState extends State<SavedNotesPage> {
   late SearchController _searchController;
   List<NoteModel?> _allSavedNoteIds = [];
-  List<NoteModel?> _filteredNotes = [];
+  final List<NoteModel?> _filteredNotes = [];
 
   @override
   void initState() {
@@ -44,8 +42,8 @@ class _SavedNotesPageState extends State<SavedNotesPage> {
 
       return false;
     });
-
-    _filteredNotes = filteredNotes.toList();
+    _filteredNotes.clear();
+    _filteredNotes.addAll(filteredNotes);
   }
 
   @override
@@ -56,7 +54,7 @@ class _SavedNotesPageState extends State<SavedNotesPage> {
         return const Scaffold(
           body: Center(
             child: Text(
-              "You currently don't have any saved notes.",
+              "You currently don't have any saved notes.\n To add, search a note and save it.",
             ),
           ),
         );

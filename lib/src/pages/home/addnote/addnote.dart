@@ -23,7 +23,8 @@ class _AddNoteState extends State<AddNote> {
   late TextEditingController _tag1Control;
   late TextEditingController _tag2Control;
   late TextEditingController _tag3Control;
-  String _subject = "";
+  String _subjectName = "";
+  String _subjectId = "";
   late TextEditingController _summaryControl;
 
   List<String> subjects = [];
@@ -44,7 +45,8 @@ class _AddNoteState extends State<AddNote> {
     _tag3Control = TextEditingController(text: noteData.readTag3 ?? "");
     _summaryControl = TextEditingController(text: noteData.summary ?? "");
 
-    _subject = noteData.readSubjectName ?? "Select a Subject";
+    _subjectName = noteData.readSubjectName ?? "Select a Subject";
+    _subjectId = noteData.readSubjectId ?? "";
     ftoast = FToast();
     ftoast.init(context);
 
@@ -86,7 +88,7 @@ class _AddNoteState extends State<AddNote> {
     });
 
     try {
-      if (_subject == "Select a Subject" || !subjects.contains(_subject)) {
+      if (_subjectName == "Select a Subject" || !subjects.contains(_subjectName)) {
         throw ErrorDescription("Please select a Subject first");
       }
       if (_formkey.currentState!.validate()) {
@@ -94,8 +96,8 @@ class _AddNoteState extends State<AddNote> {
           final newNote = await Database.submitFile(
               bytes!,
               _nameControl.text,
-              _subject,
-              note.readSubjectId!,
+              _subjectId,
+              _subjectName,
               [_tag1Control.text, _tag2Control.text, _tag3Control.text],
               _summaryControl.text);
           clearFields(note);
@@ -136,7 +138,8 @@ class _AddNoteState extends State<AddNote> {
     bytes = null;
     _nameControl.text = note.readName!;
     _summaryControl.text = note.readSummary!;
-    _subject = note.readSubjectName ?? "Select a Subject";
+    _subjectName = note.readSubjectName ?? "Select a Subject";
+    _subjectId = note.readSubjectId ?? "";
     _tag1Control.text = note.readTag1!;
     _tag2Control.text = note.readTag2!;
     _tag3Control.text = note.readTag3!;
@@ -154,7 +157,11 @@ class _AddNoteState extends State<AddNote> {
       }
 
       if (note.readSubjectName != null) {
-        _subject = note.readSubjectName!;
+        _subjectName = note.readSubjectName!;
+      }
+
+      if (note.readSubjectId != null) {
+        _subjectId = note.readSubjectId!;
       }
 
       if (subjects.isEmpty) {
@@ -168,8 +175,8 @@ class _AddNoteState extends State<AddNote> {
           result,
           _nameControl.text,
           _summaryControl.text,
-          _subject,
-          note.readSubjectId!,
+          _subjectName,
+          _subjectId,
           _tag1Control.text,
           _tag2Control.text,
           _tag3Control.text,
@@ -220,7 +227,7 @@ class _AddNoteState extends State<AddNote> {
                     }),
                 ElevatedButton(
                     onPressed: () {
-                      context.go("/note/selectsubject");
+                      context.go("/addnote/selectsubject");
                     },
                     child: Text(note.readSubjectName ?? "Select a Subject")),
                 (result == null)

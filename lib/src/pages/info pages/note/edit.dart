@@ -143,9 +143,12 @@ class _EditNotePageState extends State<EditNotePage> {
             )
           ],
         ),
-        body: Container(
-          padding: const EdgeInsets.all(8),
-          child: renderFormFields(),
+        body: Center(
+          child: Container(
+            height: MediaQuery.of(context).size.height * 0.8,
+            padding: const EdgeInsets.all(20),
+            child: renderFormFields(),
+          ),
         ),
       );
     });

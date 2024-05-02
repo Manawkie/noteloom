@@ -60,7 +60,7 @@ class _SelectSubjectPageState extends State<SelectSubjectPage> {
                   onPressed: () {
                     context.go("/addnote");
                   },
-                  icon: const Icon(Icons.arrow_back_ios)),
+                  icon: const Icon(Icons.arrow_back_ios_new)),
               title: const Text("Select a Subject"),
               floating: true,
               snap: true,

@@ -186,9 +186,9 @@ class NoteProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setSubject(String subjectId, String subjectName) {
-    subjectId = subjectId;
-    subjectName = subjectName;
+  void setSubject(String newSubjectId, String newSubjectName) {
+    subjectId = newSubjectId;
+    subjectName = newSubjectName;
     notifyListeners();
   }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:school_app/src/pages/settings/settings.dart';
 import 'package:school_app/src/utils/firebase.dart';
 import 'package:school_app/src/utils/providers.dart';
 
@@ -31,16 +32,41 @@ class ProfilePage extends StatelessWidget {
           return SingleChildScrollView(
               child: Column(
             children: [
-              Hero(
-                  tag: Auth.currentUser!.uid,
-                  child: CircleAvatar(
-                    backgroundImage: NetworkImage(Auth.currentUser!.photoURL!),
-                  ))
-            ],
-          ));
-        },
-      ),
-    );
+              const SizedBox(height: 40),
+
+              CircleAvatar(radius: 100,
+              backgroundImage: NetworkImage(Auth.currentUser!.photoURL!),),
+              const SizedBox(height: 10,),
+              const Text(
+                "Test name",
+              style: TextStyle(fontSize: 30 ),),// current user name dapat
+              const Text(
+                "test_email@gmail.com",
+                style: TextStyle(fontSize: 20)),// current user ermail
+                // button for editing profile
+              // const SizedBox(
+              //   width: 200,
+              //   child: ElevatedButton(onPressed: () {sa settings dapat}, 
+              //   style:  ElevatedButton.styleFrom(
+              //   backgroundColor: Colors.blue, side: BorderSide.none, shape:  StadiumBorder() ),
+              //   child: Text('Edit Profile', ))
+              // ),
+              const Center()
+              ]),
+              // // Hero(
+              // //     tag: Auth.currentUser!.uid,
+              // //     child: CircleAvatar(
+              // //       backgroundImage: NetworkImage(Auth.currentUser!.photoURL!),
+              //     ))
+      );
+      }
+      )
+      );
+    
+    
+
+
+         
   }
 
   // Widget _renderUserNotes() {

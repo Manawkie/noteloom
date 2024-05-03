@@ -45,7 +45,7 @@ class _IntroPageState extends State<IntroPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.blue.shade700,
+        backgroundColor: Colors.white70,
         body: SizedBox(
           height: MediaQuery.of(context).size.height,
           width: MediaQuery.of(context).size.width,
@@ -78,51 +78,60 @@ class _IntroPageState extends State<IntroPage> {
                         child: Image.asset("assets/images/app/introimage.png")
                       ))),
               Positioned(
-                top: 0,
-                left: 0,
-                child: AnimatedOpacity(
-                  opacity: isOnLogin ? 0 : 1,
-                  duration: const Duration(milliseconds: 500),
-                  curve: Curves.ease,
-                  child: SafeArea(
-                    child: Container(
-                      height: 300,
-                      margin: const EdgeInsets.only(left: 20, top: 20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            "Welcome to",
-                            style: TextStyle(fontSize: 20, color: Colors.white),
-                          ),
-                          const Text(
-                            "Note Loom",
-                            style: TextStyle(
-                                fontSize: 50, fontWeight: FontWeight.bold, color: Colors.white),
-                          ),
-                          const SizedBox(
-                            height: 20,
-                          ),
-                          Text(
-                            "Find and share your notes\nwitin your university.",
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                          const SizedBox(
-                            height: 40,
-                          ),
-                          ElevatedButton(
-                              child: const Text("Get Started", ),
-                              onPressed: () {
-                                setState(() {
-                                  isOnLogin = !isOnLogin;
-                                });
-                              }),
-                        ],
-                      ),
-                    ),
-                  ),
+  top: 0,
+  left: 0,
+  child: AnimatedOpacity(
+    opacity: isOnLogin ? 0 : 1,
+    duration: const Duration(milliseconds: 500),
+    curve: Curves.ease,
+    child: SafeArea(
+      child: Container(
+        height: 300,
+        margin: const EdgeInsets.only(left: 20, top: 20, right: 20), // Adjusted margin to include right
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              "Welcome to",
+              style: TextStyle(fontSize: 30, color: Colors.black),
+            ),
+            const SizedBox(height: 20),
+            Image.asset(
+              "assets/images/app/logoNoteloom.png",
+              height: 120,
+              fit: BoxFit.contain, // Ensures the image fits within the bounds
+            ),
+            const SizedBox(height: 20),
+            Text(
+              "Find and share your notes\nwithin your university.",
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.black, fontSize: 18, fontWeight: FontWeight.w300),
+            ),
+            const SizedBox(height: 17),
+            ElevatedButton(
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all(Color.fromARGB(255, 67, 178, 248)),
+                overlayColor: MaterialStateProperty.resolveWith<Color?>(
+                  (Set<MaterialState> states) {
+                    if (states.contains(MaterialState.hovered)) {
+                      return Colors.grey.shade900; // Dark hover effect
+                    }
+                    return null; // Defer to the widget's default.
+                  },
                 ),
               ),
+              child: const Text("Get Started", style: TextStyle(color: Color.fromARGB(255, 0, 0, 0))),
+              onPressed: () {
+                setState(() {
+                  isOnLogin = !isOnLogin;
+                });
+              }
+            ),
+          ],
+        ),
+      ),
+    ),
+  ),
+),
               AnimatedPositioned(
                 bottom:
                     isOnLogin ? 0 : -MediaQuery.of(context).size.height * 0.7,

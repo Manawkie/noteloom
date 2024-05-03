@@ -19,13 +19,13 @@ dependencies:
   flutter_animate: ^4.5.0
   flutter_localizations:
     sdk: flutter
-  go_router: ^13.2.0
+  go_router: ^14.0.2
   loading_indicator: ^3.1.1
   animated_bottom_navigation_bar: ^1.3.3
   flutter_svg: ^2.0.10+1
   file_picker: ^8.0.0+1
   firebase_storage: ^11.6.11
-  syncfusion_flutter_pdfviewer: ^24.2.8
+  syncfusion_flutter_pdfviewer: ^25.1.42
   provider: ^6.1.2
   shared_preferences: ^2.2.2
   liquid_pull_to_refresh: ^3.0.1

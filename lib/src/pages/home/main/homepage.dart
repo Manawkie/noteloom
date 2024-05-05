@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:school_app/src/components/uicomponents.dart';
 import 'package:school_app/src/utils/providers.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -44,17 +45,27 @@ class _HomePageState extends State<HomePage> {
         body: CustomScrollView(
       slivers: [
         SliverAppBar(
-          title: overScrolled ? const Text("Hello") : null,
-          backgroundColor: Theme.of(context).primaryColor,
           expandedHeight: 150,
-          flexibleSpace: !overScrolled
-              ? const FlexibleSpaceBar(
-                  title: Text(
+          flexibleSpace: FlexibleSpaceBar(
+            background: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: [
+                  Color.fromRGBO(95, 10, 215, 1),
+                  Color.fromRGBO(7, 156, 182, 1),
+          ],
+        ),
+              ),
+            ),
+            title: overScrolled
+                ? const Text("Hello", style: TextStyle(color: Colors.white))
+                : Text(
                     "Welcome to Note Loom!",
-                    style: TextStyle(fontSize: 20, color: Colors.white),
+                    style: GoogleFonts.ubuntu(fontSize: 20, color: Colors.white),
                   ),
-                )
-              : Container(),
+          ),
         ),
         SliverToBoxAdapter(
           child: Container(

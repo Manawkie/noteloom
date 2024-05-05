@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-
+import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:school_app/src/components/uicomponents.dart';
 import 'package:school_app/src/utils/firebase.dart';
@@ -44,54 +44,111 @@ class _LoginState extends State<Login> {
         stream: Auth.auth.userChanges(),
         builder: (context, snapshot) {
           return Scaffold(
-              body: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text("Log in with your"),
-                    Container(
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: Colors.grey.shade300),
-                      margin: const EdgeInsets.symmetric(vertical: 20),
-                      padding: const EdgeInsets.all(10),
-                      child: Text(
-                        _universityName,
-                        style: const TextStyle(
-                          fontSize: 30,
+              body: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color.fromRGBO(95, 10, 215, 1),
+                  Color.fromRGBO(7, 156, 182, 1),
+                ],
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Log in with your",
+                        style: GoogleFonts.ubuntu(
+                          color: Colors
+                              .white, // Adjust the color to match the background gradient
+                          fontSize: 16,
                         ),
-                        textAlign: TextAlign.center,
                       ),
-                    ),
-                  ],
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    context.go("/");
-                  },
-                  child: const Text("Return to Home Page"),
-                ),
-                if (snapshot.data == null)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 20),
-                    child: Center(
-                      child: ElevatedButton(
-                        onPressed: _logIn,
-                        child: const Text("Log In"),
+                      Container(
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: Colors.grey.shade300,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.2),
+                                spreadRadius: 1,
+                                blurRadius: 10,
+                                offset: const Offset(
+                                    0, 3), // changes position of shadow
+                              ),
+                            ]),
+                        margin: const EdgeInsets.symmetric(vertical: 20),
+                        padding: const EdgeInsets.all(10),
+                        child: Text(
+                          _universityName,
+                          style: GoogleFonts.ubuntu(
+                            fontSize: 30,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
                       ),
-                    ),
+                    ],
                   ),
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.3,
-                  child: _loginState(snapshot),
-                ),
-              ],
+                  ElevatedButton(
+                    onPressed: () {
+                      context.go("/");
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color.fromRGBO(255, 255, 255,
+                          1), // Adjust the color to match your gradient
+                      shadowColor: Colors.black.withOpacity(1),
+                      elevation: 10,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: Text("Return to Home Page",
+                        style: GoogleFonts.ubuntu(
+                          color: Colors.black,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        )),
+                  ),
+                  if (snapshot.data == null)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 20),
+                      child: Center(
+                        child: ElevatedButton(
+                          onPressed: _logIn,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color.fromARGB(255, 255, 255,
+                                255), // Adjust the color to match your gradient
+                            shadowColor: Colors.black.withOpacity(1),
+                            elevation: 10,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: Text("Log In",
+                              style: GoogleFonts.ubuntu(
+                                color: Colors.black,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              )),
+                        ),
+                      ),
+                    ),
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.3,
+                    child: _loginState(snapshot),
+                  ),
+                ],
+              ),
             ),
           ));
         });
@@ -113,20 +170,43 @@ class _LoginState extends State<Login> {
         future: Auth.isUserValid(snapshot.data),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: Text("Loading..."),
+            return Center(
+              child: Text("Loading...",
+                style: GoogleFonts.ubuntu(
+                  color: Colors.white, // Adjust the color to match the background gradient
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                )),
             );
           }
           if (snapshot.data == false) {
             return Column(
               children: [
-                const Text(
-                    "You are not signed in with your school email.\nOr your school may not yet be supported."),
+                Text(
+                    "You are not signed in with your school email.\nOr your school may not yet be supported.",
+                    style: GoogleFonts.ubuntu(
+                      color: Colors.white, // Adjust the color to match the background gradient
+                      fontSize: 16,
+                      fontWeight: FontWeight.normal,
+                    )),
                 ElevatedButton(
                     onPressed: () {
                       Auth.signOut();
                     },
-                    child: const Text("Sign Out"))
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color.fromRGBO(255, 255, 255, 0.8), // Semi-transparent white
+                      shadowColor: Colors.black.withOpacity(0.5),
+                      elevation: 10,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: Text("Sign Out",
+                        style: GoogleFonts.ubuntu(
+                          color: Colors.black,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        )))
               ],
             );
           }
@@ -137,10 +217,20 @@ class _LoginState extends State<Login> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text("Welcome,"),
+                  Text("\t \t \t \t \t   Welcome",
+                      style: GoogleFonts.ubuntu(
+                        color: Colors
+                            .white, // Adjust the color to match the background gradient
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      )),
                   Text(
                     Auth.auth.currentUser!.displayName ?? "",
-                    style: const TextStyle(fontSize: 20),
+                    style: GoogleFonts.ubuntu(
+                      color: Colors
+                          .white, // Adjust the color to match the background gradient
+                      fontSize: 20,
+                    ),
                   ),
                 ],
               ),
@@ -159,20 +249,35 @@ class _LoginState extends State<Login> {
                       backgroundColor: MaterialStatePropertyAll(
                           Theme.of(context).colorScheme.secondary),
                     ),
-                    child: const Text(
-                      "Get Started",
-                      style: TextStyle(
+                    child: Text("Get Started",
+                        style: GoogleFonts.ubuntu(
                           color: Colors.black,
                           fontSize: 20,
-                          fontWeight: FontWeight.bold),
-                    )),
+                          fontWeight: FontWeight.bold,
+                        ))),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text("Not you?"),
+                    Text(
+                      "Not you?",
+                      style: GoogleFonts.ubuntu(
+                        color: Colors.black,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold
+                        
+                      ),
+                    ),
                     TextButton(
                       onPressed: () => Auth.signOut(),
-                      child: const Text("Log out"),
+                      child: Text(
+                        "Log out",
+                        style: GoogleFonts.ubuntu(
+                          color: const Color.fromARGB(255, 255, 255, 255),
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          
+                        ),
+                      ),
                     )
                   ],
                 )

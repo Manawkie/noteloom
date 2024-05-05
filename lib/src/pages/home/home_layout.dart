@@ -42,10 +42,6 @@ class _PageWithDrawerState extends State<PageWithDrawer>
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          leading: IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () => context.go("/addnote"),
-          ),
           actions: [
             IconButton(
                 onPressed: () {
@@ -64,7 +60,7 @@ class _PageWithDrawerState extends State<PageWithDrawer>
         bottomNavigationBar: AnimatedBottomNavigationBar.builder(
           notchAndCornersAnimation: _animationController,
           blurEffect: true,
-          itemCount: 4,
+          itemCount: icons.length,
           gapLocation: GapLocation.none,
           tabBuilder: (index, isActive) {
             return Padding(
@@ -75,9 +71,15 @@ class _PageWithDrawerState extends State<PageWithDrawer>
             );
           },
           activeIndex: _bottomNavIndex,
-          onTap: (index) => setState(() {
-            _bottomNavIndex = index;
-          }),
+          onTap: (index) {
+            if (index == 2) {
+              context.go("/addnote");
+            } else {
+              setState(() {
+                _bottomNavIndex = index;
+              });
+            }
+          },
         ),
         body: IndexedStack(
           index: _bottomNavIndex,
@@ -88,8 +90,9 @@ class _PageWithDrawerState extends State<PageWithDrawer>
   List icons = [
     const Icon(Icons.home),
     const Icon(Icons.search),
-    getSvgIcon("assets/images/app/icons/subjects.svg"),
-    getSvgIcon("assets/images/app/icons/notes.svg")
+    const Icon(Icons.add),
+    const Icon(Icons.star),
+    const Icon(Icons.book),
   ];
 
   Widget getPage() {
@@ -99,6 +102,7 @@ class _PageWithDrawerState extends State<PageWithDrawer>
   final List<Widget> _pages = [
     const HomePage(),
     const SearchPage(),
+    Container(),
     const SavedNotesPage(),
     const PrioritySubjects(),
   ];

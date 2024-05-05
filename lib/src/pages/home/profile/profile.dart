@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:school_app/src/pages/settings/settings.dart';
 import 'package:school_app/src/utils/firebase.dart';
 import 'package:school_app/src/utils/providers.dart';
 
@@ -28,17 +27,16 @@ class ProfilePage extends StatelessWidget {
         ],
       ),
       body: Consumer<UserProvider>(
-        builder: (context, value, child) {
+        builder: (context, user, child) {
           return SingleChildScrollView(
               child: Column(
             children: [
               const SizedBox(height: 40),
-
               CircleAvatar(radius: 100,
               backgroundImage: NetworkImage(Auth.currentUser!.photoURL!),),
               const SizedBox(height: 10,),
-              const Text(
-                "Test name",
+              Text(
+                user.readUserData!.username,
               style: TextStyle(fontSize: 30 ),),// current user name dapat
               const Text(
                 "test_email@gmail.com",

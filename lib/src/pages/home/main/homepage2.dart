@@ -62,8 +62,9 @@ class _MainHomePageState extends State<MainHomePage> {
                   );
                 }
 
-                return SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.2,
+                return Container(
+                  padding: EdgeInsets.symmetric(vertical: 20),
+                  height: MediaQuery.of(context).size.height * 0.25,
                   child: ListView.builder(
                       itemCount: _recents!.length,
                       scrollDirection: Axis.horizontal,
@@ -72,6 +73,19 @@ class _MainHomePageState extends State<MainHomePage> {
                 );
               }),
             ),
+            const SliverToBoxAdapter(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Suggested Notes",
+                    style: TextStyle(fontSize: 30),
+                  ),
+                  Text("Here are suggested notes based on your saved subjects.")
+                ],
+              ),
+            ),
+            
           ],
         ),
       ),
@@ -101,9 +115,7 @@ class _MainHomePageState extends State<MainHomePage> {
 Widget _buildRecentSubject(SubjectModel subject, BuildContext context) {
   return GestureDetector(
     onTap: () {
-      context.pushNamed("subjectNotes", pathParameters: {
-        "id": subject.id!,
-      });
+      context.push("/subject/${subject.id}");
     },
     child: Container(
       padding: const EdgeInsets.all(10),
@@ -123,13 +135,25 @@ Widget _buildRecentSubject(SubjectModel subject, BuildContext context) {
               children: [Text(subject.subject), Text(subject.subjectCode)],
             ),
           ),
-          IconButton(
-            onPressed: () {
-              context.pushNamed("discussions", pathParameters: {
-                "id": subject.id!,
-              });
-            },
-            icon: const Icon(Icons.message),
+          Row(
+            children: [
+              IconButton(
+                onPressed: () {
+                  context.pushNamed("discussions", pathParameters: {
+                    "id": subject.id!,
+                  });
+                },
+                icon: const Icon(Icons.message),
+              ),
+              IconButton(
+                  onPressed: () {
+                    context.pushNamed(
+                      "subjectNotes",
+                      pathParameters: {"id": subject.id!},
+                    );
+                  },
+                  icon: const Icon(Icons.book))
+            ],
           )
         ],
       ),

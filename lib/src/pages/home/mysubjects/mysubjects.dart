@@ -73,17 +73,7 @@ class _PrioritySubjectsState extends State<PrioritySubjects> {
 
       return Scaffold(
         appBar: AppBar(
-            flexibleSpace: Container(
-                decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-                colors: [
-                  Color.fromRGBO(95, 10, 215, 1),
-                  Color.fromRGBO(7, 156, 182, 1),
-                ],
-              ),
-            )),
+          backgroundColor: Theme.of(context).primaryColor,
             title: mySearchBar(
                 context, _searchController, "Search your Priority Subjects")),
         body: ListView.builder(
@@ -96,7 +86,7 @@ class _PrioritySubjectsState extends State<PrioritySubjects> {
                 );
               }
 
-              return subjectButton(subject, context);
+              return subjectButton(subject, context, Colors.white);
             }),
       );
     });

@@ -49,52 +49,54 @@ class _SavedNotesPageState extends State<SavedNotesPage> {
   @override
   Widget build(BuildContext context) {
     return Consumer2<UserProvider, QueryNotesProvider>(
-        builder: (context, userdata, notes, child) {
-      if (userdata.readSavedNoteIds.isEmpty) {
-        return const Scaffold(
-          backgroundColor: Colors.white,
-          body: Center(
-            child: Text(
-              "You currently don't have any saved notes.\n To add, search a note and save it.",
-            ),
-          ),
-        );
-      }
-
-      _allSavedNoteIds = userdata.readSavedNoteIds
-          .map((savedNoteId) => notes.findNote(savedNoteId))
-          .toList();
-
-      filterResults();
-
-      return Scaffold(
-          appBar: AppBar(
-            flexibleSpace: Container(
-                decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-                colors: [
-                  Color.fromRGBO(95, 10, 215, 1),
-                  Color.fromRGBO(7, 156, 182, 1),
-                ],
+      builder: (context, userdata, notes, child) {
+        if (userdata.readSavedNoteIds.isEmpty) {
+          return const Scaffold(
+            backgroundColor: Colors.white,
+            body: Center(
+              child: Text(
+                "You currently don't have any saved notes.\n To add, search a note and save it.",
               ),
-            )),
+            ),
+          );
+        }
+
+        _allSavedNoteIds = userdata.readSavedNoteIds
+            .map((savedNoteId) => notes.findNote(savedNoteId))
+            .toList();
+
+        filterResults();
+
+        return Scaffold(
+          backgroundColor: Theme.of(context).primaryColor,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
             title: mySearchBar(context, _searchController, "Search Notes"),
           ),
-          body: ListView.builder(
-              itemBuilder: (context, index) {
-                NoteModel? note = _filteredNotes[index];
+          body: Container(
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(
+                top: Radius.circular(45),
+              ),
+            ),
+            margin: const EdgeInsets.only(top:20),
+            padding: const EdgeInsets.all(20),
+            child: ListView.builder(
+                itemBuilder: (context, index) {
+                  NoteModel? note = _filteredNotes[index];
+                  if (note == null) {
+                    return const Center(
+                      child: Text("Note not found"),
+                    );
+                  }
 
-                if (note == null) {
-                  return const Center(
-                    child: Text("Note not found"),
-                  );
-                }
-
-                return noteButton(note, context);
-              },
-              itemCount: _filteredNotes.length));
-    });
+                  return noteButton(note, context, Colors.white);
+                },
+                itemCount: _filteredNotes.length),
+          ),
+        );
+      },
+    );
   }
 }

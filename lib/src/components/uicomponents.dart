@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:school_app/src/utils/models.dart';
@@ -72,7 +73,7 @@ Widget myToast(ThemeData theme, String text) {
 
 // notes / subject button
 
-Widget noteButton(NoteModel note, BuildContext context) {
+Widget noteButton(NoteModel note, BuildContext context, Color color) {
   return GestureDetector(
     onTap: () {
       GoRouter.of(context).push('/note/${note.id}');
@@ -80,20 +81,60 @@ Widget noteButton(NoteModel note, BuildContext context) {
     child: Container(
       width: double.infinity,
       height: 150,
-      margin: const EdgeInsets.all(10),
+      margin: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: Colors.grey),
-        borderRadius: BorderRadius.circular(8.0),
+        color: color,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.3),
+            spreadRadius: 2,
+            blurRadius: 5,
+            offset: const Offset(0, 2), // changes position of shadow
+          ),
+        ],
       ),
-      child: Column(
-        children: [Text(note.name), Text(note.subjectName), Text(note.author)],
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(
+                    note.name,
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey.shade700),
+                  ),
+                  Text(note.subjectName, style: const TextStyle(fontSize: 14)),
+                ]),
+                Text(note.author, style: const TextStyle(fontSize: 12),)
+              ],
+            ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(note.peopleLiked?.length.toString() ?? "0"),
+              const SizedBox(width: 10),
+              const Icon(Icons.thumb_up_off_alt)
+            ],
+          )
+        ],
       ),
     ),
   );
 }
 
-Widget subjectButton(SubjectModel subjectModel, BuildContext context) {
+Widget subjectButton(
+    SubjectModel subjectModel, BuildContext context, Color color) {
   return GestureDetector(
     onTap: () {
       GoRouter.of(context).push('/subject/${subjectModel.id}');
@@ -102,9 +143,16 @@ Widget subjectButton(SubjectModel subjectModel, BuildContext context) {
       height: 150,
       margin: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: Colors.grey),
-        borderRadius: BorderRadius.circular(8.0),
+        borderRadius: BorderRadius.circular(12),
+        color: color,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.4),
+            spreadRadius: 2,
+            blurRadius: 5,
+            offset: const Offset(0, 2), // changes position of shadow
+          ),
+        ],
       ),
       child: Center(
         child: Column(
@@ -130,7 +178,7 @@ SearchBar mySearchBar(
     shape: const MaterialStatePropertyAll(
       RoundedRectangleBorder(
         borderRadius: BorderRadius.all(
-          Radius.circular(8),
+          Radius.circular(50),
         ),
       ),
     ),
@@ -140,7 +188,7 @@ SearchBar mySearchBar(
         child: IconButton(
           icon: const Icon(
             Icons.clear,
-            color: Colors.white,
+            color: Colors.black,
           ),
           onPressed: () {
             controller.clear();
@@ -149,13 +197,13 @@ SearchBar mySearchBar(
       ),
     ],
     hintStyle: const MaterialStatePropertyAll(
-      TextStyle(color: Colors.white, fontSize: 16),
+      TextStyle(color: Colors.black, fontSize: 16),
     ),
     textStyle: const MaterialStatePropertyAll(
-      TextStyle(color: Colors.white, fontSize: 16),
+      TextStyle(color: Colors.black, fontSize: 16),
     ),
-    backgroundColor: const MaterialStatePropertyAll(
-      Color.fromRGBO(0, 0, 0, 0),
+    backgroundColor: MaterialStatePropertyAll(
+      Theme.of(context).colorScheme.tertiary,
     ),
   );
 }

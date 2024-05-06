@@ -44,20 +44,10 @@ class _PageWithDrawerState extends State<PageWithDrawer>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
         elevation: 0,
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-              colors: [
-                Color.fromRGBO(95, 10, 215, 1),
-                Color.fromRGBO(7, 156, 182, 1),
-              ],
-            ),
-          ),
-        ),
+        backgroundColor: Theme.of(context).primaryColor,
         actions: [
           IconButton(
               onPressed: () {
@@ -95,26 +85,10 @@ class _PageWithDrawerState extends State<PageWithDrawer>
           }
         },
       ),
-      body: Stack(children: [
-        Container(
-          height: double.infinity,
-          width: double.infinity,
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-              colors: [
-                Color.fromRGBO(95, 10, 215, 1),
-                Color.fromRGBO(7, 156, 182, 1),
-              ],
-            ),
-          ),
-        ),
-        IndexedStack(
-          index: _bottomNavIndex,
-          children: _pages,
-        ),
-      ]),
+      body: IndexedStack(
+        index: _bottomNavIndex,
+        children: _pages,
+      ),
     );
   }
 

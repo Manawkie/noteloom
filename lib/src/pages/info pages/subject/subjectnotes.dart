@@ -79,7 +79,7 @@ class _SubjectNotesPageState extends State<SubjectNotesPage> {
               itemBuilder: (context, index) {
                 final NoteModel note = _filteredNotes[index];
       
-                return noteButton(note, context);
+                return noteButton(note, context, Colors.white);
               },
             ),
           );

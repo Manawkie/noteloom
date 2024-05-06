@@ -106,13 +106,15 @@ class _HomePageState extends State<HomePage> {
       final type = result.split("/")[0];
       final id = result.split("/")[1];
 
+      final color = Colors.white;
+
       if (type == "notes") {
         final displayedNote = notes.findNote(id);
-        if (displayedNote != null) return noteButton(displayedNote, context);
+        if (displayedNote != null) return noteButton(displayedNote, context, color);
       } else if (type == "subjects") {
         final displayedSubject = notes.findSubject(id);
         if (displayedSubject != null) {
-          return subjectButton(displayedSubject, context);
+          return subjectButton(displayedSubject, context, color);
         }
       }
       return Container();

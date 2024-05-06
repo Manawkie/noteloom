@@ -76,11 +76,8 @@ class _SearchPageState extends State<SearchPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<QueryNotesProvider>(
-        builder: (context, notes, child) {
+    return Consumer<QueryNotesProvider>(builder: (context, notes, child) {
       if (notes.getUniversityNotes.isEmpty) {
-        
-
         return Scaffold(
           body: Center(
             child: Column(
@@ -94,62 +91,51 @@ class _SearchPageState extends State<SearchPage> {
         );
       }
 
-
       _allNotes = notes.getUniversityNotes;
       _allSubjects = notes.getUniversitySubjects;
 
       filterResults();
-
       return Scaffold(
-          backgroundColor: Theme.of(context).colorScheme.primary,
-          body: LiquidPullToRefresh(
-            color: Theme.of(context).colorScheme.primary,
-            showChildOpacityTransition: false,
-            onRefresh: () async {
-              notes.getUniversityNotes;
-            },
-            child: CustomScrollView(
-              physics: const BouncingScrollPhysics(
-                  parent: AlwaysScrollableScrollPhysics()),
-              slivers: [
-                SliverAppBar(
-                  flexibleSpace: Container(
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.centerLeft,
-                        end: Alignment.centerRight,
-                        colors: [
-                          Color.fromRGBO(95, 10, 215, 1),
-                          Color.fromRGBO(7, 156, 182, 1),
-                        ],
-                      ),
-                    )
+          backgroundColor: Theme.of(context).primaryColor,
+          body: CustomScrollView(
+            slivers: [
+              SliverAppBar(
+                expandedHeight: 100,
+                stretch: false,
+                flexibleSpace: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 5),
+                    child: mySearchBar(
+                        context, _searchController, "Search Note or Subject"),
                   ),
-                  title: mySearchBar(
-                      context, _searchController, "Search Note or Subject"),
                 ),
+                backgroundColor: Theme.of(context).primaryColor,
+              ),
+              SliverToBoxAdapter(
+                child: Container(
+                  decoration: const BoxDecoration(
+                      color: Colors.white,
+                      borderRadius:
+                          BorderRadius.vertical(top: Radius.circular(45))),
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: renderNotes(),
+                  ),
+                ),
+              ),
+              if (!_filteredResults
+                  .any((result) => result.runtimeType == SubjectModel))
                 SliverToBoxAdapter(
-                  child: ColoredBox(
-                    color: Colors.white,
-                    child: Column(
-                      children: renderNotes(),
-                    ),
-                  ),
+                  child: noSubjectButton(),
                 ),
-                if (!_filteredResults
-                    .any((result) => result.runtimeType == SubjectModel))
-                  SliverToBoxAdapter(
-                    child: noSubjectButton(),
-                  ),
-                const SliverFillRemaining(
-                  fillOverscroll: true,
-                  hasScrollBody: false,
-                  child: ColoredBox(
-                    color: Colors.white,
-                  ),
+              const SliverFillRemaining(
+                fillOverscroll: true,
+                hasScrollBody: false,
+                child: ColoredBox(
+                  color: Colors.white,
                 ),
-              ],
-            ),
+              ),
+            ],
           ));
     });
   }
@@ -181,18 +167,27 @@ class _SearchPageState extends State<SearchPage> {
     );
   }
 
+  List<Color> colors = const [
+    Color.fromRGBO(255, 242, 218, 1),
+    Color.fromRGBO(253, 233, 238, 1),
+    Color.fromRGBO(232, 243, 243, 1),
+    Color.fromRGBO(254, 254, 240, 1),
+  ];
+
   List<Widget> renderNotes() {
     return List.generate(
       _filteredResults.length,
       (index) {
         final dynamic result = _filteredResults[index];
 
+        final color = colors[index % colors.length];
+
         if (result.runtimeType == NoteModel) {
-          return noteButton(result as NoteModel, context);
+          return noteButton(result as NoteModel, context, color);
         }
 
         if (result.runtimeType == SubjectModel) {
-          return subjectButton(result as SubjectModel, context);
+          return subjectButton(result as SubjectModel, context, color);
         }
 
         return Container();

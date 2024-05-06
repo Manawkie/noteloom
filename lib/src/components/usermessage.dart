@@ -14,28 +14,30 @@ class UserMessage extends StatelessWidget {
   final MessageModel message;
 
   Widget renderUpperBox(BuildContext context) {
-    if (message.messageType == MessageType.comment && message.noteId != null) {
-      final NoteModel? note =
-          context.read<QueryNotesProvider>().findNote(message.noteId!);
-      return GestureDetector(
-        onTap: () {
-          context.push('/note/${note.id}');
-        },
-        child: Container(
-            decoration: BoxDecoration(
-              color: Colors.grey[300],
-              borderRadius: BorderRadius.circular(10),
-            ),
-            padding: const EdgeInsets.all(5),
-            child: Text(
-              note!.name,
-              softWrap: false,
-              overflow: TextOverflow.ellipsis,
-            )),
-      );
+
+    if (message.noteId == null || message.noteId == "") {
+      return const SizedBox.shrink();
     }
 
-    return Container();
+    final NoteModel? note =
+        context.read<QueryNotesProvider>().findNote(message.noteId!);
+
+    return GestureDetector(
+      onTap: () {
+        context.push('/note/${note.id}');
+      },
+      child: Container(
+          decoration: BoxDecoration(
+            color: Colors.grey[300],
+            borderRadius: BorderRadius.circular(10),
+          ),
+          padding: const EdgeInsets.all(5),
+          child: Text(
+            note!.name,
+            softWrap: false,
+            overflow: TextOverflow.ellipsis,
+          )),
+    );
   }
 
   @override
@@ -55,7 +57,7 @@ class UserMessage extends StatelessWidget {
               isUserMessage ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children: [
             if (!isUserMessage) Text(message.senderUsername),
-            if (message.messageType == MessageType.comment)
+            if (message.noteId != null || message.noteId == "")
               renderUpperBox(context),
             Container(
                 padding: const EdgeInsets.all(10),

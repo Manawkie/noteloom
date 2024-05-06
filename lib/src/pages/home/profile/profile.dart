@@ -32,15 +32,19 @@ class ProfilePage extends StatelessWidget {
               child: Column(
             children: [
               const SizedBox(height: 40),
-              CircleAvatar(radius: 100,
-              backgroundImage: NetworkImage(Auth.currentUser!.photoURL!),),
+              Hero(
+                transitionOnUserGestures: true,
+                tag: Auth.currentUser!.uid,
+                child: CircleAvatar(radius: 100,
+                backgroundImage: NetworkImage(Auth.currentUser!.photoURL!),),
+              ),
               const SizedBox(height: 10,),
               Text(
                 user.readUserData!.username,
-              style: TextStyle(fontSize: 30 ),),// current user name dapat
-              const Text(
-                "test_email@gmail.com",
-                style: TextStyle(fontSize: 20)),// current user ermail
+              style: const TextStyle(fontSize: 30 ),),// current user name dapat
+              Text(
+                Auth.currentUser!.email!,
+                style: const TextStyle(fontSize: 20)),// current user ermail
                 // button for editing profile
               // const SizedBox(
               //   width: 200,

@@ -1,10 +1,8 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:provider/provider.dart';
 import 'package:school_app/src/components/uicomponents.dart';
-import 'package:school_app/src/utils/firebase.dart';
 import 'package:school_app/src/utils/models.dart';
 import 'package:school_app/src/utils/providers.dart';
 
@@ -78,8 +76,8 @@ class _SearchPageState extends State<SearchPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<QueryNotesProvider, UserProvider>(
-        builder: (context, notes, userdata, child) {
+    return Consumer<QueryNotesProvider>(
+        builder: (context, notes, child) {
       if (notes.getUniversityNotes.isEmpty) {
         
 
@@ -96,9 +94,6 @@ class _SearchPageState extends State<SearchPage> {
         );
       }
 
-      void onRefresh() async {
-        
-      }
 
       _allNotes = notes.getUniversityNotes;
       _allSubjects = notes.getUniversitySubjects;
@@ -110,12 +105,26 @@ class _SearchPageState extends State<SearchPage> {
           body: LiquidPullToRefresh(
             color: Theme.of(context).colorScheme.primary,
             showChildOpacityTransition: false,
-            onRefresh: () async => onRefresh(),
+            onRefresh: () async {
+              notes.getUniversityNotes;
+            },
             child: CustomScrollView(
               physics: const BouncingScrollPhysics(
                   parent: AlwaysScrollableScrollPhysics()),
               slivers: [
                 SliverAppBar(
+                  flexibleSpace: Container(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                        colors: [
+                          Color.fromRGBO(95, 10, 215, 1),
+                          Color.fromRGBO(7, 156, 182, 1),
+                        ],
+                      ),
+                    )
+                  ),
                   title: mySearchBar(
                       context, _searchController, "Search Note or Subject"),
                 ),

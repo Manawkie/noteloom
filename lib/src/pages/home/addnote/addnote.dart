@@ -197,7 +197,7 @@ class _AddNoteState extends State<AddNote> {
           backgroundColor: Theme.of(context).colorScheme.secondary,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back_ios_new),
-            onPressed: () => context.go("/home"),
+            onPressed: () => context.pop(),
             color: Colors.black,
           ),
         ),

@@ -52,6 +52,7 @@ class _SavedNotesPageState extends State<SavedNotesPage> {
         builder: (context, userdata, notes, child) {
       if (userdata.readSavedNoteIds.isEmpty) {
         return const Scaffold(
+          backgroundColor: Colors.white,
           body: Center(
             child: Text(
               "You currently don't have any saved notes.\n To add, search a note and save it.",
@@ -68,6 +69,17 @@ class _SavedNotesPageState extends State<SavedNotesPage> {
 
       return Scaffold(
           appBar: AppBar(
+            flexibleSpace: Container(
+                decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: [
+                  Color.fromRGBO(95, 10, 215, 1),
+                  Color.fromRGBO(7, 156, 182, 1),
+                ],
+              ),
+            )),
             title: mySearchBar(context, _searchController, "Search Notes"),
           ),
           body: ListView.builder(

@@ -2,6 +2,7 @@
 
 // ignore_for_file: prefer_interpolation_to_compose_strings
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:school_app/src/utils/firebase.dart';
@@ -53,10 +54,6 @@ class UserProvider extends ChangeNotifier {
   }
 
   UserProvider() {
-    if (kDebugMode) {
-      print(_userData?.toFirestore());
-      print("Please work");
-    }
 
     if (_userData == null) {
       SharedPrefs.getUserData().then((data) {
@@ -293,6 +290,9 @@ class QueryNotesProvider extends ChangeNotifier {
   List<NoteModel> get getUniversityNotes => _universityNotes;
   List<SubjectModel> get getUniversitySubjects => _universitySubjects;
 
+  Stream get readNotesStream => streamNotes;
+  Stream<QuerySnapshot<SubjectModel>> get readSubjectsStream => streamSubjects;
+
   QueryNotesProvider() {
     streamNotes.listen((snap) {
       setUniversityNotes(snap.docs.map((note) => note.data()).toList());
@@ -343,12 +343,10 @@ class QueryNotesProvider extends ChangeNotifier {
 
 class MessageProvider extends ChangeNotifier {
   String message = "";
-  MessageType messageType = MessageType.message;
   String? noteId;
   String? currentSubjectId;
 
   String get readMessage => message;
-  MessageType get readMessageType => messageType;
   String? get readNoteId => noteId;
   String? get readCurrentSubjectId => currentSubjectId;
 
@@ -357,24 +355,18 @@ class MessageProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setMessageType(MessageType newMessageType) {
-    messageType = newMessageType;
-    notifyListeners();
-  }
-
   void setNoteId(String? newNoteId) {
     noteId = newNoteId;
     notifyListeners();
   }
 
-  void setCurrentNoteId(String newSubjectId) {
+  void setCurrentNoteId(String? newSubjectId) {
     currentSubjectId = newSubjectId;
     notifyListeners();
   }
 
   void clearFields() {
     message = "";
-    messageType = MessageType.message;
     noteId = null;
     notifyListeners();
   }

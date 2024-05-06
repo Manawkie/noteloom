@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -61,7 +60,8 @@ class _RenderNoteState extends State<RenderNote> {
       // set current note
 
       if (currentNote.readEditing == false) {
-        currentNote.setNote(widget.note.name, widget.note.subjectName, widget.note.subjectId,
+        currentNote.setNote(
+            widget.note.name, widget.note.subjectName, widget.note.subjectId,
             notesummary: widget.note.summary,
             notetag1: widget.note.tags?[0],
             notetag2: widget.note.tags?[1],
@@ -103,6 +103,8 @@ class _RenderNoteState extends State<RenderNote> {
               ),
             );
           }
+          final Uint8List? noteData = snapshot.data?[0] as Uint8List?;
+          final bool isSaved = snapshot.data?[1] as bool;
           final userData = Provider.of<UserProvider>(context, listen: false);
           bool isOwned = false;
 
@@ -110,6 +112,22 @@ class _RenderNoteState extends State<RenderNote> {
 
           if (widget.note.author == userData.readUserData!.username) {
             isOwned = true;
+          }
+
+          if (noteData == null) {
+            return Scaffold(
+              appBar: AppBar(
+                leading: IconButton(
+                  icon: const Icon(Icons.arrow_back_ios_new),
+                  onPressed: () {
+                    context.go('/home');
+                  },
+                ),
+              ),
+              body: const Center(
+                child: Text("Note not found"),
+              ),
+            );
           }
 
           return Consumer<CurrentNoteProvider>(
@@ -159,9 +177,11 @@ class _RenderNoteState extends State<RenderNote> {
                           ),
                         ),
                         Actions(
-                          isSaved: snapshot.data![1] as bool,
+                          isSaved: isSaved,
                           note: widget.note,
-                          isLiked: widget.note.peopleLiked?.contains(Auth.currentUser!.uid) ?? false,
+                          isLiked: widget.note.peopleLiked
+                                  ?.contains(Auth.currentUser!.uid) ??
+                              false,
                           peopleLiked: widget.note.peopleLiked?.length ?? 0,
                         ),
                       ],
@@ -181,7 +201,7 @@ class _RenderNoteState extends State<RenderNote> {
                     ),
                     Flexible(
                         child: SfPdfViewer.memory(
-                      snapshot.data?[0] as Uint8List,
+                      noteData,
                       key: _key,
                       enableTextSelection: true,
                       controller: _controller,

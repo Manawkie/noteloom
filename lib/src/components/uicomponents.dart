@@ -124,30 +124,40 @@ SearchBar mySearchBar(
   String hintText,
 ) {
   return SearchBar(
-      controller: controller,
-      hintText: hintText,
-      elevation: const MaterialStatePropertyAll(0),
-      shape: const MaterialStatePropertyAll(RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(8)))),
-      trailing: [
-        Tooltip(
-          message: "Clear search",
-          child: IconButton(
-            icon: const Icon(Icons.clear, color: Colors.white,),
-            onPressed: () {
-              controller.clear();
-            },
-          ),
+    controller: controller,
+    hintText: hintText,
+    elevation: const MaterialStatePropertyAll(0),
+    shape: const MaterialStatePropertyAll(
+      RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(
+          Radius.circular(8),
         ),
-      ],
-      hintStyle: const MaterialStatePropertyAll(
-        TextStyle(color: Colors.white, fontSize: 16),
       ),
-      textStyle: const MaterialStatePropertyAll(
-        TextStyle(color: Colors.white, fontSize: 16),
+    ),
+    trailing: [
+      Tooltip(
+        message: "Clear search",
+        child: IconButton(
+          icon: const Icon(
+            Icons.clear,
+            color: Colors.white,
+          ),
+          onPressed: () {
+            controller.clear();
+          },
+        ),
       ),
-      backgroundColor:
-          MaterialStatePropertyAll(Theme.of(context).primaryColor));
+    ],
+    hintStyle: const MaterialStatePropertyAll(
+      TextStyle(color: Colors.white, fontSize: 16),
+    ),
+    textStyle: const MaterialStatePropertyAll(
+      TextStyle(color: Colors.white, fontSize: 16),
+    ),
+    backgroundColor: const MaterialStatePropertyAll(
+      Color.fromRGBO(0, 0, 0, 0),
+    ),
+  );
 }
 
 class MyMessageField extends StatelessWidget {

@@ -88,7 +88,8 @@ class _EditNotePageState extends State<EditNotePage> {
         [_tag1Control.text, _tag2Control.text, _tag3Control.text]);
 
     queryNotes.editNote(editedNote);
-    Database.editNote(editedNote);
+    final username = context.read<UserProvider>().readUserData?.username;
+    Database.editNote(editedNote, username ?? editedNote.author);
   }
 
   void deleteNote() {

@@ -215,9 +215,9 @@ class _LoginState extends State<Login> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text("\t \t \t \t \t   Welcome",
+                  Text("Welcome",
                       style: GoogleFonts.ubuntu(
                         color: Colors
                             .white, // Adjust the color to match the background gradient

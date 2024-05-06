@@ -12,32 +12,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final _scrollControl = ScrollController();
   List<String>? _recents = <String>[];
-
-  bool overScrolled = false;
-
-  @override
-  void initState() {
-    _scrollControl.addListener(overScroll);
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _scrollControl.dispose();
-    super.dispose();
-  }
-
-  void overScroll() {
-    setState(() {
-      if (_scrollControl.hasClients && _scrollControl.offset > 200) {
-        overScrolled = true;
-      } else {
-        overScrolled = false;
-      }
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,71 +20,79 @@ class _HomePageState extends State<HomePage> {
         body: CustomScrollView(
       slivers: [
         SliverAppBar(
+          backgroundColor: Colors.transparent,
+          floating: true,
+          elevation: 0,
           expandedHeight: 150,
+          forceElevated: true,
           flexibleSpace: FlexibleSpaceBar(
             background: Container(
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-                colors: [
-                  Color.fromRGBO(95, 10, 215, 1),
-                  Color.fromRGBO(7, 156, 182, 1),
-          ],
-        ),
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                  colors: [
+                    Color.fromRGBO(95, 10, 215, 1),
+                    Color.fromRGBO(7, 156, 182, 1),
+                  ],
+                ),
               ),
             ),
-            title: overScrolled
-                ? const Text("Hello", style: TextStyle(color: Colors.white))
-                : Text(
-                    "Welcome to Note Loom!",
-                    style: GoogleFonts.ubuntu(fontSize: 20, color: Colors.white),
-                  ),
+            centerTitle: false,
+            expandedTitleScale: 1,
+            titlePadding: const EdgeInsets.all(12),
+            title: Text(
+              "Welcome to Note Loom!",
+              style: GoogleFonts.ubuntu(fontSize: 30, color: Colors.white),
+              textAlign: TextAlign.start,
+            ),
           ),
         ),
         SliverToBoxAdapter(
           child: Container(
             padding: const EdgeInsets.all(12),
             child: Consumer2<UserProvider, QueryNotesProvider>(
-                builder: (context, userdetails, allnotes, child) {
-              _recents = userdetails.readRecents;
-              final getAllNotes = allnotes.getUniversityNotes;
-              final getAllSubjects = allnotes.getUniversitySubjects;
-              if (getAllNotes.isEmpty || getAllSubjects.isEmpty) {
-                return Padding(
-                  padding: const EdgeInsets.only(top: 100),
-                  child: Column(
-                    children: [
-                      myLoadingIndicator(),
-                      Text(
-                        getAllNotes.isEmpty
-                            ? "Loading Recent Notes..."
-                            : getAllSubjects.isEmpty
-                                ? "Loading Recent Subjects..."
-                                : "Please wait...",
-                      )
-                    ],
-                  ),
-                );
-              }
+              builder: (context, userdetails, allnotes, child) {
+                _recents = userdetails.readRecents;
+                final getAllNotes = allnotes.getUniversityNotes;
+                final getAllSubjects = allnotes.getUniversitySubjects;
+                if (getAllNotes.isEmpty || getAllSubjects.isEmpty) {
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 100),
+                    child: Column(
+                      children: [
+                        myLoadingIndicator(),
+                        Text(
+                          getAllNotes.isEmpty
+                              ? "Loading Recent Notes..."
+                              : getAllSubjects.isEmpty
+                                  ? "Loading Recent Subjects..."
+                                  : "Please wait...",
+                        )
+                      ],
+                    ),
+                  );
+                }
 
-              return Column(
+                return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text("Recent Notes and Subjects:"),
                     ..._buildList(),
                     _recents!.isEmpty
                         ? const SizedBox(
-                          height: 200,
-                          child: Center(
+                            height: 200,
+                            child: Center(
                               child: Text("No recent notes or subjects"),
                             ),
-                        )
+                          )
                         : Container()
-                  ]);
-            }),
+                  ],
+                );
+              },
+            ),
           ),
-        )
+        ),
       ],
     ));
   }
@@ -124,11 +107,13 @@ class _HomePageState extends State<HomePage> {
       final id = result.split("/")[1];
 
       if (type == "notes") {
-        final displayedNote =  notes.findNote(id);
+        final displayedNote = notes.findNote(id);
         if (displayedNote != null) return noteButton(displayedNote, context);
       } else if (type == "subjects") {
         final displayedSubject = notes.findSubject(id);
-        if (displayedSubject != null) return subjectButton(displayedSubject, context);
+        if (displayedSubject != null) {
+          return subjectButton(displayedSubject, context);
+        }
       }
       return Container();
     });

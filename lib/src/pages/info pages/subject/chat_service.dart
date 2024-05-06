@@ -9,7 +9,7 @@ class ChatService extends ChangeNotifier {
 
   /// sending a message
   Future<void> sendMessage(
-      String senderName, String message, String subjectId, MessageType messageType, String noteId) async {
+      String senderName, String message, String subjectId, String? noteId) async {
     // get the current user
     final String senderUserId = _firebaseAuth.currentUser!.uid;
     final Timestamp timestamp = Timestamp.now();
@@ -18,7 +18,6 @@ class ChatService extends ChangeNotifier {
     MessageModel newMessage = MessageModel(
       senderId: senderUserId,
       senderUserProfileURL: Auth.currentUser!.photoURL!,
-      messageType: messageType,
       noteId: noteId,
       senderUsername: senderName,
       message: message,

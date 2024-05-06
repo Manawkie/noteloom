@@ -1,5 +1,8 @@
+import 'dart:js_interop';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -51,20 +54,17 @@ class _SetupFormState extends State<SetupForm> {
   final List<String> _courses = ["Select a Department first"];
   final List<String> _filteredCourses = ["Select a Department first"];
 
-  final List<String> _takenUsernames = [];
-
   String _selectedDepartment = "";
   String _selectedCourse = "";
 
+  late FToast ftoast;
+
   @override
   void initState() {
+    ftoast = FToast();
+    ftoast.init(context);
     _selectedDepartment = _departments.first;
     _selectedCourse = _filteredCourses.first;
-
-    Database.getUsernames().then((value) {
-      _takenUsernames.addAll(value);
-    });
-
     for (var department in widget.data) {
       if (kDebugMode) print(widget.data);
       department.forEach((key, value) {
@@ -85,18 +85,29 @@ class _SetupFormState extends State<SetupForm> {
   }
 
   void _getStarted() async {
-    if (_formKey.currentState!.validate()) {
-      final department = _selectedDepartment == "Select a Department"
-          ? null
-          : _selectedDepartment;
-      final course = _selectedCourse == "Select a Department first"
-          ? null
-          : _selectedCourse;
-      await Database.createUser(_username.text, department, course).then((UserModel user) {
-        context.read<UserProvider>().setUserData(user);
-        GoRouter.of(context).refresh();
-      });
-
+    try {
+      if (_selectedDepartment == "Select a Department") {
+        throw "Please select a department and course.";
+      }
+      if (_formKey.currentState!.validate()) {
+        final course = _selectedCourse == "Select a Department first"
+            ? null
+            : _selectedCourse;
+        await Database.createUser(
+                _username.text, _selectedDepartment, course, [], [])
+            .then((UserModel user) {
+          context.read<UserProvider>().setUserData(user);
+          GoRouter.of(context).refresh();
+        });
+      }
+    } catch (err) {
+      final theme = Theme.of(context);
+      if (kDebugMode) print(err);
+      ftoast.showToast(
+        child: myToast(theme, err.toString()),
+        gravity: ToastGravity.BOTTOM,
+        toastDuration: const Duration(seconds: 3),
+      );
     }
   }
 
@@ -144,9 +155,6 @@ class _SetupFormState extends State<SetupForm> {
                     usernameField(_username, (value) {
                       if (value!.isEmpty) {
                         return "This field is required.";
-                      }
-                      if (_takenUsernames.contains(value)) {
-                        return "This username is already taken.";
                       }
                       return null;
                     }),

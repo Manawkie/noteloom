@@ -105,22 +105,19 @@ class Database {
     return userFromDatabase;
   }
 
-  static Future<List<String>> getUsernames() async {
-    final usernames = <String>[]; // Initialize the list
-    await db
+  static Future<bool> isUsernameTaken(String username) async {
+    return await db
         .collection("users")
         .withConverter(
             fromFirestore: UserModel.fromFirestore,
             toFirestore: (model, _) => model.toFirestore())
+        .where("username", isEqualTo: username)
         .get()
         .then(
       (QuerySnapshot<UserModel> snap) {
-        for (var docs in snap.docs) {
-          usernames.add(docs.data().username);
-        }
+        return snap.docs.firstOrNull?.data().username == username;
       },
     );
-    return usernames;
   }
 
   static Future<List<DepartmentModel>> getDepartments() async {
@@ -216,6 +213,8 @@ class Database {
     String username,
     String? department,
     String? course,
+    List<String> recents,
+    List<String> prioritySubjects,
   ) async {
     final user = UserModel(
         id: Auth.auth.currentUser!.uid,
@@ -225,8 +224,8 @@ class Database {
         username: username,
         department: department,
         course: course,
-        recents: [],
-        prioritySubjects: []);
+        recents: recents,
+        prioritySubjects: prioritySubjects);
 
     await db
         .collection("users")
@@ -299,7 +298,9 @@ class Database {
         .withConverter(
           fromFirestore: NoteModel.fromFirestore,
           toFirestore: (model, _) => model.toFirestore(),
-        ).limit(100).orderBy("time", descending: true)
+        )
+        .limit(100)
+        .orderBy("time", descending: true)
         .snapshots();
   }
 
@@ -315,67 +316,6 @@ class Database {
 
     return note;
   }
-
-  // static Future<List<NoteModel>> getAllNotes() async {
-  //   final allNotes = <NoteModel>[];
-
-  //   await db
-  //       .collection("notes")
-  //       .withConverter(
-  //           fromFirestore: NoteModel.fromFirestore,
-  //           toFirestore: (model, _) => model.toFirestore())
-  //       .limit(100)
-  //       .where("schoolId", isEqualTo: Auth.schoolDomain)
-  //       .get()
-  //       .then((snapshot) {
-  //     for (var note in snapshot.docs) {
-  //       allNotes.add(note.data());
-  //     }
-  //   });
-
-  //   return allNotes;
-  // }
-
-  // static Future<List<NoteModel>> searchNotes(
-  //     String search, List<String> priorityIds) async {
-  //   final searchNotes = <NoteModel>[];
-
-  //   final priorityQuery = db
-  //       .collection("notes")
-  //       .withConverter(
-  //           fromFirestore: NoteModel.fromFirestore,
-  //           toFirestore: (model, _) => model.toFirestore())
-  //       .where("__name__", arrayContainsAny: priorityIds);
-
-  //   int maxRandomNotes = 100 - priorityIds.length;
-
-  //   if (maxRandomNotes < 20) {
-  //     maxRandomNotes = 20;
-  //   }
-
-  //   await priorityQuery.get().then((snapshot) {
-  //     for (var note in snapshot.docs) {
-  //       searchNotes.add(note.data());
-  //     }
-  //   });
-
-  //   await db
-  //       .collection("notes")
-  //       .withConverter(
-  //           fromFirestore: NoteModel.fromFirestore,
-  //           toFirestore: (model, _) => model.toFirestore())
-  //       .limit(maxRandomNotes)
-  //       .where("schoolId", isEqualTo: Auth.schoolDomain)
-  //       .where("__docIdIn", whereNotIn: priorityIds)
-  //       .get()
-  //       .then((snapshot) {
-  //     for (var note in snapshot.docs) {
-  //       searchNotes.add(note.data());
-  //     }
-  //   });
-
-  //   return searchNotes;
-  // }
 
   static Future saveNote(NoteModel note, bool saved) async {
     final saveData = SavedNoteModel(
@@ -407,7 +347,8 @@ class Database {
     }
   }
 
-  static Future<void> editNote(NoteModel note) async {
+  static Future<void> editNote(NoteModel note, String userName) async {
+    note.author = userName;
     await db
         .collection("notes")
         .withConverter(
@@ -505,6 +446,20 @@ class Database {
       transaction.update(dbNote, {"peopleLiked": peopleLiked});
     });
   }
+
+  static Future editUserNotes(String oldUsername, String username) async {
+    final userNotes =
+        db.collection("notes").where("author", isEqualTo: oldUsername);
+
+    final batch = db.batch();
+    await userNotes.get().then((snapshot) {
+      for (var note in snapshot.docs) {
+        batch.update(note.reference, {"author": username});
+      }
+    });
+    batch.commit();
+  }
+
   // subjects
 
   static Stream<QuerySnapshot<SubjectModel>> getSubjectsStream() {
@@ -568,6 +523,48 @@ class Database {
     user.update({"prioritySubjects": prioritySubjectIds});
 
     return prioritySubjectIds;
+  }
+
+  static Future editMessageUsername(
+      Stream<QuerySnapshot<SubjectModel>> subjects, String newUsername) async {
+     final batch = db.batch();
+
+  // Fetch all subjects at once using a future
+  final snapSubjects = await subjects.first;
+
+  if (snapSubjects.docs.isEmpty) {
+    print('No subjects found. Skipping username update.');
+    return; // Early exit if no subjects
+  }
+
+  // Efficiently iterate through each subject and its messages
+  for (var subjectDoc in snapSubjects.docs) {
+    final subjectId = subjectDoc.id;
+    final discussionRef = db
+        .collection('subjects')
+        .doc(subjectId)
+        .collection('discussion')
+        .withConverter(
+          fromFirestore: MessageModel.fromFirestore,
+          toFirestore: (model, _) => model.toFirestore(),
+        );
+
+    // Stream-based approach for efficient listener handling
+    discussionRef
+        .where('authorId', isEqualTo: Auth.currentUser!.uid)
+        .snapshots()
+        .listen((messageSnap) {
+      for (var messageDoc in messageSnap.docs) {
+        batch.update(messageDoc.reference, {'author': newUsername});
+      }
+    });
+  }
+
+  await batch.commit().then((_) {
+    print('Batch write successful!');
+  }).catchError((error) {
+    print('Error updating message usernames: $error');
+  });
   }
 }
 

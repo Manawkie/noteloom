@@ -6,7 +6,6 @@ import "package:provider/provider.dart";
 import "package:school_app/src/components/uicomponents.dart";
 import "package:school_app/src/components/usermessage.dart";
 import "package:school_app/src/pages/info%20pages/subject/chat_service.dart";
-import "package:school_app/src/utils/models.dart";
 import "package:school_app/src/utils/providers.dart";
 
 class ChatPage extends StatefulWidget {
@@ -30,6 +29,9 @@ class _ChatPageState extends State<ChatPage> {
       final currentSubject = querynotes.findSubject(widget.subjectId);
       return Scaffold(
         appBar: AppBar(
+          leading: IconButton(icon: Icon(Icons.arrow_back_ios_new), onPressed: () {
+            context.pop();
+          },),
           title: Text(currentSubject?.subject ?? " "),
         ),
         body: Column(
@@ -60,7 +62,14 @@ class _ChatPageState extends State<ChatPage> {
           return Text('error${snapshot.error}');
         }
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Text('Loading...');
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              myLoadingIndicator(),
+              const Text('Loading...'),
+            ],
+          );
         }
 
         return ListView(
@@ -93,7 +102,6 @@ class _MessageInputState extends State<MessageInput> {
   String message = "";
   late UserProvider _user;
   late MessageProvider _messageData;
-  MessageType messageType = MessageType.message;
   String noteIdRef = "";
 
   @override
@@ -108,11 +116,8 @@ class _MessageInputState extends State<MessageInput> {
         _messsageController.text = "";
       }
       _messageData.setCurrentNoteId(widget.subjectId);
-      messageType = _messageData.readMessageType;
       noteIdRef = _messageData.readNoteId ?? "";
     });
-
-    
 
     super.initState();
   }
@@ -120,8 +125,6 @@ class _MessageInputState extends State<MessageInput> {
   void sendMessage() async {
     if (kDebugMode) {
       print(noteIdRef);
-      print(messageType);
-      
     }
     //only send message if theres something to send
     if (_messsageController.text.isNotEmpty) {
@@ -129,7 +132,6 @@ class _MessageInputState extends State<MessageInput> {
         _user.readUserData!.username,
         _messsageController.text,
         widget.subjectId,
-        messageType,
         noteIdRef,
       );
 
@@ -140,62 +142,15 @@ class _MessageInputState extends State<MessageInput> {
 
   void setFields() {
     _messageData.setNoteId(noteIdRef);
-    _messageData.setMessageType(messageType);
-  }
-
-  void setMessageType(MessageType type) {
-    setState(() {
-      messageType = type;
-    });
-  }
-
-  void selectMessageType(MessageProvider messageData) {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) => Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Text(
-                  "Select a message type. Using a Note Message will allow you to reference a note."),
-            ),
-            ListTile(
-              leading: const Icon(Icons.message),
-              title: const Text("Message"),
-              onTap: () {
-                setMessageType(MessageType.message);
-                messageData.setMessageType(MessageType.message);
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              leading: const Icon(
-                Icons.note,
-              ),
-              title: const Text("Note"),
-              onTap: () {
-                setMessageType(MessageType.comment);
-                messageData.setMessageType(MessageType.comment);
-                Navigator.pop(context);
-              },
-            )
-          ],
-        ),
-      ),
-    );
-    setFields();
   }
 
   @override
   Widget build(BuildContext context) {
     return Consumer<MessageProvider>(builder: (context, messageData, child) {
-
       if (messageData.readNoteId != null) {
         noteIdRef = messageData.readNoteId!;
       }
-      
+
       return Row(
         children: [
           // text field
@@ -216,17 +171,9 @@ class _MessageInputState extends State<MessageInput> {
           Row(
             children: [
               IconButton(
-                onPressed: () => selectMessageType(messageData),
-                icon: Icon(messageType == MessageType.message
-                    ? Icons.message
-                    : Icons.note),
-              ),
-              IconButton(
                 onPressed: () {
-                  if (messageType == MessageType.comment) {
-                    context.pushNamed("selectNote",
-                        pathParameters: {"id": widget.subjectId});
-                  }
+                  context.pushNamed("selectNote",
+                      pathParameters: {"id": widget.subjectId});
                 },
                 icon: const Icon(
                   Icons.note_add,

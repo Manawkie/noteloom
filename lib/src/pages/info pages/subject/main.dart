@@ -95,14 +95,14 @@ class _RenderSubjectPageState extends State<RenderSubjectPage> {
               children: [
                 TextButton(
                     onPressed: () {
-                      context.goNamed("subjectNotes", pathParameters: {
+                      context.pushNamed("subjectNotes", pathParameters: {
                         "id": widget.subject.id!,
                       });
                     },
                     child: const Text("View Subject Notes")),
                 TextButton(
                     onPressed: () {
-                      context.goNamed("discussions", pathParameters: {
+                      context.pushNamed("discussions", pathParameters: {
                         "id": widget.subject.id!,
                       });
                     },

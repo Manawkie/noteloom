@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:school_app/src/components/uicomponents.dart';
@@ -41,8 +42,11 @@ class SetupForm extends StatefulWidget {
   final List<Map<String, dynamic>> departmentsAndCourses;
   final UserModel user;
 
-  const SetupForm(
-      {super.key, required this.departmentsAndCourses, required this.user});
+  const SetupForm({
+    super.key,
+    required this.departmentsAndCourses,
+    required this.user,
+  });
 
   @override
   State<SetupForm> createState() => _SetupFormState();
@@ -55,10 +59,11 @@ class _SetupFormState extends State<SetupForm> {
   final List<String> _departments = ["Select a Department"];
   final List<String> _courses = ["Select a Department first"];
   final List<String> _filteredCourses = ["Select a Department first"];
-  final List<String> _takenUsernames = [];
 
   String _selectedDepartment = "";
   String _selectedCourse = "";
+
+  late FToast ftoast;
 
   @override
   void initState() {
@@ -79,12 +84,8 @@ class _SetupFormState extends State<SetupForm> {
     resetCourses();
     _selectedCourse = widget.user.course ?? _courses.first;
 
-    // get all taken usernames
-    Database.getUsernames().then((value) {
-      _takenUsernames
-          .where((element) => element != widget.user.username)
-          .toList();
-    });
+    ftoast = FToast();
+    ftoast.init(context);
 
     super.initState();
   }
@@ -104,16 +105,50 @@ class _SetupFormState extends State<SetupForm> {
   }
 
   void _saveData() async {
-    if (_formKey.currentState!.validate()) {
-      // save the data
-      final department = _selectedDepartment == "Select a Department"
-          ? null
-          : _selectedDepartment;
-      final course = _selectedCourse == "Select a Department first"
-          ? null
-          : _selectedCourse;
-      context.read<UserProvider>().setUserData(
-          await Database.createUser(_username.text, department, course));
+    final theme = Theme.of(context);
+
+    final userData = context.read<UserProvider>();
+    final oldUsername = userData.readUserData!.username;
+
+    final queryNotes = context.read<QueryNotesProvider>();
+    try {
+      if (await Database.isUsernameTaken(_username.text)) {
+        throw "Username already taken. Please try another username";
+      }
+      if (_selectedDepartment == "Select a Department") {
+        throw "Please select a department.";
+      }
+
+      if (_formKey.currentState!.validate()) {
+        // save the data
+
+        final course = _selectedCourse == "Select a Department first"
+            ? null
+            : _selectedCourse;
+
+        final currentUserData = userData.readUserData;
+        userData.setUserData(await Database.createUser(
+          _username.text,
+          _selectedDepartment,
+          course,
+          currentUserData?.recents ?? [],
+          currentUserData?.prioritySubjects ?? [],
+        ));
+
+        // change notes data by the user
+        print("Editing user notes");
+        await Database.editUserNotes(oldUsername, _username.text);
+
+        // change message usernames
+        final subjectsStream = queryNotes.readSubjectsStream;
+        await Database.editMessageUsername(subjectsStream, _username.text);
+      }
+    } catch (err) {
+      ftoast.showToast(
+        child: myToast(theme, err.toString()),
+        gravity: ToastGravity.BOTTOM,
+        toastDuration: const Duration(seconds: 3),
+      );
     }
   }
 
@@ -137,9 +172,6 @@ class _SetupFormState extends State<SetupForm> {
               usernameField(_username, (value) {
                 if (value!.isEmpty) {
                   return "This field is required.";
-                }
-                if (_takenUsernames.contains(value)) {
-                  return "This username is already taken.";
                 }
                 return null;
               }),

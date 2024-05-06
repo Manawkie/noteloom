@@ -280,8 +280,6 @@ class NoteModel extends Results {
   }
 }
 
-enum MessageType { message, comment }
-
 class MessageModel {
   String? id;
   String message;
@@ -289,7 +287,6 @@ class MessageModel {
   String senderUserProfileURL;
   String senderUsername;
   Timestamp timestamp;
-  MessageType messageType;
   String? noteId;
 
   MessageModel(
@@ -299,7 +296,6 @@ class MessageModel {
       this.senderUserProfileURL = "",
       required this.senderUsername,
       required this.timestamp,
-      this.messageType = MessageType.message,
       this.noteId});
 
   factory MessageModel.fromFirestore(
@@ -314,8 +310,7 @@ class MessageModel {
         senderUserProfileURL: data?['senderUserProfileURL'] ?? "",
         senderUsername: data?['senderUsername'],
         timestamp: data?['timestamp'],
-        messageType: data?['messageType'] != null ? MessageType.values.byName(data?['messageType']) : MessageType.message,
-        noteId: data?['noteId'] ?? "");
+        noteId: data?['noteId']?? "");
     return message;
   }
 
@@ -326,7 +321,6 @@ class MessageModel {
       "senderUserProfileURL": senderUserProfileURL,
       "senderUsername": senderUsername,
       "timestamp": timestamp,
-      "messageType": messageType.name,
       if (noteId != null) "noteId": noteId
     };
   }

@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:school_app/src/components/uicomponents.dart';
 import 'package:school_app/src/utils/models.dart';
 import 'package:school_app/src/utils/providers.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class MainHomePage extends StatefulWidget {
   const MainHomePage({super.key});
@@ -24,10 +25,10 @@ class _MainHomePageState extends State<MainHomePage> {
         padding: const EdgeInsets.all(12),
         child: CustomScrollView(
           slivers: [
-            const SliverToBoxAdapter(
+            SliverToBoxAdapter(
               child: Text(
                 "Recents",
-                style: TextStyle(fontSize: 30),
+                style: GoogleFonts.ubuntu(fontSize: 30),
               ),
             ),
             SliverToBoxAdapter(
@@ -48,6 +49,7 @@ class _MainHomePageState extends State<MainHomePage> {
                             : getAllSubjects.isEmpty
                                 ? "Loading Recent Subjects..."
                                 : "Please wait...",
+                        style: GoogleFonts.ubuntu(),
                       )
                     ],
                   );
@@ -56,8 +58,10 @@ class _MainHomePageState extends State<MainHomePage> {
                 if (_recents!.isEmpty) {
                   return SizedBox(
                     height: MediaQuery.of(context).size.height * 0.2,
-                    child: const Center(
-                      child: Text("You currently have no recents..."),
+                    child: Center(
+                      child: Text("You currently have no recents...",
+                        style: GoogleFonts.ubuntu(),
+                      ),
                     ),
                   );
                 }
@@ -73,15 +77,17 @@ class _MainHomePageState extends State<MainHomePage> {
                 );
               }),
             ),
-            const SliverToBoxAdapter(
+            SliverToBoxAdapter(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     "Suggested Notes",
-                    style: TextStyle(fontSize: 30),
+                    style: GoogleFonts.ubuntu(fontSize: 30),
                   ),
-                  Text("Here are suggested notes based on your saved subjects.")
+                  Text("Here are suggested notes based on your saved subjects.",
+                    style: GoogleFonts.ubuntu(),
+                  )
                 ],
               ),
             ),
@@ -122,8 +128,17 @@ Widget _buildRecentSubject(SubjectModel subject, BuildContext context) {
       margin: const EdgeInsets.only(right: 10),
       width: MediaQuery.of(context).size.width * 0.5,
       decoration: BoxDecoration(
+        color: colors[subject.id.hashCode % colors.length], // Dynamic color based on subject ID
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.black, width: 1),
+        border: Border.all(color: Color.fromARGB(255, 37, 197, 255), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.5),
+            spreadRadius: 1,
+            blurRadius: 5,
+            offset: Offset(0, 3), // changes position of shadow
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -132,7 +147,10 @@ Widget _buildRecentSubject(SubjectModel subject, BuildContext context) {
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [Text(subject.subject), Text(subject.subjectCode)],
+              children: [
+                Text(subject.subject, style: GoogleFonts.ubuntu(fontSize: 16)),
+                Text(subject.subjectCode, style: GoogleFonts.ubuntu(fontSize: 14))
+              ],
             ),
           ),
           Row(
@@ -180,10 +198,16 @@ Widget _buildRecentNote(NoteModel note, BuildContext context) {
           children: [
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [Text(note.name), Text(note.subjectName)],
+              children: [Text(note.name, style: GoogleFonts.ubuntu()), Text(note.subjectName, style: GoogleFonts.ubuntu())],
             ),
-            Text(note.author)
+            Text(note.author, style: GoogleFonts.ubuntu())
           ]),
     ),
   );
 }
+ List<Color> colors = const [
+    Color.fromRGBO(255, 242, 218, 1),
+    Color.fromRGBO(253, 233, 238, 1),
+    Color.fromRGBO(232, 243, 243, 1),
+    Color.fromRGBO(254, 254, 240, 1),
+  ];

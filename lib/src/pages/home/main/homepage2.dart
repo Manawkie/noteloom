@@ -130,7 +130,7 @@ Widget _buildRecentSubject(SubjectModel subject, BuildContext context) {
       decoration: BoxDecoration(
         color: colors[subject.id.hashCode % colors.length], // Dynamic color based on subject ID
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Color.fromARGB(255, 37, 197, 255), width: 1),
+        border: Border.all(color: const Color.fromARGB(255, 37, 197, 255), width: 1),
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withOpacity(0.5),

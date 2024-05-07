@@ -21,8 +21,8 @@ class _AddNoteState extends State<AddNote> {
 
   late TextEditingController _nameControl;
   late TextEditingController _tag1Control;
-  late TextEditingController _tag2Control;
-  late TextEditingController _tag3Control;
+  // late TextEditingController _tag2Control;
+  // late TextEditingController _tag3Control;
   String _subjectName = "";
   String _subjectId = "";
   late TextEditingController _summaryControl;
@@ -41,8 +41,8 @@ class _AddNoteState extends State<AddNote> {
 
     _nameControl = TextEditingController(text: noteData.name ?? "");
     _tag1Control = TextEditingController(text: noteData.readTag1 ?? "");
-    _tag2Control = TextEditingController(text: noteData.readTag2 ?? "");
-    _tag3Control = TextEditingController(text: noteData.readTag3 ?? "");
+    // _tag2Control = TextEditingController(text: noteData.readTag2 ?? "");
+    // _tag3Control = TextEditingController(text: noteData.readTag3 ?? "");
     _summaryControl = TextEditingController(text: noteData.summary ?? "");
 
     _subjectName = noteData.readSubjectName ?? "Select a Subject";
@@ -59,8 +59,8 @@ class _AddNoteState extends State<AddNote> {
   void dispose() {
     _nameControl.dispose();
     _tag1Control.dispose();
-    _tag2Control.dispose();
-    _tag3Control.dispose();
+    // _tag2Control.dispose();
+    // _tag3Control.dispose();
     super.dispose();
   }
 
@@ -98,7 +98,7 @@ class _AddNoteState extends State<AddNote> {
               _nameControl.text,
               _subjectId,
               _subjectName,
-              [_tag1Control.text, _tag2Control.text, _tag3Control.text],
+              [_tag1Control.text],
               _summaryControl.text);
           clearFields(note);
           setState(() {
@@ -141,8 +141,8 @@ class _AddNoteState extends State<AddNote> {
     _subjectName = note.readSubjectName ?? "Select a Subject";
     _subjectId = note.readSubjectId ?? "";
     _tag1Control.text = note.readTag1!;
-    _tag2Control.text = note.readTag2!;
-    _tag3Control.text = note.readTag3!;
+    // _tag2Control.text = note.readTag2!;
+    // _tag3Control.text = note.readTag3!;
   }
 
   @override
@@ -177,13 +177,13 @@ class _AddNoteState extends State<AddNote> {
           _summaryControl.text,
           _subjectName,
           _subjectId,
-          _tag1Control.text,
-          _tag2Control.text,
-          _tag3Control.text,
+          _tag1Control.text
+          // _tag2Control.text,
+          // _tag3Control.text,
         );
       }
 
-      void removeNote() {
+      void removeNote() { 
         note.removeFile();
         setState(() {
           _nameControl.text = "";
@@ -252,21 +252,24 @@ class _AddNoteState extends State<AddNote> {
                               icon: const Icon(Icons.delete))
                         ],
                       ),
-                myFormField(
-                    label: "Tag 1",
-                    controller: _tag1Control,
-                    isRequired: false,
-                    onChanged: (value) => setNote()),
-                myFormField(
-                    label: "Tag 2",
-                    controller: _tag2Control,
-                    isRequired: false,
-                    onChanged: (value) => setNote()),
-                myFormField(
-                    label: "Tag 3",
-                    controller: _tag3Control,
-                    isRequired: false,
-                    onChanged: (value) => setNote()),
+                      ElevatedButton(
+                        onPressed: null, 
+                        child: child),
+                // myFormField(
+                //     label: "Tag 1",
+                //     controller: _tag1Control,
+                //     isRequired: false,
+                //     onChanged: (value) => setNote()),
+                // myFormField(
+                //     label: "Tag 2",
+                //     controller: _tag2Control,
+                //     isRequired: false,
+                //     onChanged: (value) => setNote()),
+                // myFormField(
+                //     label: "Tag 3",
+                //     controller: _tag3Control,
+                //     isRequired: false,
+                //     onChanged: (value) => setNote()),
                 TextFormField(
                   controller: _summaryControl,
                   decoration: const InputDecoration(

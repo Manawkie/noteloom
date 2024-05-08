@@ -34,8 +34,7 @@ class _EditNotePageState extends State<EditNotePage> {
 
     _nameControl = TextEditingController(text: currentNote.name ?? "");
     _tag1Control = TextEditingController(text: currentNote.readTag1 ?? "");
-    _tag2Control = TextEditingController(text: currentNote.readTag2 ?? "");
-    _tag3Control = TextEditingController(text: currentNote.readTag3 ?? "");
+    
     _summaryControl = TextEditingController(text: currentNote.summary ?? "");
 
     _subjectName = currentNote.readSubjectName ?? "";
@@ -51,8 +50,7 @@ class _EditNotePageState extends State<EditNotePage> {
   void resetFields() {
     _nameControl.text = currentNote.readName ?? "";
     _tag1Control.text = currentNote.readTag1 ?? "";
-    _tag2Control.text = currentNote.readTag2 ?? "";
-    _tag3Control.text = currentNote.readTag3 ?? "";
+    
     _summaryControl.text = currentNote.summary ?? "";
 
     setState(() {
@@ -69,8 +67,7 @@ class _EditNotePageState extends State<EditNotePage> {
       _subjectId,
       notesummary: _summaryControl.text,
       notetag1: _tag1Control.text,
-      notetag2: _tag2Control.text,
-      notetag3: _tag3Control.text,
+      
     );
 
     // reset notemodel
@@ -175,16 +172,16 @@ class _EditNotePageState extends State<EditNotePage> {
             label: "Tag 1",
             controller: _tag1Control,
             isRequired: false,
-          ),
-          myFormField(
-            label: "Tag 2",
-            controller: _tag2Control,
-            isRequired: false,
-          ),
-          myFormField(
-            label: "Tag 3",
-            controller: _tag3Control,
-            isRequired: false,
+          // ),
+          // myFormField(
+          //   label: "Tag 2",
+          //   controller: _tag2Control,
+          //   isRequired: false,
+          // ),
+          // myFormField(
+          //   label: "Tag 3",
+          //   controller: _tag3Control,
+          //   isRequired: false,
           ),
           TextFormField(
             controller: _summaryControl,

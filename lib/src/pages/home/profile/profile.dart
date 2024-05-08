@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:school_app/src/pages/settings/settings.dart';
 import 'package:school_app/src/utils/firebase.dart';
+import 'package:school_app/src/utils/models.dart';
 import 'package:school_app/src/utils/providers.dart';
 
 class ProfilePage extends StatelessWidget {
@@ -27,24 +29,21 @@ class ProfilePage extends StatelessWidget {
         ],
       ),
       body: Consumer<UserProvider>(
-        builder: (context, user, child) {
+        builder: (context, value, child) {
           return SingleChildScrollView(
               child: Column(
             children: [
               const SizedBox(height: 40),
-              Hero(
-                transitionOnUserGestures: true,
-                tag: Auth.currentUser!.uid,
-                child: CircleAvatar(radius: 100,
-                backgroundImage: NetworkImage(Auth.currentUser!.photoURL!),),
-              ),
+
+              CircleAvatar(radius: 100,
+              backgroundImage: NetworkImage(Auth.currentUser!.photoURL!),),
               const SizedBox(height: 10,),
-              Text(
-                user.readUserData!.username,
-              style: const TextStyle(fontSize: 30 ),),// current user name dapat
-              Text(
-                Auth.currentUser!.email!,
-                style: const TextStyle(fontSize: 20)),// current user ermail
+              const Text(
+                "test name", 
+              style: TextStyle(fontSize: 30 ),),// current user name dapat
+              const Text(
+                "test_email@gmail.com",
+                style: TextStyle(fontSize: 20)),// current user ermail
                 // button for editing profile
               // const SizedBox(
               //   width: 200,

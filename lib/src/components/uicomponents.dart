@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:school_app/src/utils/models.dart';

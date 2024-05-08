@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:school_app/src/components/uicomponents.dart';
 import 'package:school_app/src/utils/models.dart';
 import 'package:school_app/src/utils/providers.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class SavedNotesPage extends StatefulWidget {
   const SavedNotesPage({super.key});
@@ -71,7 +72,14 @@ class _SavedNotesPageState extends State<SavedNotesPage> {
           backgroundColor: Theme.of(context).primaryColor,
           appBar: AppBar(
             backgroundColor: Colors.transparent,
+            centerTitle: true, // Center the title
             title: mySearchBar(context, _searchController, "Search your Saved Notes"),
+            elevation: 4.0, // Adds shadow
+            titleTextStyle: GoogleFonts.ubuntu( // Using Google Fonts for the title
+              fontSize: 20,
+              fontWeight: FontWeight.w500,
+              color: const Color.fromARGB(255, 255, 255, 255),
+            ),
           ),
           body: Container(
             decoration: const BoxDecoration(

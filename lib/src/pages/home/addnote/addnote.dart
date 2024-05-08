@@ -8,6 +8,77 @@ import 'package:school_app/src/components/uicomponents.dart';
 import 'package:school_app/src/utils/firebase.dart';
 import 'package:school_app/src/utils/providers.dart';
 
+
+
+
+class MultiSelect extends StatefulWidget {
+  final List<String> tags;
+  const MultiSelect({Key? key,
+   required this.tags
+   }):
+   super(key: key);
+
+  @override
+  State<MultiSelect> createState() => _MultiSelectState();
+}
+
+class _MultiSelectState extends State<MultiSelect> {
+  final List<String> _selectedItems = [];
+
+  void _itemChange(String itemValue, bool isSelected) {
+    setState(() {
+      if(isSelected) {
+        _selectedItems.add(itemValue);
+      }else{ 
+        _selectedItems.remove(itemValue);
+
+        }
+      }
+    );
+  }
+
+  void _cancel() {
+    Navigator.pop(context);
+
+  }
+
+  void _submit() {
+    Navigator.pop(context, _selectedItems);
+
+  }
+
+   @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Select Topics'),
+      content: SingleChildScrollView(
+        child: ListBody(
+          children: widget.tags
+              .map((item) => CheckboxListTile(
+                    value: _selectedItems.contains(item),
+                    title: Text(item),
+                    controlAffinity: ListTileControlAffinity.leading,
+                    onChanged: (isChecked) => _itemChange(item, isChecked!),
+                  ))
+              .toList(),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: _cancel,
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton(
+          onPressed: _submit,
+          child: const Text('Submit'),
+        ),
+      ],
+    );
+  }
+}
+
+
+
 class AddNote extends StatefulWidget {
   const AddNote({super.key, required this.onpageChanged});
   final void Function(int index) onpageChanged;
@@ -18,6 +89,7 @@ class AddNote extends StatefulWidget {
 
 class _AddNoteState extends State<AddNote> {
   final _formkey = GlobalKey<FormState>();
+  List<String> _selectedTags = [];
 
   late TextEditingController _nameControl;
   late TextEditingController _tag1Control;
@@ -181,6 +253,7 @@ class _AddNoteState extends State<AddNote> {
           // _tag2Control.text,
           // _tag3Control.text,
         );
+      
       }
 
       void removeNote() { 
@@ -191,6 +264,45 @@ class _AddNoteState extends State<AddNote> {
           bytes = null;
         });
       }
+      @override
+      void showTags() async {
+        final List<String> tags = [
+          'math',
+          'science',
+          'engineering',
+          'medical',
+          'biology',
+          'modern math',
+          'religion',
+          'anatomy',
+          'psychology',
+          'physics',
+          'chemistry',
+          'logic',
+          'culture',
+          'management',
+          'business',
+          'hospitality',
+          'arts',
+          'music',
+          'philosophy',
+          'computer',
+          'technology',
+          'language',
+        ];
+        final List<String>? results = await showDialog(
+          context: context,
+          builder: (BuildContext context){
+            return  MultiSelect(tags: tags,);
+          }
+        );
+        if (results != null) {
+          setState(() {
+            _selectedTags = results;
+          });
+        }
+      }
+
 
       return Scaffold(
         appBar: AppBar(
@@ -253,8 +365,18 @@ class _AddNoteState extends State<AddNote> {
                         ],
                       ),
                       ElevatedButton(
-                        onPressed: null, 
-                        child: child),
+                        onPressed: () {showTags();}, 
+                        child: const Text('Select Tags')),
+
+                      const Divider(
+                        height: 30,
+                      ),
+                      Wrap(
+                        children: _selectedTags.map((e) => Chip(
+                          label: Text(e),
+                        )).toList(),
+                      ),
+                        
                 // myFormField(
                 //     label: "Tag 1",
                 //     controller: _tag1Control,
@@ -307,11 +429,13 @@ class _AddNoteState extends State<AddNote> {
                     )
                   ],
                 ),
-              ],
-            ),
+        
+            ]),
           ),
-        )),
+        )
+      )
       );
-    });
+      }
+    );
   }
 }

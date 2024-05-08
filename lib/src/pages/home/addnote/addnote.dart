@@ -13,10 +13,9 @@ import 'package:school_app/src/utils/providers.dart';
 
 class MultiSelect extends StatefulWidget {
   final List<String> tags;
-  const MultiSelect({Key? key,
+  const MultiSelect({super.key,
    required this.tags
-   }):
-   super(key: key);
+   });
 
   @override
   State<MultiSelect> createState() => _MultiSelectState();
@@ -170,9 +169,12 @@ class _AddNoteState extends State<AddNote> {
               _nameControl.text,
               _subjectId,
               _subjectName,
-              [_tag1Control.text],
+              _selectedTags,
               _summaryControl.text);
-          clearFields(note);
+              clearFields(note);
+              _selectedTags.clear;
+          
+          
           setState(() {
             isUploading = false;
           });
@@ -212,9 +214,8 @@ class _AddNoteState extends State<AddNote> {
     _summaryControl.text = note.readSummary!;
     _subjectName = note.readSubjectName ?? "Select a Subject";
     _subjectId = note.readSubjectId ?? "";
-    _tag1Control.text = note.readTag1!;
-    // _tag2Control.text = note.readTag2!;
-    // _tag3Control.text = note.readTag3!;
+    _selectedTags.clear();
+
   }
 
   @override
@@ -262,6 +263,7 @@ class _AddNoteState extends State<AddNote> {
           _nameControl.text = "";
           result = null;
           bytes = null;
+          
         });
       }
       @override

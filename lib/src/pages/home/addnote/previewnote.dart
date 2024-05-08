@@ -18,11 +18,6 @@ class _PreviewNoteState extends State<PreviewNote> {
   Widget build(BuildContext context) {
     return Consumer<NoteProvider>(builder: (context, addnote, child) {
       final bytes = addnote.readBytes;
-
-      final subject = addnote.readSubjectName;
-
-      if (kDebugMode) print(subject);
-      
       return Scaffold(
           appBar: AppBar(
             leading: IconButton(

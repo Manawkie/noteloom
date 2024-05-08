@@ -64,8 +64,7 @@ class _RenderNoteState extends State<RenderNote> {
             widget.note.name, widget.note.subjectName, widget.note.subjectId,
             notesummary: widget.note.summary,
             notetag1: widget.note.tags?[0],
-            notetag2: widget.note.tags?[1],
-            notetag3: widget.note.tags?[2]);
+            );
       }
 
       final userData = context.read<UserProvider>();

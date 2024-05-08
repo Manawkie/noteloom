@@ -8,6 +8,76 @@ import 'package:school_app/src/components/uicomponents.dart';
 import 'package:school_app/src/utils/firebase.dart';
 import 'package:school_app/src/utils/providers.dart';
 
+
+
+
+class MultiSelect extends StatefulWidget {
+  final List<String> tags;
+  const MultiSelect({super.key,
+   required this.tags
+   });
+
+  @override
+  State<MultiSelect> createState() => _MultiSelectState();
+}
+
+class _MultiSelectState extends State<MultiSelect> {
+  final List<String> _selectedItems = [];
+
+  void _itemChange(String itemValue, bool isSelected) {
+    setState(() {
+      if(isSelected) {
+        _selectedItems.add(itemValue);
+      }else{ 
+        _selectedItems.remove(itemValue);
+
+        }
+      }
+    );
+  }
+
+  void _cancel() {
+    Navigator.pop(context);
+
+  }
+
+  void _submit() {
+    Navigator.pop(context, _selectedItems);
+
+  }
+
+   @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Select Topics'),
+      content: SingleChildScrollView(
+        child: ListBody(
+          children: widget.tags
+              .map((item) => CheckboxListTile(
+                    value: _selectedItems.contains(item),
+                    title: Text(item),
+                    controlAffinity: ListTileControlAffinity.leading,
+                    onChanged: (isChecked) => _itemChange(item, isChecked!),
+                  ))
+              .toList(),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: _cancel,
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton(
+          onPressed: _submit,
+          child: const Text('Submit'),
+        ),
+      ],
+    );
+  }
+}
+
+
+
 class AddNote extends StatefulWidget {
   const AddNote({super.key, required this.onpageChanged});
   final void Function(int index) onpageChanged;
@@ -18,11 +88,12 @@ class AddNote extends StatefulWidget {
 
 class _AddNoteState extends State<AddNote> {
   final _formkey = GlobalKey<FormState>();
+  List<String> _selectedTags = [];
 
   late TextEditingController _nameControl;
   late TextEditingController _tag1Control;
-  late TextEditingController _tag2Control;
-  late TextEditingController _tag3Control;
+  // late TextEditingController _tag2Control;
+  // late TextEditingController _tag3Control;
   String _subjectName = "";
   String _subjectId = "";
   late TextEditingController _summaryControl;
@@ -41,8 +112,8 @@ class _AddNoteState extends State<AddNote> {
 
     _nameControl = TextEditingController(text: noteData.name ?? "");
     _tag1Control = TextEditingController(text: noteData.readTag1 ?? "");
-    _tag2Control = TextEditingController(text: noteData.readTag2 ?? "");
-    _tag3Control = TextEditingController(text: noteData.readTag3 ?? "");
+    // _tag2Control = TextEditingController(text: noteData.readTag2 ?? "");
+    // _tag3Control = TextEditingController(text: noteData.readTag3 ?? "");
     _summaryControl = TextEditingController(text: noteData.summary ?? "");
 
     _subjectName = noteData.readSubjectName ?? "Select a Subject";
@@ -59,8 +130,8 @@ class _AddNoteState extends State<AddNote> {
   void dispose() {
     _nameControl.dispose();
     _tag1Control.dispose();
-    _tag2Control.dispose();
-    _tag3Control.dispose();
+    // _tag2Control.dispose();
+    // _tag3Control.dispose();
     super.dispose();
   }
 
@@ -98,9 +169,12 @@ class _AddNoteState extends State<AddNote> {
               _nameControl.text,
               _subjectId,
               _subjectName,
-              [_tag1Control.text, _tag2Control.text, _tag3Control.text],
+              _selectedTags,
               _summaryControl.text);
-          clearFields(note);
+              clearFields(note);
+              _selectedTags.clear;
+          
+          
           setState(() {
             isUploading = false;
           });
@@ -140,9 +214,8 @@ class _AddNoteState extends State<AddNote> {
     _summaryControl.text = note.readSummary!;
     _subjectName = note.readSubjectName ?? "Select a Subject";
     _subjectId = note.readSubjectId ?? "";
-    _tag1Control.text = note.readTag1!;
-    _tag2Control.text = note.readTag2!;
-    _tag3Control.text = note.readTag3!;
+    _selectedTags.clear();
+
   }
 
   @override
@@ -177,20 +250,61 @@ class _AddNoteState extends State<AddNote> {
           _summaryControl.text,
           _subjectName,
           _subjectId,
-          _tag1Control.text,
-          _tag2Control.text,
-          _tag3Control.text,
+          _tag1Control.text
+          // _tag2Control.text,
+          // _tag3Control.text,
         );
+      
       }
 
-      void removeNote() {
+      void removeNote() { 
         note.removeFile();
         setState(() {
           _nameControl.text = "";
           result = null;
           bytes = null;
+          
         });
       }
+      @override
+      void showTags() async {
+        final List<String> tags = [
+          'math',
+          'science',
+          'engineering',
+          'medical',
+          'biology',
+          'modern math',
+          'religion',
+          'anatomy',
+          'psychology',
+          'physics',
+          'chemistry',
+          'logic',
+          'culture',
+          'management',
+          'business',
+          'hospitality',
+          'arts',
+          'music',
+          'philosophy',
+          'computer',
+          'technology',
+          'language',
+        ];
+        final List<String>? results = await showDialog(
+          context: context,
+          builder: (BuildContext context){
+            return  MultiSelect(tags: tags,);
+          }
+        );
+        if (results != null) {
+          setState(() {
+            _selectedTags = results;
+          });
+        }
+      }
+
 
       return Scaffold(
         appBar: AppBar(
@@ -252,21 +366,34 @@ class _AddNoteState extends State<AddNote> {
                               icon: const Icon(Icons.delete))
                         ],
                       ),
-                myFormField(
-                    label: "Tag 1",
-                    controller: _tag1Control,
-                    isRequired: false,
-                    onChanged: (value) => setNote()),
-                myFormField(
-                    label: "Tag 2",
-                    controller: _tag2Control,
-                    isRequired: false,
-                    onChanged: (value) => setNote()),
-                myFormField(
-                    label: "Tag 3",
-                    controller: _tag3Control,
-                    isRequired: false,
-                    onChanged: (value) => setNote()),
+                      ElevatedButton(
+                        onPressed: () {showTags();}, 
+                        child: const Text('Select Tags')),
+
+                      const Divider(
+                        height: 30,
+                      ),
+                      Wrap(
+                        children: _selectedTags.map((e) => Chip(
+                          label: Text(e),
+                        )).toList(),
+                      ),
+                        
+                // myFormField(
+                //     label: "Tag 1",
+                //     controller: _tag1Control,
+                //     isRequired: false,
+                //     onChanged: (value) => setNote()),
+                // myFormField(
+                //     label: "Tag 2",
+                //     controller: _tag2Control,
+                //     isRequired: false,
+                //     onChanged: (value) => setNote()),
+                // myFormField(
+                //     label: "Tag 3",
+                //     controller: _tag3Control,
+                //     isRequired: false,
+                //     onChanged: (value) => setNote()),
                 TextFormField(
                   controller: _summaryControl,
                   decoration: const InputDecoration(
@@ -304,11 +431,13 @@ class _AddNoteState extends State<AddNote> {
                     )
                   ],
                 ),
-              ],
-            ),
+        
+            ]),
           ),
-        )),
+        )
+      )
       );
-    });
+      }
+    );
   }
 }

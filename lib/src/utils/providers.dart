@@ -144,8 +144,7 @@ class NoteProvider extends ChangeNotifier {
   String? subjectName;
   String? subjectId;
   String? tag1;
-  String? tag2;
-  String? tag3;
+  
 
   FilePickerResult? get readResult => _result;
   Uint8List? get readBytes => bytes;
@@ -154,8 +153,7 @@ class NoteProvider extends ChangeNotifier {
   String? get readSubjectName => subjectName;
   String? get readSubjectId => subjectId;
   String? get readTag1 => tag1;
-  String? get readTag2 => tag2;
-  String? get readTag3 => tag3;
+  
 
   void setName(String value) {
     name = value;
@@ -169,8 +167,7 @@ class NoteProvider extends ChangeNotifier {
       String fileSubjectName,
       String fileSubjectId,
       String fileTags1,
-      String fileTags2,
-      String fileTags3) {
+      ) {
     _result = result;
     bytes = result?.files.single.bytes!;
     name = filename;
@@ -178,8 +175,7 @@ class NoteProvider extends ChangeNotifier {
     subjectName = fileSubjectName;
     subjectId = fileSubjectId;
     tag1 = fileTags1;
-    tag2 = fileTags2;
-    tag3 = fileTags3;
+    
     notifyListeners();
   }
 
@@ -211,8 +207,7 @@ class NoteProvider extends ChangeNotifier {
     subjectId = "";
     summary = "";
     tag1 = "";
-    tag2 = "";
-    tag3 = "";
+    
     notifyListeners();
   }
 }
@@ -225,8 +220,7 @@ class CurrentNoteProvider extends ChangeNotifier {
   String? subjectName;
   String? subjectId;
   String? tag1;
-  String? tag2;
-  String? tag3;
+  
 
   bool editing = false;
 
@@ -238,8 +232,7 @@ class CurrentNoteProvider extends ChangeNotifier {
   String? get readSubjectId => subjectId;
   String? get readSubjectName => subjectName;
   String? get readTag1 => tag1;
-  String? get readTag2 => tag2;
-  String? get readTag3 => tag3;
+  
   bool get readEditing => editing;
 
   void setEditing(bool value) {
@@ -253,16 +246,14 @@ class CurrentNoteProvider extends ChangeNotifier {
     String noteSubjectId, {
     String? notesummary,
     String? notetag1,
-    String? notetag2,
-    String? notetag3,
+    
   }) {
     name = notename;
     summary = notesummary;
     subjectName = noteSubjectName;
     subjectId = noteSubjectId;
     tag1 = notetag1;
-    tag2 = notetag2;
-    tag3 = notetag3;
+    
 
     notifyListeners();
   }

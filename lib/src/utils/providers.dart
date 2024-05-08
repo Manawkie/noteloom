@@ -143,7 +143,7 @@ class NoteProvider extends ChangeNotifier {
   String? summary;
   String? subjectName;
   String? subjectId;
-  String? tag1;
+  List<String>? tags;
   
 
   FilePickerResult? get readResult => _result;
@@ -152,7 +152,7 @@ class NoteProvider extends ChangeNotifier {
   String? get readSummary => summary;
   String? get readSubjectName => subjectName;
   String? get readSubjectId => subjectId;
-  String? get readTag1 => tag1;
+  List<String>? get readTags => tags;
   
 
   void setName(String value) {
@@ -166,7 +166,7 @@ class NoteProvider extends ChangeNotifier {
       String fileSummary,
       String fileSubjectName,
       String fileSubjectId,
-      String fileTags1,
+      List<String> fileTags,
       ) {
     _result = result;
     bytes = result?.files.single.bytes!;
@@ -174,7 +174,7 @@ class NoteProvider extends ChangeNotifier {
     summary = fileSummary;
     subjectName = fileSubjectName;
     subjectId = fileSubjectId;
-    tag1 = fileTags1;
+    tags = fileTags;
     
     notifyListeners();
   }
@@ -206,7 +206,7 @@ class NoteProvider extends ChangeNotifier {
     subjectName = "Select a Subject";
     subjectId = "";
     summary = "";
-    tag1 = "";
+    tags = [];
     
     notifyListeners();
   }

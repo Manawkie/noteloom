@@ -198,7 +198,7 @@ class _SetupFormState extends State<SetupForm> {
                     }),
               ElevatedButton(
                   onPressed: () async {
-                    await Auth.auth.signOut().then((_) {
+                    await Auth.signOut().then((_) {
                       GoRouter.of(context).go("/");
                     });
                   },

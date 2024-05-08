@@ -17,12 +17,41 @@ class MainHomePage extends StatefulWidget {
 
 class _MainHomePageState extends State<MainHomePage> {
   List<String>? _recents = [];
+  List<NoteModel> recommendedNotes = <NoteModel>[];
+
+  @override
+  void initState() {
+    final prioritySubjects = context.read<UserProvider>().readPrioritySubjects;
+
+    if (prioritySubjects.isNotEmpty) {
+      for (final subject in prioritySubjects) {
+        final subjectNotes =
+            context.read<QueryNotesProvider>().getNotesBySubject(subject);
+        if (subjectNotes.isNotEmpty) {
+          recommendedNotes.addAll(subjectNotes);
+          recommendedNotes.sort(
+              (a, b) => a.peopleLiked!.length.compareTo(b.peopleLiked!.length));
+        }
+      }
+    }
+
+    for (var note in recommendedNotes) {
+      print(note.name);
+    }
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(12),
+      backgroundColor: Theme.of(context).primaryColor,
+      body: Container(
+        decoration: const BoxDecoration(
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(45),
+            ),
+            color: Colors.white),
+        padding: const EdgeInsets.all(20),
         child: CustomScrollView(
           slivers: [
             SliverToBoxAdapter(
@@ -59,7 +88,8 @@ class _MainHomePageState extends State<MainHomePage> {
                   return SizedBox(
                     height: MediaQuery.of(context).size.height * 0.2,
                     child: Center(
-                      child: Text("You currently have no recents...",
+                      child: Text(
+                        "You currently have no recents...",
                         style: GoogleFonts.ubuntu(),
                       ),
                     ),
@@ -67,7 +97,7 @@ class _MainHomePageState extends State<MainHomePage> {
                 }
 
                 return Container(
-                  padding: EdgeInsets.symmetric(vertical: 20),
+                  padding: const EdgeInsets.symmetric(vertical: 20),
                   height: MediaQuery.of(context).size.height * 0.25,
                   child: ListView.builder(
                       itemCount: _recents!.length,
@@ -85,13 +115,16 @@ class _MainHomePageState extends State<MainHomePage> {
                     "Suggested Notes",
                     style: GoogleFonts.ubuntu(fontSize: 30),
                   ),
-                  Text("Here are suggested notes based on your saved subjects.",
+                  Text(
+                    "Here are suggested notes based on your saved subjects.",
                     style: GoogleFonts.ubuntu(),
                   )
                 ],
               ),
             ),
-            
+            SliverToBoxAdapter(
+              child: const RenderRecommended(),
+            )
           ],
         ),
       ),
@@ -128,15 +161,17 @@ Widget _buildRecentSubject(SubjectModel subject, BuildContext context) {
       margin: const EdgeInsets.only(right: 10),
       width: MediaQuery.of(context).size.width * 0.5,
       decoration: BoxDecoration(
-        color: colors[subject.id.hashCode % colors.length], // Dynamic color based on subject ID
+        color: colors[subject.id.hashCode %
+            colors.length], // Dynamic color based on subject ID
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color.fromARGB(255, 37, 197, 255), width: 1),
+        border: Border.all(
+            color: const Color.fromARGB(255, 37, 197, 255), width: 1),
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withOpacity(0.5),
             spreadRadius: 1,
             blurRadius: 5,
-            offset: Offset(0, 3), // changes position of shadow
+            offset: const Offset(0, 3), // changes position of shadow
           ),
         ],
       ),
@@ -149,7 +184,8 @@ Widget _buildRecentSubject(SubjectModel subject, BuildContext context) {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(subject.subject, style: GoogleFonts.ubuntu(fontSize: 16)),
-                Text(subject.subjectCode, style: GoogleFonts.ubuntu(fontSize: 14))
+                Text(subject.subjectCode,
+                    style: GoogleFonts.ubuntu(fontSize: 14))
               ],
             ),
           ),
@@ -198,16 +234,54 @@ Widget _buildRecentNote(NoteModel note, BuildContext context) {
           children: [
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [Text(note.name, style: GoogleFonts.ubuntu()), Text(note.subjectName, style: GoogleFonts.ubuntu())],
+              children: [
+                Text(note.name, style: GoogleFonts.ubuntu()),
+                Text(note.subjectName, style: GoogleFonts.ubuntu())
+              ],
             ),
             Text(note.author, style: GoogleFonts.ubuntu())
           ]),
     ),
   );
 }
- List<Color> colors = const [
-    Color.fromRGBO(255, 242, 218, 1),
-    Color.fromRGBO(253, 233, 238, 1),
-    Color.fromRGBO(232, 243, 243, 1),
-    Color.fromRGBO(254, 254, 240, 1),
-  ];
+
+List<Color> colors = const [
+  Color.fromRGBO(255, 242, 218, 1),
+  Color.fromRGBO(253, 233, 238, 1),
+  Color.fromRGBO(232, 243, 243, 1),
+  Color.fromRGBO(254, 254, 240, 1),
+];
+
+class RenderRecommended extends StatelessWidget {
+  const RenderRecommended({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer2<UserProvider, QueryNotesProvider>(
+      builder: (context, userdata, querynotes, child) {
+        final recommendedNotes = [];
+        final prioritySubjects = userdata.readPrioritySubjects.take(3).toList();
+
+        for (var prioritySubject in prioritySubjects) {
+          final getHighestLikes = querynotes.getNotesBySubject(prioritySubject);
+          // sort gethighest likes by people liked length;
+
+          getHighestLikes.sort((a, b) => (b.peopleLiked?.length ?? 0).compareTo(a.peopleLiked?.length ?? 0));
+          if (getHighestLikes.isNotEmpty) {
+            recommendedNotes.add(getHighestLikes.first);
+          }
+        }
+
+        if (recommendedNotes.isEmpty) {
+          return Container();
+        }
+        return Column(
+          children: List.generate(recommendedNotes.length, (index) {
+            final note = recommendedNotes[index];
+            return noteButton(note, context, Colors.white);
+          }),
+        );
+      },
+    );
+  }
+}

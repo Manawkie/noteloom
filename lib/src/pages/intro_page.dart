@@ -5,56 +5,56 @@ import 'package:school_app/src/utils/models.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:math';
 
-class WavePainter extends CustomPainter {
-  final double
-      animationValue; // This should be updated by an external animation controller
-  WavePainter(this.animationValue);
+// class WavePainter extends CustomPainter {
+//   final double
+//       animationValue; // This should be updated by an external animation controller
+//   WavePainter(this.animationValue);
 
-  @override
-  void paint(Canvas canvas, Size size) {
-    var paint = Paint()
-      ..color = Colors.blue[300]!
-      ..style = PaintingStyle.fill;
+//   @override
+//   void paint(Canvas canvas, Size size) {
+//     var paint = Paint()
+//       ..color = Colors.blue[300]!
+//       ..style = PaintingStyle.fill;
 
-    var path = Path();
+//     var path = Path();
 
-    // Start the wave from the left bottom of the screen
-    path.moveTo(0, size.height * 0.60 + 20 * sin(animationValue * pi));
+//     // Start the wave from the left bottom of the screen
+//     path.moveTo(0, size.height * 0.60 + 20 * sin(animationValue * pi));
 
-    // Create two quadratic bezier curves with dynamic control points influenced by animationValue
-    path.quadraticBezierTo(
-        size.width * 0.25,
-        size.height *
-            (0.60 +
-                0.10 *
-                    cos(animationValue * pi)), // Dynamic height for animation
-        size.width * 0.5,
-        size.height * 0.60 +
-            20 * sin(animationValue * pi + pi / 2)); // Shift phase by pi/2
+//     // Create two quadratic bezier curves with dynamic control points influenced by animationValue
+//     path.quadraticBezierTo(
+//         size.width * 0.25,
+//         size.height *
+//             (0.60 +
+//                 0.10 *
+//                     cos(animationValue * pi)), // Dynamic height for animation
+//         size.width * 0.5,
+//         size.height * 0.60 +
+//             20 * sin(animationValue * pi + pi / 2)); // Shift phase by pi/2
 
-    path.quadraticBezierTo(
-        size.width * 0.75,
-        size.height *
-            (0.60 -
-                0.10 *
-                    cos(animationValue * pi)), // Dynamic height for animation
-        size.width,
-        size.height * 0.60 + 20 * sin(animationValue * pi));
+//     path.quadraticBezierTo(
+//         size.width * 0.75,
+//         size.height *
+//             (0.60 -
+//                 0.10 *
+//                     cos(animationValue * pi)), // Dynamic height for animation
+//         size.width,
+//         size.height * 0.60 + 20 * sin(animationValue * pi));
 
-    // Complete the path to fill the bottom part of the screen
-    path.lineTo(size.width, size.height);
-    path.lineTo(0, size.height);
+//     // Complete the path to fill the bottom part of the screen
+//     path.lineTo(size.width, size.height);
+//     path.lineTo(0, size.height);
 
-    canvas.drawPath(path, paint);
-  }
+//     canvas.drawPath(path, paint);
+//   }
 
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    // Repaint only if the animation value changes
-    return oldDelegate is WavePainter &&
-        oldDelegate.animationValue != animationValue;
-  }
-}
+//   @override
+//   bool shouldRepaint(covariant CustomPainter oldDelegate) {
+//     // Repaint only if the animation value changes
+//     return oldDelegate is WavePainter &&
+//         oldDelegate.animationValue != animationValue;
+//   }
+// }
 
 class IntroPage extends StatefulWidget {
   const IntroPage({super.key});
@@ -267,7 +267,7 @@ class _IntroPageState extends State<IntroPage>
                   width: MediaQuery.of(context).size.width,
                   height: MediaQuery.of(context).size.height * 0.7,
                   child: CustomPaint(
-                      painter: WavePainter(_animation!.value),
+                      // painter: WavePainter(_animation!.value),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 20, vertical: 40),

@@ -8,14 +8,11 @@ import 'package:school_app/src/components/uicomponents.dart';
 import 'package:school_app/src/utils/firebase.dart';
 import 'package:school_app/src/utils/providers.dart';
 
-
-
-
 class MultiSelect extends StatefulWidget {
+  final List<String> selectedTags;
   final List<String> tags;
-  const MultiSelect({super.key,
-   required this.tags
-   });
+  const MultiSelect(
+      {super.key, required this.selectedTags, required this.tags});
 
   @override
   State<MultiSelect> createState() => _MultiSelectState();
@@ -24,29 +21,31 @@ class MultiSelect extends StatefulWidget {
 class _MultiSelectState extends State<MultiSelect> {
   final List<String> _selectedItems = [];
 
+  @override
+  void initState() {
+    _selectedItems.addAll(widget.selectedTags);
+    super.initState();
+  }
+
   void _itemChange(String itemValue, bool isSelected) {
     setState(() {
-      if(isSelected) {
+      if (isSelected) {
         _selectedItems.add(itemValue);
-      }else{ 
+      } else {
         _selectedItems.remove(itemValue);
-
-        }
       }
-    );
+    });
   }
 
   void _cancel() {
     Navigator.pop(context);
-
   }
 
   void _submit() {
     Navigator.pop(context, _selectedItems);
-
   }
 
-   @override
+  @override
   Widget build(BuildContext context) {
     return AlertDialog(
       title: const Text('Select Topics'),
@@ -76,8 +75,6 @@ class _MultiSelectState extends State<MultiSelect> {
   }
 }
 
-
-
 class AddNote extends StatefulWidget {
   const AddNote({super.key, required this.onpageChanged});
   final void Function(int index) onpageChanged;
@@ -91,9 +88,7 @@ class _AddNoteState extends State<AddNote> {
   List<String> _selectedTags = [];
 
   late TextEditingController _nameControl;
-  late TextEditingController _tag1Control;
-  // late TextEditingController _tag2Control;
-  // late TextEditingController _tag3Control;
+
   String _subjectName = "";
   String _subjectId = "";
   late TextEditingController _summaryControl;
@@ -111,13 +106,11 @@ class _AddNoteState extends State<AddNote> {
     final noteData = Provider.of<NoteProvider>(context, listen: false);
 
     _nameControl = TextEditingController(text: noteData.name ?? "");
-    _tag1Control = TextEditingController(text: noteData.readTag1 ?? "");
-    // _tag2Control = TextEditingController(text: noteData.readTag2 ?? "");
-    // _tag3Control = TextEditingController(text: noteData.readTag3 ?? "");
     _summaryControl = TextEditingController(text: noteData.summary ?? "");
-
     _subjectName = noteData.readSubjectName ?? "Select a Subject";
     _subjectId = noteData.readSubjectId ?? "";
+
+    _selectedTags = noteData.readTags ?? [];
     ftoast = FToast();
     ftoast.init(context);
 
@@ -129,9 +122,7 @@ class _AddNoteState extends State<AddNote> {
   @override
   void dispose() {
     _nameControl.dispose();
-    _tag1Control.dispose();
-    // _tag2Control.dispose();
-    // _tag3Control.dispose();
+    _summaryControl.dispose();
     super.dispose();
   }
 
@@ -145,7 +136,9 @@ class _AddNoteState extends State<AddNote> {
       final file = result!.files.single;
       bytes = file.bytes!;
       setState(() {
-        _nameControl.text = file.name.split(".pdf")[0];
+        if (_nameControl.text == "") {
+          _nameControl.text = file.name.split(".pdf")[0];
+        }
       });
     }
   }
@@ -154,27 +147,27 @@ class _AddNoteState extends State<AddNote> {
       BuildContext context, NoteProvider note, QueryNotesProvider uni) async {
     final theme = Theme.of(context);
 
+    if (isUploading) return;
     setState(() {
       isUploading = true;
     });
 
     try {
-      if (_subjectName == "Select a Subject" || !subjects.contains(_subjectName)) {
+      if (bytes == null || result == null) {
+        throw ErrorDescription("Please upload a file first");
+      }
+
+      if (_subjectName == "Select a Subject" ||
+          !subjects.contains(_subjectName)) {
         throw ErrorDescription("Please select a Subject first");
       }
       if (_formkey.currentState!.validate()) {
         if (result != null && bytes != null) {
-          final newNote = await Database.submitFile(
-              bytes!,
-              _nameControl.text,
-              _subjectId,
-              _subjectName,
-              _selectedTags,
-              _summaryControl.text);
-              clearFields(note);
-              _selectedTags.clear;
-          
-          
+          final newNote = await Database.submitFile(bytes!, _nameControl.text,
+              _subjectId, _subjectName, _selectedTags, _summaryControl.text);
+          clearFields(note);
+          _selectedTags.clear;
+
           setState(() {
             isUploading = false;
           });
@@ -192,9 +185,6 @@ class _AddNoteState extends State<AddNote> {
         }
       }
     } on ErrorDescription catch (e) {
-      setState(() {
-        isUploading = false;
-      });
       ftoast.showToast(
         child: myToast(theme, e.toString()),
         gravity: ToastGravity.BOTTOM_RIGHT,
@@ -204,6 +194,9 @@ class _AddNoteState extends State<AddNote> {
         ignorePointer: false,
       );
     }
+    setState(() {
+      isUploading = false;
+    });
   }
 
   void clearFields(NoteProvider note) {
@@ -215,7 +208,6 @@ class _AddNoteState extends State<AddNote> {
     _subjectName = note.readSubjectName ?? "Select a Subject";
     _subjectId = note.readSubjectId ?? "";
     _selectedTags.clear();
-
   }
 
   @override
@@ -244,29 +236,22 @@ class _AddNoteState extends State<AddNote> {
       }
 
       void setNote() {
-        note.setResult(
-          result,
-          _nameControl.text,
-          _summaryControl.text,
-          _subjectName,
-          _subjectId,
-          _tag1Control.text
-          // _tag2Control.text,
-          // _tag3Control.text,
-        );
-      
+        note.setResult(result, _nameControl.text, _summaryControl.text,
+            _subjectName, _subjectId, _selectedTags
+            // _tag2Control.text,
+            // _tag3Control.text,
+            );
       }
 
-      void removeNote() { 
+      void removeNote() {
         note.removeFile();
         setState(() {
           _nameControl.text = "";
           result = null;
           bytes = null;
-          
         });
       }
-      @override
+
       void showTags() async {
         final List<String> tags = [
           'math',
@@ -293,151 +278,158 @@ class _AddNoteState extends State<AddNote> {
           'language',
         ];
         final List<String>? results = await showDialog(
-          context: context,
-          builder: (BuildContext context){
-            return  MultiSelect(tags: tags,);
-          }
-        );
+            context: context,
+            builder: (BuildContext context) {
+              return MultiSelect(
+                selectedTags: _selectedTags,
+                tags: tags,
+              );
+            });
         if (results != null) {
           setState(() {
             _selectedTags = results;
           });
+          setNote();
         }
       }
 
-
       return Scaffold(
-        appBar: AppBar(
-          backgroundColor: Theme.of(context).colorScheme.secondary,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new),
-            onPressed: () => context.pop(),
-            color: Colors.black,
+          appBar: AppBar(
+            backgroundColor: Theme.of(context).colorScheme.secondary,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_ios_new),
+              onPressed: () {
+                if (context.canPop()) {
+                  context.pop();
+                } else {
+                  context.go("/home");
+                }
+              },
+              color: Colors.black,
+            ),
           ),
-        ),
-        body: Scaffold(
-            body: Container(
-          height: double.infinity,
-          margin: const EdgeInsets.all(20),
-          child: Form(
-            key: _formkey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                const Text("Share your note here",
-                    style: TextStyle(fontSize: 30)),
-                const SizedBox(
-                  height: 20,
-                ),
-                myFormField(
-                    label: "Name",
-                    controller: _nameControl,
-                    isRequired: true,
-                    onChanged: (value) {
-                      setState(() {
-                        resultString = value;
-                      });
-                      note.setName(resultString);
-                    }),
-                ElevatedButton(
-                    onPressed: () {
-                      context.go("/addnote/selectsubject");
-                    },
-                    child: Text(note.readSubjectName ?? "Select a Subject")),
-                (result == null)
-                    ? ElevatedButton(
-                        onPressed: () async {
-                          await _uploadFile();
-                          setNote();
+          body: Scaffold(
+              body: Container(
+            height: double.infinity,
+            margin: const EdgeInsets.all(20),
+            child: Form(
+              key: _formkey,
+              child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    const Text("Share your note here",
+                        style: TextStyle(fontSize: 30)),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    myFormField(
+                        label: "Name",
+                        controller: _nameControl,
+                        isRequired: true,
+                        onChanged: (value) {
+                          setState(() {
+                            resultString = value;
+                          });
+                          note.setName(resultString);
+                        }),
+                    ElevatedButton(
+                        onPressed: () {
+                          context.go("/addnote/selectsubject");
                         },
-                        child: const Text("Upload a file"),
-                      )
-                    : Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          ElevatedButton(
-                              onPressed: () {
-                                setNote();
-                                widget.onpageChanged(1);
-                              },
-                              child: const Text("Preview File")),
-                          IconButton(
-                              onPressed: removeNote,
-                              icon: const Icon(Icons.delete))
-                        ],
-                      ),
-                      ElevatedButton(
-                        onPressed: () {showTags();}, 
+                        child:
+                            Text(note.readSubjectName ?? "Select a Subject")),
+                    (result == null)
+                        ? ElevatedButton(
+                            onPressed: () async {
+                              await _uploadFile();
+                              setNote();
+                            },
+                            child: const Text("Upload a file"),
+                          )
+                        : Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              ElevatedButton(
+                                  onPressed: () {
+                                    setNote();
+                                    widget.onpageChanged(1);
+                                  },
+                                  child: const Text("Preview File")),
+                              IconButton(
+                                  onPressed: removeNote,
+                                  icon: const Icon(Icons.delete))
+                            ],
+                          ),
+                    ElevatedButton(
+                        onPressed: () {
+                          showTags();
+                        },
                         child: const Text('Select Tags')),
 
-                      const Divider(
-                        height: 30,
+                    const Divider(
+                      height: 30,
+                    ),
+                    Wrap(
+                      children: _selectedTags
+                          .map((e) => Chip(
+                                label: Text(e),
+                              ))
+                          .toList(),
+                    ),
+
+                    // myFormField(
+                    //     label: "Tag 1",
+                    //     controller: _tag1Control,
+                    //     isRequired: false,
+                    //     onChanged: (value) => setNote()),
+                    // myFormField(
+                    //     label: "Tag 2",
+                    //     controller: _tag2Control,
+                    //     isRequired: false,
+                    //     onChanged: (value) => setNote()),
+                    // myFormField(
+                    //     label: "Tag 3",
+                    //     controller: _tag3Control,
+                    //     isRequired: false,
+                    //     onChanged: (value) => setNote()),
+                    TextFormField(
+                      controller: _summaryControl,
+                      decoration: const InputDecoration(
+                        labelText: "Summary",
+                        hintText: "Write a brief summary of the note",
                       ),
-                      Wrap(
-                        children: _selectedTags.map((e) => Chip(
-                          label: Text(e),
-                        )).toList(),
-                      ),
-                        
-                // myFormField(
-                //     label: "Tag 1",
-                //     controller: _tag1Control,
-                //     isRequired: false,
-                //     onChanged: (value) => setNote()),
-                // myFormField(
-                //     label: "Tag 2",
-                //     controller: _tag2Control,
-                //     isRequired: false,
-                //     onChanged: (value) => setNote()),
-                // myFormField(
-                //     label: "Tag 3",
-                //     controller: _tag3Control,
-                //     isRequired: false,
-                //     onChanged: (value) => setNote()),
-                TextFormField(
-                  controller: _summaryControl,
-                  decoration: const InputDecoration(
-                    labelText: "Summary",
-                    hintText: "Write a brief summary of the note",
-                  ),
-                  maxLengthEnforcement: MaxLengthEnforcement.enforced,
-                  maxLength: 100,
-                  maxLines: 4,
-                  onChanged: (value) {
-                    note.setSummary(value);
-                  },
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    (isUploading)
-                        ? ElevatedButton(
-                            onPressed: () {},
-                            child: SizedBox(
-                              height: 10,
-                              width: 10,
-                              child: myLoadingIndicator(),
-                            ))
-                        : ElevatedButton(
+                      maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                      maxLength: 100,
+                      maxLines: 4,
+                      onChanged: (value) {
+                        note.setSummary(value);
+                      },
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        ElevatedButton(
                             onPressed: () async =>
                                 _submitFile(context, note, uni),
-                            child: const Text("Post")),
-                    IconButton(
-                      onPressed: () => clearFields(note),
-                      icon: const Icon(
-                        Icons.remove_circle_outline,
-                        color: Colors.red,
-                      ),
-                    )
-                  ],
-                ),
-        
-            ]),
-          ),
-        )
-      )
-      );
-      }
-    );
+                            child: isUploading
+                                ? SizedBox(
+                                    height: 10,
+                                    width: 10,
+                                    child: myLoadingIndicator(),
+                                  )
+                                : Text("Post")),
+                        IconButton(
+                          onPressed: () => clearFields(note),
+                          icon: const Icon(
+                            Icons.remove_circle_outline,
+                            color: Colors.red,
+                          ),
+                        )
+                      ],
+                    ),
+                  ]),
+            ),
+          )));
+    });
   }
 }

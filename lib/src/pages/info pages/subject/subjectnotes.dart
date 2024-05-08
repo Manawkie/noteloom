@@ -1,7 +1,5 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:provider/provider.dart';
 import 'package:school_app/src/components/uicomponents.dart';
 import 'package:school_app/src/utils/models.dart';
@@ -69,18 +67,30 @@ class _SubjectNotesPageState extends State<SubjectNotesPage> {
             );
           }
           return Scaffold(
-            
+            backgroundColor: Theme.of(context).primaryColor,
             appBar: AppBar(
               leading: Container(),
-              flexibleSpace: mySearchBar(context, _controller, "Search Notes"),
+              flexibleSpace: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: mySearchBar(context, _controller, "Search Notes")),
             ),
-            body: ListView.builder(
-              itemCount: _filteredNotes.length,
-              itemBuilder: (context, index) {
-                final NoteModel note = _filteredNotes[index];
-      
-                return noteButton(note, context, Colors.white);
-              },
+            body: Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(45),
+                ),
+              ),
+              margin: const EdgeInsets.only(top: 20),
+              padding: const EdgeInsets.all(20),
+              child: ListView.builder(
+                itemCount: _filteredNotes.length,
+                itemBuilder: (context, index) {
+                  final NoteModel note = _filteredNotes[index];
+
+                  return noteButton(note, context, Colors.white);
+                },
+              ),
             ),
           );
         },

@@ -72,22 +72,34 @@ class _PrioritySubjectsState extends State<PrioritySubjects> {
       filterResults();
 
       return Scaffold(
+          backgroundColor: Theme.of(context).primaryColor,
+
         appBar: AppBar(
           backgroundColor: Theme.of(context).primaryColor,
             title: mySearchBar(
                 context, _searchController, "Search your Priority Subjects")),
-        body: ListView.builder(
-            itemCount: _filteredSubjects.length,
-            itemBuilder: (context, index) {
-              final subject = _filteredSubjects[index];
-              if (subject == null) {
-                return const Center(
-                  child: Text("Subject not found"),
-                );
-              }
-
-              return subjectButton(subject, context, Colors.white);
-            }),
+        body: Container(
+          decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(
+                top: Radius.circular(45),
+              ),
+            ),
+            margin: const EdgeInsets.only(top:20),
+            padding: const EdgeInsets.all(20),
+          child: ListView.builder(
+              itemCount: _filteredSubjects.length,
+              itemBuilder: (context, index) {
+                final subject = _filteredSubjects[index];
+                if (subject == null) {
+                  return const Center(
+                    child: Text("Subject not found"),
+                  );
+                }
+          
+                return subjectButton(subject, context, Colors.white);
+              }),
+        ),
       );
     });
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:school_app/src/components/uicomponents.dart';
+import 'package:school_app/src/utils/firebase.dart';
 import 'package:school_app/src/utils/models.dart';
 import 'package:school_app/src/utils/providers.dart';
 import 'package:school_app/src/utils/sharedprefs.dart';
@@ -41,15 +42,32 @@ class _SubjectPageState extends State<SubjectPage> {
   }
 }
 
-class RenderSubjectPage extends StatelessWidget {
+class RenderSubjectPage extends StatefulWidget {
   const RenderSubjectPage({super.key, required this.subject});
 
   final SubjectModel subject;
 
   @override
+  State<RenderSubjectPage> createState() => _RenderSubjectPageState();
+}
+
+class _RenderSubjectPageState extends State<RenderSubjectPage> {
+  @override
+  void initState() {
+    Future.microtask(() {
+      final userData = context.read<UserProvider>();
+
+      Database.addRecents("subjects/${widget.subject.id}");
+      userData.addRecents("subjects/${widget.subject.id}");
+    });
+
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-        future: SharedPrefs.isSubjectPriority(subject.id!),
+        future: SharedPrefs.isSubjectPriority(widget.subject.id!),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: myLoadingIndicator());
@@ -67,16 +85,16 @@ class RenderSubjectPage extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      subject.subject,
+                      widget.subject.subject,
                       style: const TextStyle(
                         fontSize: 24.0,
                       ),
                     ),
-                    Actions(isPriority: isPriority, subject: subject)
+                    Actions(isPriority: isPriority, subject: widget.subject)
                   ],
                 ),
                 Text(
-                  subject.subjectCode,
+                  widget.subject.subjectCode,
                   style: const TextStyle(
                     fontSize: 16.0,
                     color: Colors.black,
@@ -89,7 +107,7 @@ class RenderSubjectPage extends StatelessWidget {
                       GestureDetector(
                         onTap: () {
                           context.pushNamed("subjectNotes", pathParameters: {
-                            "id": subject.id!,
+                            "id": widget.subject.id!,
                           });
                         },
                         child: Container(
@@ -112,7 +130,7 @@ class RenderSubjectPage extends StatelessWidget {
                       GestureDetector(
                         onTap: () {
                           context.pushNamed("discussions", pathParameters: {
-                            "id": subject.id!,
+                            "id": widget.subject.id!,
                           });
                         },
                         child: Container(

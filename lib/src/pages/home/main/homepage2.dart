@@ -94,6 +94,7 @@ class _MainHomePageState extends State<MainHomePage> {
                   margin: const EdgeInsets.symmetric(vertical: 20),
                   height: MediaQuery.of(context).size.height * 0.25,
                   child: ListView.builder(
+                    reverse: true,
                       itemCount: _recents!.length,
                       scrollDirection: Axis.horizontal,
                       itemBuilder: (context, index) =>

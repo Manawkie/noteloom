@@ -169,7 +169,7 @@ class NoteProvider extends ChangeNotifier {
       List<String> fileTags,
       ) {
     _result = result;
-    bytes = result?.files.single.bytes!;
+    bytes = result?.files.single.bytes;
     name = filename;
     summary = fileSummary;
     subjectName = fileSubjectName;

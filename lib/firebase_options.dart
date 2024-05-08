@@ -25,7 +25,10 @@ class DefaultFirebaseOptions {
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
-        return macos;
+        throw UnsupportedError(
+          'DefaultFirebaseOptions have not been configured for macos - '
+          'you can reconfigure this by running the FlutterFire CLI again.',
+        );
       case TargetPlatform.windows:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for windows - '
@@ -55,7 +58,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyDK_APvSiVCJYwVlQoJqLsLAlhv36P2jcE',
-    appId: '1:874668964337:android:2ae7fe4dc72ee53f08ac50',
+    appId: '1:874668964337:android:d31aecd204659fa908ac50',
     messagingSenderId: '874668964337',
     projectId: 'note-loom',
     storageBucket: 'note-loom.appspot.com',
@@ -67,17 +70,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '874668964337',
     projectId: 'note-loom',
     storageBucket: 'note-loom.appspot.com',
+    androidClientId: '874668964337-1m8os5h3bv2h27angrmbjeruj6c2ej3g.apps.googleusercontent.com',
     iosClientId: '874668964337-5g8ufkcek8imb1kcc1977q7lbipm9tgi.apps.googleusercontent.com',
     iosBundleId: 'com.example.schoolApp',
-  );
-
-  static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyDZdHytShHotdIXyq3mXgmuJ0rX3aJc1tU',
-    appId: '1:874668964337:ios:e1475fbf0be6f96208ac50',
-    messagingSenderId: '874668964337',
-    projectId: 'note-loom',
-    storageBucket: 'note-loom.appspot.com',
-    iosClientId: '874668964337-2gmafr6bucei779qkgojm0imep7ebjdf.apps.googleusercontent.com',
-    iosBundleId: 'com.example.schoolApp.RunnerTests',
   );
 }

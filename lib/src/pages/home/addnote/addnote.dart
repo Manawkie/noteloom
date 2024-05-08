@@ -71,13 +71,16 @@ class _AddNoteState extends State<AddNote> {
 
   Future _uploadFile() async {
     result = await FilePicker.platform.pickFiles(
+        withData: true,
         allowMultiple: false,
         type: FileType.custom,
         allowedExtensions: ['pdf']);
 
     if (result != null) {
       final file = result!.files.single;
-      bytes = file.bytes!;
+      print(file);
+      bytes = file.bytes;
+      print(file.bytes);
       setState(() {
         if (_nameControl.text == "") {
           _nameControl.text = file.name.split(".pdf")[0];
@@ -88,6 +91,7 @@ class _AddNoteState extends State<AddNote> {
 
   Future _submitFile(
       BuildContext context, NoteProvider note, QueryNotesProvider uni) async {
+    final gorouter = GoRouter.of(context);
     final theme = Theme.of(context);
 
     if (isUploading) return;
@@ -126,6 +130,7 @@ class _AddNoteState extends State<AddNote> {
           final newList = uni.getUniversityNotes;
           newList.add(newNote);
           uni.setUniversityNotes(newList);
+          gorouter.go("/home");
         }
       }
     } on ErrorDescription catch (e) {

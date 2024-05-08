@@ -6,74 +6,9 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:school_app/src/components/uicomponents.dart';
 import 'package:school_app/src/utils/firebase.dart';
+import 'package:school_app/src/utils/models.dart';
 import 'package:school_app/src/utils/providers.dart';
-
-class MultiSelect extends StatefulWidget {
-  final List<String> selectedTags;
-  final List<String> tags;
-  const MultiSelect(
-      {super.key, required this.selectedTags, required this.tags});
-
-  @override
-  State<MultiSelect> createState() => _MultiSelectState();
-}
-
-class _MultiSelectState extends State<MultiSelect> {
-  final List<String> _selectedItems = [];
-
-  @override
-  void initState() {
-    _selectedItems.addAll(widget.selectedTags);
-    super.initState();
-  }
-
-  void _itemChange(String itemValue, bool isSelected) {
-    setState(() {
-      if (isSelected) {
-        _selectedItems.add(itemValue);
-      } else {
-        _selectedItems.remove(itemValue);
-      }
-    });
-  }
-
-  void _cancel() {
-    Navigator.pop(context);
-  }
-
-  void _submit() {
-    Navigator.pop(context, _selectedItems);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Select Topics'),
-      content: SingleChildScrollView(
-        child: ListBody(
-          children: widget.tags
-              .map((item) => CheckboxListTile(
-                    value: _selectedItems.contains(item),
-                    title: Text(item),
-                    controlAffinity: ListTileControlAffinity.leading,
-                    onChanged: (isChecked) => _itemChange(item, isChecked!),
-                  ))
-              .toList(),
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: _cancel,
-          child: const Text('Cancel'),
-        ),
-        ElevatedButton(
-          onPressed: _submit,
-          child: const Text('Submit'),
-        ),
-      ],
-    );
-  }
-}
+import 'package:school_app/src/utils/util_functions.dart';
 
 class AddNote extends StatefulWidget {
   const AddNote({super.key, required this.onpageChanged});
@@ -88,12 +23,15 @@ class _AddNoteState extends State<AddNote> {
   List<String> _selectedTags = [];
 
   late TextEditingController _nameControl;
+  late TextEditingController _summaryControl;
+  late SearchController _searchController;
 
   String _subjectName = "";
   String _subjectId = "";
-  late TextEditingController _summaryControl;
 
   List<String> subjects = [];
+  List<SubjectModel> allUniversitySubjects = [];
+  List<SubjectModel> suggestedSubjects = [];
 
   FilePickerResult? result;
   Uint8List? bytes;
@@ -105,9 +43,14 @@ class _AddNoteState extends State<AddNote> {
   void initState() {
     final noteData = Provider.of<NoteProvider>(context, listen: false);
 
+    allUniversitySubjects =
+        context.read<QueryNotesProvider>().getUniversitySubjects;
     _nameControl = TextEditingController(text: noteData.name ?? "");
     _summaryControl = TextEditingController(text: noteData.summary ?? "");
-    _subjectName = noteData.readSubjectName ?? "Select a Subject";
+
+    _searchController = SearchController();
+    _searchController.text = noteData.readSubjectName ?? "";
+    _searchController.addListener(filterSubjects);
     _subjectId = noteData.readSubjectId ?? "";
 
     _selectedTags = noteData.readTags ?? [];
@@ -159,6 +102,7 @@ class _AddNoteState extends State<AddNote> {
 
       if (_subjectName == "Select a Subject" ||
           !subjects.contains(_subjectName)) {
+        print(_subjectName);
         throw ErrorDescription("Please select a Subject first");
       }
       if (_formkey.currentState!.validate()) {
@@ -204,96 +148,85 @@ class _AddNoteState extends State<AddNote> {
     result = null;
     bytes = null;
     _nameControl.text = note.readName!;
+    _searchController.text = "";
     _summaryControl.text = note.readSummary!;
     _subjectName = note.readSubjectName ?? "Select a Subject";
     _subjectId = note.readSubjectId ?? "";
     _selectedTags.clear();
   }
 
+  void filterSubjects() {
+    final search = _searchController.text;
+    if (search.isEmpty) {
+      suggestedSubjects = allUniversitySubjects;
+      return;
+    }
+    final filteredSubjects = allUniversitySubjects
+        .where((subject) =>
+            subject.subject.toLowerCase().contains(search.toLowerCase()))
+        .toList();
+    suggestedSubjects = filteredSubjects;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer2<NoteProvider, QueryNotesProvider>(
-        builder: (context, note, uni, child) {
-      if (note.readBytes != null) {
-        bytes = note.readBytes;
-      }
-      if (note.readResult != null) {
-        result = note.readResult;
-      }
-
-      if (note.readSubjectName != null) {
-        _subjectName = note.readSubjectName!;
-      }
-
-      if (note.readSubjectId != null) {
-        _subjectId = note.readSubjectId!;
-      }
-
-      if (subjects.isEmpty) {
-        for (var subject in uni.getUniversitySubjects) {
-          subjects.add(subject.subject);
+      builder: (context, note, uni, child) {
+        if (note.readBytes != null) {
+          bytes = note.readBytes;
         }
-      }
+        if (note.readResult != null) {
+          result = note.readResult;
+        }
 
-      void setNote() {
-        note.setResult(result, _nameControl.text, _summaryControl.text,
-            _subjectName, _subjectId, _selectedTags
-            // _tag2Control.text,
-            // _tag3Control.text,
-            );
-      }
+        if (note.readSubjectName != null) {
+          _subjectName = note.readSubjectName!;
+        }
 
-      void removeNote() {
-        note.removeFile();
-        setState(() {
-          _nameControl.text = "";
-          result = null;
-          bytes = null;
-        });
-      }
+        if (note.readSubjectId != null) {
+          _subjectId = note.readSubjectId!;
+        }
 
-      void showTags() async {
-        final List<String> tags = [
-          'math',
-          'science',
-          'engineering',
-          'medical',
-          'biology',
-          'modern math',
-          'religion',
-          'anatomy',
-          'psychology',
-          'physics',
-          'chemistry',
-          'logic',
-          'culture',
-          'management',
-          'business',
-          'hospitality',
-          'arts',
-          'music',
-          'philosophy',
-          'computer',
-          'technology',
-          'language',
-        ];
-        final List<String>? results = await showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return MultiSelect(
-                selectedTags: _selectedTags,
-                tags: tags,
-              );
-            });
-        if (results != null) {
+        if (subjects.isEmpty) {
+          for (var subject in uni.getUniversitySubjects) {
+            subjects.add(subject.subject);
+          }
+        }
+
+        void setNote() {
+          note.setResult(result, _nameControl.text, _summaryControl.text,
+              _subjectName, _subjectId, _selectedTags);
+        }
+
+        void removeNote() {
+          note.removeFile();
           setState(() {
-            _selectedTags = results;
+            _nameControl.text = "";
+            result = null;
+            bytes = null;
           });
-          setNote();
         }
-      }
 
-      return Scaffold(
+        filterSubjects();
+
+        void showTags() async {
+          final List<String>? results = await showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return MultiSelect(
+                  selectedTags: _selectedTags,
+                  tags: Utils.tags,
+                );
+              });
+          if (results != null) {
+            setState(() {
+              _selectedTags = results;
+            });
+            setNote();
+          }
+        }
+
+        return Scaffold(
           appBar: AppBar(
             backgroundColor: Theme.of(context).colorScheme.secondary,
             leading: IconButton(
@@ -309,12 +242,12 @@ class _AddNoteState extends State<AddNote> {
             ),
           ),
           body: Scaffold(
-              body: Container(
-            height: double.infinity,
-            margin: const EdgeInsets.all(20),
-            child: Form(
-              key: _formkey,
-              child: Column(
+            body: Container(
+              height: double.infinity,
+              margin: const EdgeInsets.all(20),
+              child: Form(
+                key: _formkey,
+                child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     const Text("Share your note here",
@@ -332,12 +265,34 @@ class _AddNoteState extends State<AddNote> {
                           });
                           note.setName(resultString);
                         }),
-                    ElevatedButton(
-                        onPressed: () {
-                          context.go("/addnote/selectsubject");
-                        },
-                        child:
-                            Text(note.readSubjectName ?? "Select a Subject")),
+                    subjectSearchBar(_searchController, "Select a Subject here",
+                        suggestedSubjects, (context, controller) {
+                      return [
+                        ...List.generate(
+                            suggestedSubjects.length > 5
+                                ? 5
+                                : suggestedSubjects.length, (index) {
+                          final subject = suggestedSubjects[index].subject;
+                          final subjectCode =
+                              suggestedSubjects[index].subjectCode;
+                          final subjectId = suggestedSubjects[index].id;
+                          return ListTile(
+                            title: Text(subject),
+                            subtitle: Text(subjectCode),
+                            onTap: () {
+                              setState(() {
+                                _subjectName = subject;
+                                _subjectId = subjectId!;
+                                controller.closeView(subject);
+                              });
+                              setNote();
+                            },
+                          );
+                        }),
+                        if (suggestedSubjects.isEmpty)
+                          addASubjectButton(context)
+                      ];
+                    }),
                     (result == null)
                         ? ElevatedButton(
                             onPressed: () async {
@@ -365,33 +320,20 @@ class _AddNoteState extends State<AddNote> {
                           showTags();
                         },
                         child: const Text('Select Tags')),
-
                     const Divider(
                       height: 30,
                     ),
                     Wrap(
                       children: _selectedTags
-                          .map((e) => Chip(
-                                label: Text(e),
+                          .map((e) => Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 8.0),
+                                child: Chip(
+                                  label: Text(e),
+                                ),
                               ))
                           .toList(),
                     ),
-
-                    // myFormField(
-                    //     label: "Tag 1",
-                    //     controller: _tag1Control,
-                    //     isRequired: false,
-                    //     onChanged: (value) => setNote()),
-                    // myFormField(
-                    //     label: "Tag 2",
-                    //     controller: _tag2Control,
-                    //     isRequired: false,
-                    //     onChanged: (value) => setNote()),
-                    // myFormField(
-                    //     label: "Tag 3",
-                    //     controller: _tag3Control,
-                    //     isRequired: false,
-                    //     onChanged: (value) => setNote()),
                     TextFormField(
                       controller: _summaryControl,
                       decoration: const InputDecoration(
@@ -417,19 +359,26 @@ class _AddNoteState extends State<AddNote> {
                                     width: 10,
                                     child: myLoadingIndicator(),
                                   )
-                                : Text("Post")),
-                        IconButton(
+                                : const Text("Post")),
+                        TextButton(
+                          style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all(
+                                  Colors.red.shade100)),
                           onPressed: () => clearFields(note),
-                          icon: const Icon(
-                            Icons.remove_circle_outline,
-                            color: Colors.red,
+                          child: const Text(
+                            "Clear all fields",
+                            style: TextStyle(color: Colors.red),
                           ),
                         )
                       ],
                     ),
-                  ]),
+                  ],
+                ),
+              ),
             ),
-          )));
-    });
+          ),
+        );
+      },
+    );
   }
 }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:provider/provider.dart';
 import 'package:school_app/src/components/uicomponents.dart';
 import 'package:school_app/src/utils/models.dart';
@@ -100,16 +99,16 @@ class _SearchPageState extends State<SearchPage> {
           body: CustomScrollView(
             slivers: [
               SliverAppBar(
-                expandedHeight: 100,
+                expandedHeight: 120,
                 stretch: false,
-                flexibleSpace: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 5),
-                    child: mySearchBar(
-                        context, _searchController, "Search Note or Subject"),
-                  ),
+                pinned: true,
+                flexibleSpace: Padding(
+                  padding: const EdgeInsets.all( 8.0),
+                  child: mySearchBar(
+                      context, _searchController, "Search Note or Subject"),
                 ),
                 backgroundColor: Theme.of(context).primaryColor,
+                floating: true,
               ),
               SliverToBoxAdapter(
                 child: Container(
@@ -117,6 +116,7 @@ class _SearchPageState extends State<SearchPage> {
                       color: Colors.white,
                       borderRadius:
                           BorderRadius.vertical(top: Radius.circular(45))),
+                          margin: const EdgeInsets.only(top: 20),
                   padding: const EdgeInsets.all(20),
                   child: Column(
                     children: renderNotes(),

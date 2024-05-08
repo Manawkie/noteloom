@@ -48,46 +48,45 @@ class _PrioritySubjectsState extends State<PrioritySubjects> {
   @override
   Widget build(BuildContext context) {
     return Consumer2<UserProvider, QueryNotesProvider>(
-        builder: (context, userdata, notes, child) {
-      final userPrioritySubjects = userdata.readPrioritySubjects;
+      builder: (context, userdata, notes, child) {
+        final userPrioritySubjects = userdata.readPrioritySubjects;
 
-      if (userPrioritySubjects.isEmpty) {
-        return const Scaffold(
-          backgroundColor: Colors.white,
-          body: Padding(
-            padding: EdgeInsets.all(20.0),
-            child: Center(
-              child: Text(
-                "You currently don't have any priority subjects.\nTo add, search a subject and add as priority.",
+        if (userPrioritySubjects.isEmpty) {
+          return const Scaffold(
+            backgroundColor: Colors.white,
+            body: Padding(
+              padding: EdgeInsets.all(20.0),
+              child: Center(
+                child: Text(
+                  "You currently don't have any priority subjects.\nTo add, search a subject and add as priority.",
+                ),
               ),
             ),
-          ),
-        );
-      }
+          );
+        }
 
-      _allPrioritySubjects = userPrioritySubjects
-          .map((subjectId) => notes.findSubject(subjectId))
-          .toList();
+        _allPrioritySubjects = userPrioritySubjects
+            .map((subjectId) => notes.findSubject(subjectId))
+            .toList();
 
-      filterResults();
+        filterResults();
 
-      return Scaffold(
+        return Scaffold(
           backgroundColor: Theme.of(context).primaryColor,
-
-        appBar: AppBar(
-          backgroundColor: Theme.of(context).primaryColor,
-            title: mySearchBar(
-                context, _searchController, "Search your Priority Subjects")),
-        body: Container(
-          decoration: const BoxDecoration(
+          appBar: AppBar(
+              backgroundColor: Theme.of(context).primaryColor,
+              title: mySearchBar(
+                  context, _searchController, "Search your Priority Subjects")),
+          body: Container(
+            decoration: const BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.vertical(
                 top: Radius.circular(45),
               ),
             ),
-            margin: const EdgeInsets.only(top:20),
+            margin: const EdgeInsets.only(top: 20),
             padding: const EdgeInsets.all(20),
-          child: ListView.builder(
+            child: ListView.builder(
               itemCount: _filteredSubjects.length,
               itemBuilder: (context, index) {
                 final subject = _filteredSubjects[index];
@@ -96,11 +95,13 @@ class _PrioritySubjectsState extends State<PrioritySubjects> {
                     child: Text("Subject not found"),
                   );
                 }
-          
+
                 return subjectButton(subject, context, Colors.white);
-              }),
-        ),
-      );
-    });
+              },
+            ),
+          ),
+        );
+      },
+    );
   }
 }

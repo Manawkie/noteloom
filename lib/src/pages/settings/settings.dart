@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
@@ -136,7 +137,7 @@ class _SetupFormState extends State<SetupForm> {
         ));
 
         // change notes data by the user
-        print("Editing user notes");
+        if (kDebugMode) print("Editing user notes");
         await Database.editUserNotes(oldUsername, _username.text);
 
         // change message usernames

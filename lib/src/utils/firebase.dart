@@ -533,7 +533,7 @@ class Database {
   final snapSubjects = await subjects.first;
 
   if (snapSubjects.docs.isEmpty) {
-    print('No subjects found. Skipping username update.');
+    if (kDebugMode) print('No subjects found. Skipping username update.');
     return; // Early exit if no subjects
   }
 
@@ -561,9 +561,13 @@ class Database {
   }
 
   await batch.commit().then((_) {
-    print('Batch write successful!');
+    if (kDebugMode) {
+      print('Batch write successful!');
+    }
   }).catchError((error) {
-    print('Error updating message usernames: $error');
+    if (kDebugMode) {
+      print('Error updating message usernames: $error');
+    }
   });
   }
 }

@@ -71,7 +71,7 @@ class _SavedNotesPageState extends State<SavedNotesPage> {
           backgroundColor: Theme.of(context).primaryColor,
           appBar: AppBar(
             backgroundColor: Colors.transparent,
-            title: mySearchBar(context, _searchController, "Search Notes"),
+            title: mySearchBar(context, _searchController, "Search your Saved Notes"),
           ),
           body: Container(
             decoration: const BoxDecoration(

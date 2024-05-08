@@ -219,7 +219,7 @@ class CurrentNoteProvider extends ChangeNotifier {
   String? newSubjectId;
   String? subjectName;
   String? subjectId;
-  String? tag1;
+  List<String>? tags;
   
 
   bool editing = false;
@@ -231,7 +231,7 @@ class CurrentNoteProvider extends ChangeNotifier {
   String? get readNewSubjectId => newSubjectId;
   String? get readSubjectId => subjectId;
   String? get readSubjectName => subjectName;
-  String? get readTag1 => tag1;
+  List<String>? get readTags => tags;
   
   bool get readEditing => editing;
 
@@ -245,14 +245,14 @@ class CurrentNoteProvider extends ChangeNotifier {
     String noteSubjectName,
     String noteSubjectId, {
     String? notesummary,
-    String? notetag1,
+    List<String>? notetags,
     
   }) {
     name = notename;
     summary = notesummary;
     subjectName = noteSubjectName;
     subjectId = noteSubjectId;
-    tag1 = notetag1;
+    tags = notetags;
     
 
     notifyListeners();

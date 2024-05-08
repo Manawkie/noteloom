@@ -1,6 +1,4 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:school_app/src/components/uicomponents.dart';
@@ -33,10 +31,6 @@ class _MainHomePageState extends State<MainHomePage> {
               (a, b) => a.peopleLiked!.length.compareTo(b.peopleLiked!.length));
         }
       }
-    }
-
-    for (var note in recommendedNotes) {
-      print(note.name);
     }
     super.initState();
   }
@@ -97,13 +91,13 @@ class _MainHomePageState extends State<MainHomePage> {
                 }
 
                 return Container(
-                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  margin: const EdgeInsets.symmetric(vertical: 20),
                   height: MediaQuery.of(context).size.height * 0.25,
                   child: ListView.builder(
                       itemCount: _recents!.length,
                       scrollDirection: Axis.horizontal,
                       itemBuilder: (context, index) =>
-                          _buildItem(context, index, queryNotes)),
+                          _buildItem(context, index, queryNotes),),
                 );
               }),
             ),
@@ -122,8 +116,8 @@ class _MainHomePageState extends State<MainHomePage> {
                 ],
               ),
             ),
-            SliverToBoxAdapter(
-              child: const RenderRecommended(),
+            const SliverToBoxAdapter(
+              child: RenderRecommended(),
             )
           ],
         ),
@@ -139,12 +133,16 @@ class _MainHomePageState extends State<MainHomePage> {
     if (type == "notes") {
       final displayedNote = notes.findNote(id);
       if (displayedNote != null) {
-        return _buildRecentNote(displayedNote, context);
+        return Container(
+          margin: const EdgeInsets.all(8),
+          child: _buildRecentNote(displayedNote, context));
       }
     } else if (type == "subjects") {
       final displayedSubject = notes.findSubject(id);
       if (displayedSubject != null) {
-        return _buildRecentSubject(displayedSubject, context);
+        return Container(
+          margin: const EdgeInsets.all(8),
+          child: _buildRecentSubject(displayedSubject, context));
       }
     }
     return Container();
@@ -164,8 +162,6 @@ Widget _buildRecentSubject(SubjectModel subject, BuildContext context) {
         color: colors[subject.id.hashCode %
             colors.length], // Dynamic color based on subject ID
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-            color: const Color.fromARGB(255, 37, 197, 255), width: 1),
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withOpacity(0.5),
@@ -225,8 +221,18 @@ Widget _buildRecentNote(NoteModel note, BuildContext context) {
       margin: const EdgeInsets.only(right: 10),
       width: MediaQuery.of(context).size.width * 0.5,
       decoration: BoxDecoration(
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.5),
+            spreadRadius: 1,
+            blurRadius: 5,
+            offset: const Offset(0, 3), // changes position of shadow
+          ),
+        ],
+        color: colors[note.id.hashCode %
+            colors.length], 
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.black, width: 1),
+
       ),
       child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

@@ -4,12 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:school_app/src/pages/addsubject.dart';
 import 'package:school_app/src/pages/home/addnote/layout.dart';
-import 'package:school_app/src/pages/home/addnote/selectsubject.dart';
 import 'package:school_app/src/pages/home/profile/profile.dart';
 import 'package:school_app/src/pages/info%20pages/note/edit.dart';
 import 'package:school_app/src/pages/info%20pages/note/notepage.dart';
 import 'package:school_app/src/pages/info%20pages/subject/chat_page.dart';
-import 'package:school_app/src/pages/info%20pages/subject/main.dart';
+import 'package:school_app/src/pages/info%20pages/subject/main2.dart';
 import 'package:school_app/src/pages/info%20pages/subject/selectnote.dart';
 import 'package:school_app/src/pages/info%20pages/subject/subjectnotes.dart';
 import 'package:school_app/src/pages/login.dart';
@@ -102,12 +101,12 @@ class Routes {
               child: const AddNoteLayout(),
               transitionsBuilder: (_, anim, __, child) =>
                   fromBottomTransition(_, anim, __, child)),
-          routes: [
-            GoRoute(
-              path: "selectsubject",
-              builder: (context, state) => const SelectSubjectPage(),
-            ),
-          ],
+          // routes: [
+          //   GoRoute(
+          //     path: "selectsubject",
+          //     builder: (context, state) => const SelectSubjectPage(),
+          //   ),
+          // ],
         ),
         GoRoute(
           name: "addsubject",

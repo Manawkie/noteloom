@@ -217,7 +217,7 @@ class NoteModel extends Results {
   String subjectName;
   String time;
   String storagePath;
-  List<String?>? tags;
+  List<String>? tags;
   List<String?>? peopleLiked;
   String? summary;
 
@@ -271,7 +271,7 @@ class NoteModel extends Results {
   }
 
   void editFields(String newName, String newSubjectId, String newSubjectName,
-      String? newSummary, List<String?>? newTags) {
+      String? newSummary, List<String>? newTags) {
     name = newName;
     subjectId = newSubjectId;
     subjectName = newSubjectName;

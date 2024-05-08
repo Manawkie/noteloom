@@ -40,8 +40,6 @@ class Utils {
     //   set recents
     //   set priority subjects
     await Database.getUser().then((UserModel? userData) async {
-  
-
       if (userData != null) {
         userInfo.setUserData(userData);
         userInfo.setRecents(userData.recents);
@@ -62,4 +60,29 @@ class Utils {
       userInfo.setSavedNoteIds(savedNotesIds);
     });
   }
+
+  static final List<String> tags = [
+    'math',
+    'science',
+    'engineering',
+    'medical',
+    'biology',
+    'modern math',
+    'religion',
+    'anatomy',
+    'psychology',
+    'physics',
+    'chemistry',
+    'logic',
+    'culture',
+    'management',
+    'business',
+    'hospitality',
+    'arts',
+    'music',
+    'philosophy',
+    'computer',
+    'technology',
+    'language',
+  ];
 }

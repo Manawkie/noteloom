@@ -69,7 +69,7 @@ class _RenderSubjectPageState extends State<RenderSubjectPage> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: Future.wait([SharedPrefs.isSubjectPriority(widget.subject.id!)]),
+      future: SharedPrefs.isSubjectPriority(widget.subject.id!),
       builder: (context, snapshot) {
 
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -78,7 +78,7 @@ class _RenderSubjectPageState extends State<RenderSubjectPage> {
           );
         }
 
-        bool isPriority = snapshot.data?[0] ?? false;
+        bool isPriority = snapshot.data ?? false;
         if (kDebugMode) {
           print("isPriority: $isPriority");
         }

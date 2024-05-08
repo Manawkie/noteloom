@@ -1,12 +1,8 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:school_app/src/components/uicomponents.dart';
 import 'package:school_app/src/utils/firebase.dart';
-import 'package:school_app/src/utils/models.dart';
 import 'package:school_app/src/utils/providers.dart';
 
 class ProfilePage extends StatelessWidget {
@@ -89,31 +85,20 @@ class ProfilePage extends StatelessWidget {
                   userNotes.length,
                   (index) {
                     final note = userNotes[index];
+                    final color = colors[index % colors.length];
 
-                    return noteButton(
-                        note, context, colors[Random().nextInt(4)]);
+                    return noteButton(note, context, color);
                   },
                 ),
               ),
+            )),
+            const SliverFillRemaining(
+              hasScrollBody: false,
+              child: ColoredBox(
+                color: Colors.white,
+              ),
             )
-
-                // current user ermail
-                // button for editing profile
-                // const SizedBox(
-                //   width: 200,
-                //   child: ElevatedButton(onPressed: () {sa settings dapat},
-                //   style:  ElevatedButton.styleFrom(
-                //   backgroundColor: Colors.blue, side: BorderSide.none, shape:  StadiumBorder() ),
-                //   child: Text('Edit Profile', ))
-                // ),
-                )
-          ]
-              // // Hero(
-              // //     tag: Auth.currentUser!.uid,
-              // //     child: CircleAvatar(
-              // //       backgroundImage: NetworkImage(Auth.currentUser!.photoURL!),
-              //     ))
-              );
+          ]);
         }));
   }
 

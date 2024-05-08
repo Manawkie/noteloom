@@ -83,6 +83,8 @@ class _SetupFormState extends State<SetupForm> {
   }
 
   void _getStarted() async {
+      final theme = Theme.of(context);
+
     try {
       if (_selectedDepartment == "Select a Department") {
         throw "Please select a department and course.";
@@ -99,7 +101,6 @@ class _SetupFormState extends State<SetupForm> {
         });
       }
     } catch (err) {
-      final theme = Theme.of(context);
       if (kDebugMode) print(err);
       ftoast.showToast(
         child: myToast(theme, err.toString()),

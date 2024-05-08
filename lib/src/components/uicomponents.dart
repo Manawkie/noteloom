@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:loading_indicator/loading_indicator.dart';
@@ -113,7 +115,10 @@ Widget noteButton(NoteModel note, BuildContext context, Color color) {
                   ),
                   Text(note.subjectName, style: const TextStyle(fontSize: 14)),
                 ]),
-                Text(note.author, style: const TextStyle(fontSize: 12),)
+                Text(
+                  note.author,
+                  style: const TextStyle(fontSize: 12),
+                )
               ],
             ),
           ),
@@ -132,15 +137,15 @@ Widget noteButton(NoteModel note, BuildContext context, Color color) {
   );
 }
 
-Widget subjectButton(
-    SubjectModel subjectModel, BuildContext context, Color color) {
+Widget subjectButton(SubjectModel subject, BuildContext context, Color color) {
   return GestureDetector(
     onTap: () {
-      GoRouter.of(context).push('/subject/${subjectModel.id}');
+      GoRouter.of(context).push('/subject/${subject.id}');
     },
     child: Container(
       height: 150,
-      margin: const EdgeInsets.all(10),
+      margin: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         color: color,
@@ -153,14 +158,41 @@ Widget subjectButton(
           ),
         ],
       ),
-      child: Center(
-        child: Column(
-          children: [
-            Text(subjectModel.subject),
-            Text(subjectModel.subjectCode)
-          ],
+      child: Stack(children: [
+        Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                subject.subject,
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              Text(subject.subjectCode)
+            ],
+          ),
         ),
-      ),
+        Positioned(
+            bottom: 0,
+            right: 0,
+            child: Row(
+              children: [
+                IconButton(
+                    onPressed: () {
+                      context.pushNamed("subjectNotes", pathParameters: {
+                        "id": subject.id!,
+                      });
+                    },
+                    icon: const Icon(Icons.book)),
+                IconButton(
+                    onPressed: () {
+                      context.pushNamed("discussions", pathParameters: {
+                        "id": subject.id!,
+                      });
+                    },
+                    icon: const Icon(Icons.message))
+              ],
+            ))
+      ]),
     ),
   );
 }
@@ -236,4 +268,107 @@ class MyMessageField extends StatelessWidget {
       onChanged: onChanged,
     );
   }
+}
+
+class MultiSelect extends StatefulWidget {
+  final List<String> selectedTags;
+  final List<String> tags;
+  const MultiSelect(
+      {super.key, required this.selectedTags, required this.tags});
+
+  @override
+  State<MultiSelect> createState() => _MultiSelectState();
+}
+
+class _MultiSelectState extends State<MultiSelect> {
+  final List<String> _selectedItems = [];
+
+  @override
+  void initState() {
+    _selectedItems.addAll(widget.selectedTags);
+    super.initState();
+  }
+
+  void _itemChange(String itemValue, bool isSelected) {
+    setState(() {
+      if (isSelected) {
+        if (_selectedItems.length >= 3) {
+          return;
+        }
+        _selectedItems.add(itemValue);
+      } else {
+        _selectedItems.remove(itemValue);
+      }
+    });
+  }
+
+  void _cancel() {
+    Navigator.pop(context);
+  }
+
+  void _submit() {
+    Navigator.pop(context, _selectedItems);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Select tags (Maximum of 3)'),
+      content: SingleChildScrollView(
+        child: ListBody(
+          children: widget.tags
+              .map((item) => CheckboxListTile(
+                    value: _selectedItems.contains(item),
+                    title: Text(item),
+                    controlAffinity: ListTileControlAffinity.leading,
+                    onChanged: (isChecked) => _itemChange(item, isChecked!),
+                  ))
+              .toList(),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: _cancel,
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton(
+          onPressed: _submit,
+          child: const Text('Submit'),
+        ),
+      ],
+    );
+  }
+}
+
+SearchAnchor subjectSearchBar(
+    SearchController searchController,
+    String hintText,
+    List<SubjectModel> items,
+    FutureOr<Iterable<Widget>> Function(
+            BuildContext context, SearchController controller)
+        suggestions) {
+  return SearchAnchor(
+      searchController: searchController,
+      builder: (context, controller) {
+        return SearchBar(
+          hintText: hintText,
+          controller: controller,
+          padding: const MaterialStatePropertyAll(
+              EdgeInsets.symmetric(horizontal: 12)),
+          onTap: () {
+            controller.openView();
+          },
+        );
+      },
+      suggestionsBuilder: suggestions);
+}
+
+ListTile addASubjectButton(BuildContext context) {
+  return ListTile(
+    title: const Text("Can't find your subject?"),
+    subtitle: const Text("Add a new subject"),
+    onTap: () {
+      context.push("/addSubject");
+    },
+  );
 }

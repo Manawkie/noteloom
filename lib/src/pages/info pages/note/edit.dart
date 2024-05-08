@@ -6,6 +6,7 @@ import 'package:school_app/src/components/uicomponents.dart';
 import 'package:school_app/src/utils/firebase.dart';
 import 'package:school_app/src/utils/models.dart';
 import 'package:school_app/src/utils/providers.dart';
+import 'package:school_app/src/utils/util_functions.dart';
 
 class EditNotePage extends StatefulWidget {
   const EditNotePage({super.key, required this.noteId});
@@ -18,27 +19,36 @@ class EditNotePage extends StatefulWidget {
 class _EditNotePageState extends State<EditNotePage> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _nameControl;
-  late TextEditingController _tag1Control;
-  late TextEditingController _tag2Control;
-  late TextEditingController _tag3Control;
   late TextEditingController _summaryControl;
+  late SearchController _searchController;
+  List<String> _selectedTags = [];
 
   late CurrentNoteProvider currentNote;
+  late QueryNotesProvider queryNotes;
 
   String _subjectName = "";
   String _subjectId = "";
 
+  List<SubjectModel> subjects = [];
+  List<SubjectModel> suggestedSubjects = [];
+
   @override
   void initState() {
     currentNote = Provider.of<CurrentNoteProvider>(context, listen: false);
+    queryNotes = context.read<QueryNotesProvider>();
 
     _nameControl = TextEditingController(text: currentNote.name ?? "");
-    _tag1Control = TextEditingController(text: currentNote.readTag1 ?? "");
-    
     _summaryControl = TextEditingController(text: currentNote.summary ?? "");
 
+    _searchController = SearchController();
+    _searchController.text = currentNote.subjectName ?? "";
+    _searchController.addListener(filterSubjects);
+
+    _selectedTags = currentNote.tags ?? [];
     _subjectName = currentNote.readSubjectName ?? "";
     _subjectId = currentNote.readSubjectId ?? "";
+
+    subjects = queryNotes.getUniversitySubjects;
     super.initState();
 
     Future.microtask(() {
@@ -49,25 +59,22 @@ class _EditNotePageState extends State<EditNotePage> {
 
   void resetFields() {
     _nameControl.text = currentNote.readName ?? "";
-    _tag1Control.text = currentNote.readTag1 ?? "";
-    
     _summaryControl.text = currentNote.summary ?? "";
 
     setState(() {
       _subjectName = currentNote.subjectName!;
       _subjectId = currentNote.subjectId!;
+      _selectedTags = currentNote.readTags ?? [];
     });
   }
 
-  void setNote(CurrentNoteProvider noteData) {
-    final queryNotes = context.read<QueryNotesProvider>();
-    noteData.setNote(
+  void setNote() {
+    currentNote.setNote(
       _nameControl.text,
       _subjectName,
       _subjectId,
       notesummary: _summaryControl.text,
-      notetag1: _tag1Control.text,
-      
+      notetags: _selectedTags,
     );
 
     // reset notemodel
@@ -77,16 +84,25 @@ class _EditNotePageState extends State<EditNotePage> {
     NoteModel editedNote =
         universityNotes.where((note) => note.id == widget.noteId).first;
 
-    editedNote.editFields(
-        _nameControl.text,
-        _subjectId,
-        _subjectName,
-        _summaryControl.text,
-        [_tag1Control.text, _tag2Control.text, _tag3Control.text]);
+    editedNote.editFields(_nameControl.text, _subjectId, _subjectName,
+        _summaryControl.text, _selectedTags);
 
     queryNotes.editNote(editedNote);
     final username = context.read<UserProvider>().readUserData?.username;
     Database.editNote(editedNote, username ?? editedNote.author);
+  }
+
+  void filterSubjects() {
+    final search = _searchController.text;
+    if (search.isEmpty) {
+      suggestedSubjects = subjects;
+      return;
+    }
+    final filteredSubjects = subjects
+        .where((subject) =>
+            subject.subject.toLowerCase().contains(search.toLowerCase()))
+        .toList();
+    suggestedSubjects = filteredSubjects;
   }
 
   void deleteNote() {
@@ -105,11 +121,31 @@ class _EditNotePageState extends State<EditNotePage> {
     context.pop();
   }
 
+  void showTags() async {
+    final List<String>? results = await showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return MultiSelect(
+            selectedTags: _selectedTags,
+            tags: Utils.tags,
+          );
+        });
+    if (results != null) {
+      setState(
+        () {
+          _selectedTags = results;
+        },
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<CurrentNoteProvider>(builder: (context, note, child) {
       _subjectName = note.readNewSubjectName ?? note.subjectName!;
       _subjectId = note.readNewSubjectId ?? note.subjectId!;
+
+      filterSubjects();
       return Scaffold(
         appBar: AppBar(
           leading: IconButton(
@@ -121,7 +157,7 @@ class _EditNotePageState extends State<EditNotePage> {
           ),
           actions: [
             IconButton(
-              onPressed: () => setNote(note),
+              onPressed: () => setNote(),
               icon: const Icon(Icons.save_alt),
               tooltip: "Save Changes",
             ),
@@ -163,25 +199,54 @@ class _EditNotePageState extends State<EditNotePage> {
             controller: _nameControl,
             isRequired: true,
           ),
-          ElevatedButton(
-              onPressed: () {
-                context.push("/addnote/selectsubject");
-              },
-              child: Text(_subjectName)),
-          myFormField(
-            label: "Tag 1",
-            controller: _tag1Control,
-            isRequired: false,
-          // ),
-          // myFormField(
-          //   label: "Tag 2",
-          //   controller: _tag2Control,
-          //   isRequired: false,
-          // ),
-          // myFormField(
-          //   label: "Tag 3",
-          //   controller: _tag3Control,
-          //   isRequired: false,
+          subjectSearchBar(
+              _searchController, "Select a Subject here", suggestedSubjects,
+              (context, controller) {
+            return [
+              ...List.generate(
+                  suggestedSubjects.length > 5 ? 5 : suggestedSubjects.length,
+                  (index) {
+                final subject = suggestedSubjects[index].subject;
+                final subjectCode = suggestedSubjects[index].subjectCode;
+                final subjectId = suggestedSubjects[index].id;
+                return ListTile(
+                  title: Text(subject),
+                  subtitle: Text(subjectCode),
+                  onTap: () {
+                    setState(() {
+                      _subjectName = subject;
+                      _subjectId = subjectId!;
+                      controller.closeView(subject);
+                    });
+                    setNote();
+                  },
+                );
+              }),
+              if (suggestedSubjects.isEmpty) addASubjectButton(context)
+            ];
+          }),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              ElevatedButton(
+                  onPressed: showTags, child: const Text('Select Tags')),
+              TextButton(
+                  onPressed: () {
+                    setState(() {
+                      _selectedTags = [];
+                    });
+                  },
+                  child: const Text("Clear Tags"))
+            ],
+          ),
+          Wrap(
+            children: _selectedTags
+                .map((e) => Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Chip(
+                      label: Text(e),
+                    )))
+                .toList(),
           ),
           TextFormField(
             controller: _summaryControl,

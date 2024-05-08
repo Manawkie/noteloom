@@ -63,7 +63,7 @@ class _RenderNoteState extends State<RenderNote> {
         currentNote.setNote(
             widget.note.name, widget.note.subjectName, widget.note.subjectId,
             notesummary: widget.note.summary,
-            notetag1: widget.note.tags?[0],
+            notetags: widget.note.tags,
             );
       }
 

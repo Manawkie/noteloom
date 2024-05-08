@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'package:school_app/src/utils/firebase.dart';
 import 'package:school_app/src/utils/models.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'dart:math';
 
 // class WavePainter extends CustomPainter {
 //   final double
@@ -66,7 +65,7 @@ class IntroPage extends StatefulWidget {
 class _IntroPageState extends State<IntroPage>
     with SingleTickerProviderStateMixin {
   AnimationController? _controller;
-  Animation<double>? _animation;
+  // Animation<double>? _animation;
 
   final _findUniversity = TextEditingController();
 
@@ -83,10 +82,10 @@ class _IntroPageState extends State<IntroPage>
       vsync: this,
     )..repeat(reverse: false);
 
-    _animation = Tween<double>(begin: 0, end: 2 * pi).animate(_controller!)
-      ..addListener(() {
-        setState(() {});
-      });
+    // _animation = Tween<double>(begin: 0, end: 2 * pi).animate(_controller!)
+    //   ..addListener(() {
+    //     setState(() {});
+    //   });
 
     Database.getUniversities().then((List<UniversityModel> universityLists) {
       universities =

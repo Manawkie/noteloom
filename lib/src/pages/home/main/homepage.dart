@@ -106,7 +106,7 @@ class _HomePageState extends State<HomePage> {
       final type = result.split("/")[0];
       final id = result.split("/")[1];
 
-      final color = Colors.white;
+      const color = Colors.white;
 
       if (type == "notes") {
         final displayedNote = notes.findNote(id);

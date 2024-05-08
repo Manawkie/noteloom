@@ -1,13 +1,10 @@
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:school_app/src/pages/home/find_notes/findnotes.dart';
 import 'package:school_app/src/pages/home/main/homepage2.dart';
 import 'package:school_app/src/pages/home/mysubjects/mysubjects.dart';
-import 'package:school_app/src/pages/home/main/homepage.dart';
 import 'package:school_app/src/pages/home/savednotes/savednotes.dart';
 import 'package:school_app/src/utils/firebase.dart';
 import 'package:flutter_svg/flutter_svg.dart';

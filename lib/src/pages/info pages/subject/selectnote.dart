@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -22,6 +21,14 @@ class _SelectNotePageState extends State<SelectNotePage> {
             icon: const Icon(Icons.arrow_back_ios_new),
             onPressed: () => context.pop()),
         title: const Text("Select Note"),
+        actions: [
+          IconButton(
+              onPressed: () {
+                context.read<MessageProvider>().setNoteId("");
+                context.pop();
+              },
+              icon: const Icon(Icons.remove_circle))
+        ],
       ),
       body: Consumer2<QueryNotesProvider, MessageProvider>(
         builder: (context, queryNotes, messageData, child) {
@@ -32,7 +39,6 @@ class _SelectNotePageState extends State<SelectNotePage> {
               itemCount: subjectNotes.length,
               itemBuilder: (context, index) {
                 final NoteModel note = subjectNotes[index];
-
                 return ListTile(
                   leading:
                       note.id == selectedNote ? const Icon(Icons.check) : null,

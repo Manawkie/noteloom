@@ -84,10 +84,12 @@ class _RenderSubjectPageState extends State<RenderSubjectPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      widget.subject.subject,
-                      style: const TextStyle(
-                        fontSize: 24.0,
+                    Expanded(
+                      child: Text(
+                        widget.subject.subject,
+                        style: const TextStyle(
+                          fontSize: 24.0,
+                        ),
                       ),
                     ),
                     Actions(isPriority: isPriority, subject: widget.subject)

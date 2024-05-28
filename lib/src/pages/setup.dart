@@ -117,95 +117,97 @@ class _SetupFormState extends State<SetupForm> {
         padding: const EdgeInsets.all(20),
         child: Form(
           key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              // top part
-              const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Welcome to Note Loom!",
-                    style: TextStyle(
-                      fontSize: 40,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                      "We'd like to get to know you better before you get started."),
-                ],
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              // Form Fields
-              SizedBox(
-                height: MediaQuery.of(context).size.height * 0.5,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+          child: Center(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                // top part
+                const Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    TextFormField(
-                      enabled: false,
-                      decoration: InputDecoration(
-                        labelText: Auth.auth.currentUser!.email,
+                    Text(
+                      "Welcome to Note Loom!",
+                      style: TextStyle(
+                        fontSize: 40,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    usernameField(_username, (value) {
-                      if (value!.isEmpty) {
-                        return "This field is required.";
-                      }
-                      return null;
-                    }),
-                    myButtonFormField(
-                        value: _selectedDepartment,
-                        items: _departments,
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedDepartment = value!;
-                            _selectedCourse = _filteredCourses.first;
-                            _filteredCourses.clear();
-                            _filteredCourses.add(_courses.first);
-                            for (var department in widget.data) {
-                              department.forEach((key, value) {
-                                if (key == _selectedDepartment) {
-                                  for (var course in value) {
-                                    _filteredCourses.add(course);
-                                  }
-                                }
-                              });
-                            }
-                          });
-                        }),
-                    if (_filteredCourses.isNotEmpty)
-                      myButtonFormField(
-                          value: _selectedCourse,
-                          items: _filteredCourses,
-                          onChanged: (value) {
-                            setState(() {
-                              _selectedCourse = value!;
-                            });
-                          }),
-                    ElevatedButton(
-                        onPressed: _getStarted,
-                        child: const Text("Get started!")),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text("Not your account? "),
-                        TextButton(
-                            onPressed: () async {
-                              await Auth.auth
-                                  .signOut()
-                                  .then((_) => GoRouter.of(context).refresh());
-                            },
-                            child: const Text("Sign Out")),
-                      ],
-                    )
+                    Text(
+                        "We'd like to get to know you better before you get started."),
                   ],
                 ),
-              ),
-            ],
+                const SizedBox(
+                  height: 20,
+                ),
+                // Form Fields
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.5,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      TextFormField(
+                        enabled: false,
+                        decoration: InputDecoration(
+                          labelText: Auth.auth.currentUser!.email,
+                        ),
+                      ),
+                      usernameField(_username, (value) {
+                        if (value!.isEmpty) {
+                          return "This field is required.";
+                        }
+                        return null;
+                      }),
+                      myButtonFormField(
+                          value: _selectedDepartment,
+                          items: _departments,
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedDepartment = value!;
+                              _selectedCourse = _filteredCourses.first;
+                              _filteredCourses.clear();
+                              _filteredCourses.add(_courses.first);
+                              for (var department in widget.data) {
+                                department.forEach((key, value) {
+                                  if (key == _selectedDepartment) {
+                                    for (var course in value) {
+                                      _filteredCourses.add(course);
+                                    }
+                                  }
+                                });
+                              }
+                            });
+                          }),
+                      if (_filteredCourses.isNotEmpty)
+                        myButtonFormField(
+                            value: _selectedCourse,
+                            items: _filteredCourses,
+                            onChanged: (value) {
+                              setState(() {
+                                _selectedCourse = value!;
+                              });
+                            }),
+                      ElevatedButton(
+                          onPressed: _getStarted,
+                          child: const Text("Get started!")),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text("Not your account? "),
+                          TextButton(
+                              onPressed: () async {
+                                await Auth.auth
+                                    .signOut()
+                                    .then((_) => GoRouter.of(context).refresh());
+                              },
+                              child: const Text("Sign Out")),
+                        ],
+                      )
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

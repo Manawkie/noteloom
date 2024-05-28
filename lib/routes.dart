@@ -30,12 +30,12 @@ class Routes {
         GoRoute(
           name: "intro",
           path: "/",
-          pageBuilder: (_, __) => CustomTransitionPage(
-            key: __.pageKey,
+          pageBuilder: (context, state) => CustomTransitionPage(
+            key: state.pageKey,
             transitionDuration: const Duration(milliseconds: 1000),
             child: const IntroPage(),
-            transitionsBuilder: (_, anim, __, child) =>
-                fadeTransition(_, anim, __, child),
+            transitionsBuilder: (context, anim, anim2, child) =>
+                fadeTransition(context, anim, anim2, child),
           ),
         ),
         GoRoute(
@@ -48,8 +48,9 @@ class Routes {
               reverseTransitionDuration: const Duration(milliseconds: 800),
               child: const Login(
               ),
-              transitionsBuilder: (_, __, ___, child) =>
-                  fromBottomTransition(_, __, __, child),
+                          transitionsBuilder: (context, anim, anim2, child) =>
+
+                  fromBottomTransition(context, anim, anim2, child),
             );
           },
         ),
@@ -61,8 +62,9 @@ class Routes {
             transitionDuration: const Duration(milliseconds: 500),
             reverseTransitionDuration: const Duration(milliseconds: 500),
             child: const Setup(),
-            transitionsBuilder: (_, __, ___, child) =>
-                fromRightTransition(_, __, __, child),
+            transitionsBuilder: (context, anim, anim2, child) =>
+
+                fromRightTransition(context, anim, anim2, child),
           ),
         ),
         GoRoute(
@@ -71,8 +73,9 @@ class Routes {
               key: state.pageKey,
               transitionDuration: const Duration(milliseconds: 1000),
               child: const PageWithDrawer(),
-              transitionsBuilder: (_, anim, __, child) =>
-                  fadeTransition(_, anim, __, child)),
+            transitionsBuilder: (context, anim, anim2, child) =>
+             
+                  fadeTransition(context, anim, anim2, child),),
           routes: [
             GoRoute(
               path: "profile",
@@ -84,8 +87,9 @@ class Routes {
                 key: state.pageKey,
                 transitionDuration: const Duration(milliseconds: 500),
                 child: const SettingsPage(),
-                transitionsBuilder: (_, anim, __, child) =>
-                    fromRightTransition(_, anim, __, child),
+            transitionsBuilder: (context, anim, anim2, child) =>
+
+                    fromRightTransition(context, anim, anim2, child),
                 maintainState: true,
               ),
             ),
@@ -97,8 +101,9 @@ class Routes {
           pageBuilder: (context, state) => CustomTransitionPage(
               transitionDuration: const Duration(milliseconds: 500),
               child: const AddNoteLayout(),
-              transitionsBuilder: (_, anim, __, child) =>
-                  fromBottomTransition(_, anim, __, child)),
+            transitionsBuilder: (context, anim, anim2, child) =>
+
+                  fromBottomTransition(context, anim, anim2, child),),
           // routes: [
           //   GoRoute(
           //     path: "selectsubject",
@@ -125,8 +130,9 @@ class Routes {
               child: NotePage(
                 id: id,
               ),
-              transitionsBuilder: (_, anim, __, child) =>
-                  fromRightTransition(_, anim, __, child),
+            transitionsBuilder: (context, anim, anim2, child) =>
+
+                  fromRightTransition(context, anim, anim2, child),
             );
           },
           routes: [
@@ -149,8 +155,9 @@ class Routes {
                 child: SubjectPage(
                   subjectId: id,
                 ),
-                transitionsBuilder: (_, anim, __, child) =>
-                    fromRightTransition(_, anim, __, child));
+            transitionsBuilder: (context, anim, anim2, child) =>
+
+                    fromRightTransition(context, anim, anim2, child),);
           },
           routes: [
             GoRoute(

@@ -59,6 +59,7 @@ class _LoginState extends State<Login> {
                       ),
                     ],
                   ),
+                  
                   ElevatedButton(
                     onPressed: () {
                       context.go("/");
@@ -203,15 +204,15 @@ class _LoginState extends State<Login> {
                 ElevatedButton(
                     onPressed: getStarted,
                     style: ButtonStyle(
-                      fixedSize: MaterialStatePropertyAll(
+                      fixedSize: WidgetStatePropertyAll(
                         Size(MediaQuery.of(context).size.width * 0.4, 50),
                       ),
-                      shape: MaterialStatePropertyAll(
+                      shape: WidgetStatePropertyAll(
                         RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      backgroundColor: MaterialStatePropertyAll(
+                      backgroundColor: WidgetStatePropertyAll(
                           Theme.of(context).colorScheme.secondary),
                     ),
                     child: Text("Get Started",

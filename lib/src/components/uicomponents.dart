@@ -205,8 +205,8 @@ SearchBar mySearchBar(
   return SearchBar(
     controller: controller,
     hintText: hintText,
-    elevation: const MaterialStatePropertyAll(0),
-    shape: const MaterialStatePropertyAll(
+    elevation: const WidgetStatePropertyAll(0),
+    shape: const WidgetStatePropertyAll(
       RoundedRectangleBorder(
         borderRadius: BorderRadius.all(
           Radius.circular(50),
@@ -227,13 +227,13 @@ SearchBar mySearchBar(
         ),
       ),
     ],
-    hintStyle: const MaterialStatePropertyAll(
+    hintStyle: const WidgetStatePropertyAll(
       TextStyle(color: Colors.black, fontSize: 16),
     ),
-    textStyle: const MaterialStatePropertyAll(
+    textStyle: const WidgetStatePropertyAll(
       TextStyle(color: Colors.black, fontSize: 16),
     ),
-    backgroundColor: MaterialStatePropertyAll(
+    backgroundColor: WidgetStatePropertyAll(
       Theme.of(context).colorScheme.tertiary,
     ),
   );
@@ -353,7 +353,7 @@ SearchAnchor subjectSearchBar(
         return SearchBar(
           hintText: hintText,
           controller: controller,
-          padding: const MaterialStatePropertyAll(
+          padding: const WidgetStatePropertyAll(
               EdgeInsets.symmetric(horizontal: 12)),
           onTap: () {
             controller.openView();

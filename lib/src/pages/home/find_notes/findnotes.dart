@@ -18,7 +18,7 @@ class _SearchPageState extends State<SearchPage> {
 
   List<NoteModel> _allNotes = [];
   List<SubjectModel> _allSubjects = [];
-  List<Results> _filteredResults = [];
+  List<dynamic> _filteredResults = [];
 
   @override
   void initState() {
@@ -54,7 +54,6 @@ class _SearchPageState extends State<SearchPage> {
       if (note.name.toLowerCase().contains(lowerSearchText)) return true;
       if (note.subjectId.toLowerCase().contains(lowerSearchText)) return true;
       // filter by author
-
       if (note.author.toLowerCase().contains(lowerSearchText)) return true;
       // filter by tags
       if (note.tags?.contains(lowerSearchText) ?? false) return true;
@@ -63,7 +62,6 @@ class _SearchPageState extends State<SearchPage> {
 
     final filteredSubjects = _allSubjects.where((subject) {
       if (subject.subject.toLowerCase().contains(lowerSearchText)) return true;
-
       return subject.subjectCode.toLowerCase().contains(lowerSearchText);
     }).toList();
 
@@ -140,38 +138,56 @@ class _SearchPageState extends State<SearchPage> {
     });
   }
 
-  ColoredBox noSubjectButton() {
-    return ColoredBox(
-      color: Colors.white,
-      child: GestureDetector(
-        onTap: () => context.go("/addSubject"),
-        child: Container(
-          width: double.infinity,
-          height: 150,
-          margin: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(color: Colors.grey),
-            borderRadius: BorderRadius.circular(8.0),
-          ),
-          child: const Center(
-            child: Column(
-              children: [
-                Text("Can't find your subject?"),
-                Text("Add a subject here")
-              ],
-            ),
+ColoredBox noSubjectButton() {
+  return ColoredBox(
+    color: Colors.white,
+    child: GestureDetector(
+      onTap: () => context.go("/addSubject"),
+      child: Container(
+        width: double.infinity,
+        height: 150,
+        margin: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: const  Color.fromRGBO(240, 240, 255, 1), // very light lavender
+          border: Border.all(color: const Color(0xFFC2E9FB)), // Slightly darker pastel blue for the border
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        child: const Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                "Can't find your subject?",
+                style: TextStyle(
+                  color: Color.fromARGB(255, 0, 0, 0), // Text color to match pastel theme
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  fontFamily: 'Ubuntu', // Using Ubuntu font
+                ),
+              ),
+              SizedBox(height: 8), // Spacing between the texts
+              Text(
+                "Add a subject here",
+                style: TextStyle(
+                  color: Color.fromARGB(255, 0, 0, 0), 
+                  fontWeight: FontWeight.bold, // Text color to match pastel theme
+                  fontSize: 14,
+                  fontFamily: 'Ubuntu', // Using Ubuntu font
+                ),
+              ),
+            ],
           ),
         ),
       ),
-    );
-  }
-
+    ),
+  );
+}
   List<Color> colors = const [
-    Color.fromRGBO(255, 242, 218, 1),
-    Color.fromRGBO(253, 233, 238, 1),
-    Color.fromRGBO(232, 243, 243, 1),
-    Color.fromRGBO(254, 254, 240, 1),
+    Color.fromRGBO(255, 224, 204, 1), // Soft Peach
+    Color.fromRGBO(255, 228, 232, 1), // Light Blush Pink
+    Color.fromRGBO(204, 255, 204, 1), // Soft Mint Green
+    Color.fromRGBO(240, 240, 255, 1), // Very Light Lavender
   ];
 
   List<Widget> renderNotes() {

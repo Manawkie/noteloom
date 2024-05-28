@@ -40,15 +40,13 @@ class Routes {
         ),
         GoRoute(
           name: "login",
-          path: "/login/:universityName",
+          path: "/login",
           pageBuilder: (context, state) {
-            String universityName = state.pathParameters['universityName']!;
             return CustomTransitionPage(
               key: state.pageKey,
               transitionDuration: const Duration(milliseconds: 800),
               reverseTransitionDuration: const Duration(milliseconds: 800),
-              child: Login(
-                universityName: universityName,
+              child: const Login(
               ),
               transitionsBuilder: (_, __, ___, child) =>
                   fromBottomTransition(_, __, __, child),

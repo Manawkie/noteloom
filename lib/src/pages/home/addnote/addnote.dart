@@ -1,4 +1,5 @@
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -78,9 +79,11 @@ class _AddNoteState extends State<AddNote> {
 
     if (result != null) {
       final file = result!.files.single;
-      print(file);
+      if (kDebugMode) {
+        print(file);
+      }
       bytes = file.bytes;
-      print(file.bytes);
+      if (kDebugMode) print(file.bytes);
       setState(() {
         if (_nameControl.text == "") {
           _nameControl.text = file.name.split(".pdf")[0];
@@ -106,7 +109,7 @@ class _AddNoteState extends State<AddNote> {
 
       if (_subjectName == "Select a Subject" ||
           !subjects.contains(_subjectName)) {
-        print(_subjectName);
+        if (kDebugMode) print(_subjectName);
         throw ErrorDescription("Please select a Subject first");
       }
       if (_formkey.currentState!.validate()) {
@@ -367,7 +370,7 @@ class _AddNoteState extends State<AddNote> {
                                 : const Text("Post")),
                         TextButton(
                           style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all(
+                              backgroundColor: WidgetStateProperty.all(
                                   Colors.red.shade100)),
                           onPressed: () => clearFields(note),
                           child: const Text(

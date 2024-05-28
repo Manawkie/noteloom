@@ -445,6 +445,7 @@ packages:
       url: "https://pub.dev"
     source: hosted
 <<<<<<< HEAD
+<<<<<<< HEAD
     version: "4.0.0"
 =======
 <<<<<<< HEAD
@@ -461,6 +462,9 @@ packages:
     version: "3.0.0"
 >>>>>>> ee7089cc976d33e255c8840fa55b4dcfe064fdb1
 >>>>>>> 77c53315afe927bb8d7101b4b776e8a1f83e4223
+=======
+    version: "4.0.0"
+>>>>>>> e44c115e5666b97fe13600ed7a98d7d221003567
   loading_indicator:
     dependency: "direct main"
     description:

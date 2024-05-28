@@ -14,10 +14,6 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
-<<<<<<< HEAD
-
-=======
->>>>>>> 77c53315afe927bb8d7101b4b776e8a1f83e4223
   Future _logIn() async {
     await Auth.signIn();
   }
@@ -50,7 +46,6 @@ class _LoginState extends State<Login> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-<<<<<<< HEAD
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -64,8 +59,6 @@ class _LoginState extends State<Login> {
                       ),
                     ],
                   ),
-=======
->>>>>>> 77c53315afe927bb8d7101b4b776e8a1f83e4223
                   ElevatedButton(
                     onPressed: () {
                       context.go("/");
@@ -79,12 +72,14 @@ class _LoginState extends State<Login> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    child: Text("Return to Home Page",
-                        style: GoogleFonts.ubuntu(
-                          color: Colors.black,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),),
+                    child: Text(
+                      "Return to Home Page",
+                      style: GoogleFonts.ubuntu(
+                        color: Colors.black,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                   if (snapshot.data == null)
                     Padding(

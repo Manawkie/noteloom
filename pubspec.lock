@@ -444,7 +444,27 @@ packages:
       sha256: "976c774dd944a42e83e2467f4cc670daef7eed6295b10b36ae8c85bcbf828235"
       url: "https://pub.dev"
     source: hosted
+<<<<<<< HEAD
+<<<<<<< HEAD
     version: "4.0.0"
+=======
+<<<<<<< HEAD
+    version: "4.0.0"
+  liquid_pull_to_refresh:
+    dependency: "direct main"
+    description:
+      name: liquid_pull_to_refresh
+      sha256: "11e4cd8c5460085a31b479ec4e1cd063eb8e599f35684d57a44dafa1fd1f67f3"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.1"
+=======
+    version: "3.0.0"
+>>>>>>> ee7089cc976d33e255c8840fa55b4dcfe064fdb1
+>>>>>>> 77c53315afe927bb8d7101b4b776e8a1f83e4223
+=======
+    version: "4.0.0"
+>>>>>>> e44c115e5666b97fe13600ed7a98d7d221003567
   loading_indicator:
     dependency: "direct main"
     description:

@@ -14,11 +14,6 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
   Future _logIn() async {
     await Auth.signIn();
   }

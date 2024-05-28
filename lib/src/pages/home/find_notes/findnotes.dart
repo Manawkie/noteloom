@@ -112,7 +112,7 @@ class _SearchPageState extends State<SearchPage> {
               child: Container(
                 decoration: const BoxDecoration(
                   color:  Color.fromARGB(255, 174, 198, 207), // Pastel Blue
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(45)),
+                  borderRadius:  BorderRadius.vertical(top: Radius.circular(45)),
                   boxShadow: [
                    
                   ],

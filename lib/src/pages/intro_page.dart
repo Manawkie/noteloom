@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:school_app/src/utils/firebase.dart';
-import 'package:school_app/src/utils/models.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class IntroPage extends StatefulWidget {

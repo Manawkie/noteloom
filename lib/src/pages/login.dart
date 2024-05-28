@@ -14,6 +14,19 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
+  String _universityName = "";
+  @override
+  void initState() {
+    setState(() {
+      _universityName = widget.universityName;
+    });
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
 
   Future _logIn() async {
     await Auth.signIn();
@@ -58,6 +71,31 @@ class _LoginState extends State<Login> {
                           fontSize: 16,
                         ),
                       ),
+                      Container(
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: Colors.grey.shade300,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.2),
+                                spreadRadius: 1,
+                                blurRadius: 10,
+                                offset: const Offset(
+                                    0, 3), // changes position of shadow
+                              ),
+                            ]),
+                        margin: const EdgeInsets.symmetric(vertical: 20),
+                        padding: const EdgeInsets.all(10),
+                        child: Text(
+                          _universityName,
+                          style: GoogleFonts.ubuntu(
+                            fontSize: 30,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
                     ],
                   ),
                   ElevatedButton(
@@ -78,7 +116,7 @@ class _LoginState extends State<Login> {
                           color: Colors.black,
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                        )),
+                        ),),
                   ),
                   if (snapshot.data == null)
                     Padding(
@@ -133,11 +171,12 @@ class _LoginState extends State<Login> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(
               child: Text("Loading...",
-                style: GoogleFonts.ubuntu(
-                  color: Colors.white, // Adjust the color to match the background gradient
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                )),
+                  style: GoogleFonts.ubuntu(
+                    color: Colors
+                        .white, // Adjust the color to match the background gradient
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  )),
             );
           }
           if (snapshot.data == false) {
@@ -146,7 +185,8 @@ class _LoginState extends State<Login> {
                 Text(
                     "You are not signed in with your school email.\nOr your school may not yet be supported.",
                     style: GoogleFonts.ubuntu(
-                      color: Colors.white, // Adjust the color to match the background gradient
+                      color: Colors
+                          .white, // Adjust the color to match the background gradient
                       fontSize: 16,
                       fontWeight: FontWeight.normal,
                     )),
@@ -155,7 +195,8 @@ class _LoginState extends State<Login> {
                       Auth.signOut();
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromRGBO(255, 255, 255, 0.8), // Semi-transparent white
+                      backgroundColor: const Color.fromRGBO(
+                          255, 255, 255, 0.8), // Semi-transparent white
                       shadowColor: Colors.black.withOpacity(0.5),
                       elevation: 10,
                       shape: RoundedRectangleBorder(
@@ -222,11 +263,9 @@ class _LoginState extends State<Login> {
                     Text(
                       "Not you?",
                       style: GoogleFonts.ubuntu(
-                        color: Colors.black,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold
-                        
-                      ),
+                          color: Colors.black,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold),
                     ),
                     TextButton(
                       onPressed: () => Auth.signOut(),
@@ -236,7 +275,6 @@ class _LoginState extends State<Login> {
                           color: const Color.fromARGB(255, 255, 255, 255),
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          
                         ),
                       ),
                     )

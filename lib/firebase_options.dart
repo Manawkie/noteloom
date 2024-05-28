@@ -23,7 +23,10 @@ class DefaultFirebaseOptions {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
-        return ios;
+        throw UnsupportedError(
+          'DefaultFirebaseOptions have not been configured for ios - '
+          'you can reconfigure this by running the FlutterFire CLI again.',
+        );
       case TargetPlatform.macOS:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for macos - '
@@ -47,31 +50,20 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyCEbz4bGPujRv7jtzeBqDHbbSeYptN2S_8',
-    appId: '1:874668964337:web:c7344f5ca899bbc308ac50',
-    messagingSenderId: '874668964337',
-    projectId: 'note-loom',
-    authDomain: 'note-loom.firebaseapp.com',
-    storageBucket: 'note-loom.appspot.com',
-    measurementId: 'G-8JZK230JLW',
+    apiKey: 'AIzaSyCxnIdyUFrRPl1stDOtPAZZorbAbRXeFqU',
+    appId: '1:657351363818:web:be4824741d899ff7a89b93',
+    messagingSenderId: '657351363818',
+    projectId: 'note-loom-32716',
+    authDomain: 'note-loom-32716.firebaseapp.com',
+    storageBucket: 'note-loom-32716.appspot.com',
+    measurementId: 'G-413YN64SJE',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDK_APvSiVCJYwVlQoJqLsLAlhv36P2jcE',
-    appId: '1:874668964337:android:d31aecd204659fa908ac50',
-    messagingSenderId: '874668964337',
-    projectId: 'note-loom',
-    storageBucket: 'note-loom.appspot.com',
-  );
-
-  static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyDZdHytShHotdIXyq3mXgmuJ0rX3aJc1tU',
-    appId: '1:874668964337:ios:588ee153145bf34408ac50',
-    messagingSenderId: '874668964337',
-    projectId: 'note-loom',
-    storageBucket: 'note-loom.appspot.com',
-    androidClientId: '874668964337-1m8os5h3bv2h27angrmbjeruj6c2ej3g.apps.googleusercontent.com',
-    iosClientId: '874668964337-5g8ufkcek8imb1kcc1977q7lbipm9tgi.apps.googleusercontent.com',
-    iosBundleId: 'com.example.schoolApp',
+    apiKey: 'AIzaSyCOkZpzi-PRVFS7JPHHPLvsiP-Ta9uZ5UM',
+    appId: '1:657351363818:android:3b5d95424363b877a89b93',
+    messagingSenderId: '657351363818',
+    projectId: 'note-loom-32716',
+    storageBucket: 'note-loom-32716.appspot.com',
   );
 }

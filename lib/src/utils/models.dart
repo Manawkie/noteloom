@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:school_app/src/utils/firebase.dart';
 
 class UserModel {
@@ -192,6 +193,8 @@ class SubjectModel extends Results {
     final data = snapshot.data();
     final id = snapshot.id;
 
+    if (kDebugMode) print(id);
+
     return SubjectModel(
       id: id,
       subject: data?['subject'],
@@ -310,7 +313,7 @@ class MessageModel {
         senderUserProfileURL: data?['senderUserProfileURL'] ?? "",
         senderUsername: data?['senderUsername'],
         timestamp: data?['timestamp'],
-        noteId: data?['noteId']?? "");
+        noteId: data?['noteId'] ?? "");
     return message;
   }
 

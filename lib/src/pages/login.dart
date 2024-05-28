@@ -14,7 +14,6 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
-
   Future _logIn() async {
     await Auth.signIn();
   }
@@ -47,19 +46,6 @@ class _LoginState extends State<Login> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Log in with your",
-                        style: GoogleFonts.ubuntu(
-                          color: Colors
-                              .white, // Adjust the color to match the background gradient
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  ),
                   ElevatedButton(
                     onPressed: () {
                       context.go("/");
@@ -78,7 +64,7 @@ class _LoginState extends State<Login> {
                           color: Colors.black,
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                        )),
+                        ),),
                   ),
                   if (snapshot.data == null)
                     Padding(
@@ -133,11 +119,12 @@ class _LoginState extends State<Login> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(
               child: Text("Loading...",
-                style: GoogleFonts.ubuntu(
-                  color: Colors.white, // Adjust the color to match the background gradient
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                )),
+                  style: GoogleFonts.ubuntu(
+                    color: Colors
+                        .white, // Adjust the color to match the background gradient
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  )),
             );
           }
           if (snapshot.data == false) {
@@ -146,7 +133,8 @@ class _LoginState extends State<Login> {
                 Text(
                     "You are not signed in with your school email.\nOr your school may not yet be supported.",
                     style: GoogleFonts.ubuntu(
-                      color: Colors.white, // Adjust the color to match the background gradient
+                      color: Colors
+                          .white, // Adjust the color to match the background gradient
                       fontSize: 16,
                       fontWeight: FontWeight.normal,
                     )),
@@ -155,7 +143,8 @@ class _LoginState extends State<Login> {
                       Auth.signOut();
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromRGBO(255, 255, 255, 0.8), // Semi-transparent white
+                      backgroundColor: const Color.fromRGBO(
+                          255, 255, 255, 0.8), // Semi-transparent white
                       shadowColor: Colors.black.withOpacity(0.5),
                       elevation: 10,
                       shape: RoundedRectangleBorder(
@@ -222,11 +211,9 @@ class _LoginState extends State<Login> {
                     Text(
                       "Not you?",
                       style: GoogleFonts.ubuntu(
-                        color: Colors.black,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold
-                        
-                      ),
+                          color: Colors.black,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold),
                     ),
                     TextButton(
                       onPressed: () => Auth.signOut(),
@@ -236,7 +223,6 @@ class _LoginState extends State<Login> {
                           color: const Color.fromARGB(255, 255, 255, 255),
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          
                         ),
                       ),
                     )

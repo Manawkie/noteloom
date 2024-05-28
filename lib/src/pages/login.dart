@@ -50,7 +50,7 @@ class _LoginState extends State<Login> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Log in with your",
+                        "Log in with your school email",
                         style: GoogleFonts.ubuntu(
                           color: Colors
                               .white, // Adjust the color to match the background gradient

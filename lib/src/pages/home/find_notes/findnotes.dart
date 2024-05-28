@@ -113,7 +113,7 @@ class _SearchPageState extends State<SearchPage> {
               SliverToBoxAdapter(
                 child: Container(
                   decoration: const BoxDecoration(
-                      color: Colors.white,
+                      color: Color.fromARGB(255, 174, 198, 207) ,
                       borderRadius:
                           BorderRadius.vertical(top: Radius.circular(45))),
                           margin: const EdgeInsets.only(top: 20),
@@ -142,37 +142,57 @@ class _SearchPageState extends State<SearchPage> {
 
   ColoredBox noSubjectButton() {
     return ColoredBox(
-      color: Colors.white,
-      child: GestureDetector(
-        onTap: () => context.go("/addSubject"),
-        child: Container(
-          width: double.infinity,
-          height: 150,
-          margin: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(color: Colors.grey),
-            borderRadius: BorderRadius.circular(8.0),
-          ),
-          child: const Center(
-            child: Column(
-              children: [
-                Text("Can't find your subject?"),
-                Text("Add a subject here")
-              ],
-            ),
+    color: Colors.white,
+    child: GestureDetector(
+      onTap: () => context.go("/addSubject"),
+      child: Container(
+        width: double.infinity,
+        height: 150,
+        margin: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: const Color.fromRGBO(240, 240, 255, 1), // Very light lavender
+          border: Border.all(color: const Color(0xFFC2E9FB)), // Slightly darker pastel blue for the border
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        child: const Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                "Can't find your subject?",
+                style: TextStyle(
+                  color: Color.fromARGB(255, 0, 0, 0), // Text color to match pastel theme
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  fontFamily: 'Ubuntu', // Using Ubuntu font
+                ),
+              ),
+              SizedBox(height: 8), // Spacing between the texts
+              Text(
+                "Add a subject here",
+                style: TextStyle(
+                  color: Color.fromARGB(255, 0, 0, 0), 
+                  fontWeight: FontWeight.bold, // Text color to match pastel theme
+                  fontSize: 14,
+                  fontFamily: 'Ubuntu', // Using Ubuntu font
+                ),
+              ),
+            ],
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
-  List<Color> colors = const [
-    Color.fromRGBO(255, 242, 218, 1),
-    Color.fromRGBO(253, 233, 238, 1),
-    Color.fromRGBO(232, 243, 243, 1),
-    Color.fromRGBO(254, 254, 240, 1),
-  ];
+List<Color> colors = const [
+  Color.fromRGBO(175, 238, 238, 1), // Pale Turquoise (#AFEEEE)
+  Color.fromRGBO(250, 218, 221, 1), // Pale Pink (#FADADD)
+  Color.fromRGBO(189, 252, 189, 1), // Soft Mint Green (#CCFFCC)
+  Color.fromRGBO(255, 250, 205, 1), // Lemon Chiffon (#FFFACD)
+];
+
 
   List<Widget> renderNotes() {
     return List.generate(

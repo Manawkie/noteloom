@@ -44,7 +44,7 @@ class _MainHomePageState extends State<MainHomePage> {
             borderRadius: BorderRadius.vertical(
               top: Radius.circular(45),
             ),
-            color: Colors.white),
+            color:  Color.fromARGB(255, 174, 198, 207)),
         padding: const EdgeInsets.all(20),
         child: CustomScrollView(
           slivers: [
@@ -232,7 +232,7 @@ Widget _buildRecentNote(NoteModel note, BuildContext context) {
         ],
         color: colors[note.id.hashCode %
             colors.length], 
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(15),
 
       ),
       child: Column(
@@ -253,10 +253,10 @@ Widget _buildRecentNote(NoteModel note, BuildContext context) {
 }
 
 List<Color> colors = const [
-  Color.fromRGBO(255, 242, 218, 1),
-  Color.fromRGBO(253, 233, 238, 1),
-  Color.fromRGBO(232, 243, 243, 1),
-  Color.fromRGBO(254, 254, 240, 1),
+  Color.fromRGBO(255, 255, 204, 1), // Pale Yellow (#FFFFCC)
+  Color.fromRGBO(135, 206, 250, 1), // Light Sky Blue (#87CEFA)
+  Color.fromRGBO(204, 255, 204, 1), // Soft Mint Green (#CCFFCC)
+ Color.fromRGBO(255, 250, 205, 1), // Lemon Chiffon (#FFFACD)
 ];
 
 class RenderRecommended extends StatelessWidget {

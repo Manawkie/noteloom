@@ -46,9 +46,15 @@ class _SavedNotesPageState extends State<SavedNotesPage> {
     _filteredNotes.clear();
     _filteredNotes.addAll(filteredNotes);
   }
+List<Color> colors = const [
+  Color.fromRGBO(255, 224, 204, 1), // Soft Peach (#FFE0CC)
+  Color.fromRGBO(255, 228, 232, 1), // Light Blush Pink (#FFE4E8)
+  Color.fromRGBO(204, 255, 204, 1), // Soft Mint Green (#CCFFCC)
+  Color.fromRGBO(240, 240, 255, 1), // Very Light Lavender (#F0F0FF)
+];
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext caontext) {
     return Consumer2<UserProvider, QueryNotesProvider>(
       builder: (context, userdata, notes, child) {
         if (userdata.readSavedNoteIds.isEmpty) {
@@ -83,7 +89,7 @@ class _SavedNotesPageState extends State<SavedNotesPage> {
           ),
           body: Container(
             decoration: const BoxDecoration(
-              color: Colors.white,
+              color: Color.fromARGB(255, 174, 198, 207),
               borderRadius: BorderRadius.vertical(
                 top: Radius.circular(45),
               ),
@@ -99,7 +105,7 @@ class _SavedNotesPageState extends State<SavedNotesPage> {
                     );
                   }
 
-                  return noteButton(note, context, Colors.white);
+                  return noteButton(note, context, colors[index % colors.length]);
                 },
                 itemCount: _filteredNotes.length),
           ),

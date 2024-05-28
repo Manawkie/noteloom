@@ -11,6 +11,13 @@ class PrioritySubjects extends StatefulWidget {
   State<PrioritySubjects> createState() => _PrioritySubjectsState();
 }
 
+List<Color> colors = const [
+  Color.fromRGBO(255, 255, 204, 1), // Pale Yellow (#FFFFCC)
+  Color.fromRGBO(255, 204, 204, 1), // Light Coral (#FFCCCC)
+  Color.fromRGBO(204, 255, 204, 1), // Soft Mint Green (#CCFFCC)
+  Color.fromRGBO(135, 206, 250, 1), // Light Sky Blue (#87CEFA)
+];
+
 class _PrioritySubjectsState extends State<PrioritySubjects> {
   late SearchController _searchController;
   List<SubjectModel?> _allPrioritySubjects = [];
@@ -79,7 +86,7 @@ class _PrioritySubjectsState extends State<PrioritySubjects> {
                   context, _searchController, "Search your Priority Subjects")),
           body: Container(
             decoration: const BoxDecoration(
-              color: Colors.white,
+              color: Color.fromARGB(255, 174, 198, 207),
               borderRadius: BorderRadius.vertical(
                 top: Radius.circular(45),
               ),
@@ -96,7 +103,7 @@ class _PrioritySubjectsState extends State<PrioritySubjects> {
                   );
                 }
 
-                return subjectButton(subject, context, Colors.white);
+                return subjectButton(subject, context, colors[index % colors.length]);
               },
             ),
           ),

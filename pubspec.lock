@@ -444,6 +444,7 @@ packages:
       sha256: "976c774dd944a42e83e2467f4cc670daef7eed6295b10b36ae8c85bcbf828235"
       url: "https://pub.dev"
     source: hosted
+<<<<<<< HEAD
     version: "4.0.0"
   liquid_pull_to_refresh:
     dependency: "direct main"
@@ -453,6 +454,9 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.1"
+=======
+    version: "3.0.0"
+>>>>>>> ee7089cc976d33e255c8840fa55b4dcfe064fdb1
   loading_indicator:
     dependency: "direct main"
     description:

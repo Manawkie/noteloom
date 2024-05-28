@@ -93,51 +93,48 @@ class _SearchPageState extends State<SearchPage> {
 
       filterResults();
       return Scaffold(
-        backgroundColor: Theme.of(context).primaryColor,
-        body: CustomScrollView(
-          slivers: [
-            SliverAppBar(
-              expandedHeight: 120,
-              stretch: false,
-              pinned: true,
-              flexibleSpace: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: mySearchBar(
-                    context, _searchController, "Search Note or Subject"),
-              ),
-              backgroundColor: Theme.of(context).primaryColor,
-              floating: true,
-            ),
-            SliverToBoxAdapter(
-              child: Container(
-                decoration: const BoxDecoration(
-                  color:  Color.fromARGB(255, 174, 198, 207), // Pastel Blue
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(45)),
-                  boxShadow: [
-                   
-                  ],
+          backgroundColor: Theme.of(context).primaryColor,
+          body: CustomScrollView(
+            slivers: [
+              SliverAppBar(
+                expandedHeight: 120,
+                stretch: false,
+                pinned: true,
+                flexibleSpace: Padding(
+                  padding: const EdgeInsets.all( 8.0),
+                  child: mySearchBar(
+                      context, _searchController, "Search Note or Subject"),
                 ),
-                margin: const EdgeInsets.only(top: 20),
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  children: renderNotes(),
-                ),
+                backgroundColor: Theme.of(context).primaryColor,
+                floating: true,
               ),
-            ),
-            if (!_filteredResults.any((result) => result.runtimeType == SubjectModel))
               SliverToBoxAdapter(
-                child: noSubjectButton(),
+                child: Container(
+                  decoration: const BoxDecoration(
+                      color: Colors.white,
+                      borderRadius:
+                          BorderRadius.vertical(top: Radius.circular(45))),
+                          margin: const EdgeInsets.only(top: 20),
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: renderNotes(),
+                  ),
+                ),
               ),
-            const SliverFillRemaining(
-              fillOverscroll: true,
-              hasScrollBody: false,
-              child: ColoredBox(
-                color: Colors.white,
+              if (!_filteredResults
+                  .any((result) => result.runtimeType == SubjectModel))
+                SliverToBoxAdapter(
+                  child: noSubjectButton(),
+                ),
+              const SliverFillRemaining(
+                fillOverscroll: true,
+                hasScrollBody: false,
+                child: ColoredBox(
+                  color: Colors.white,
+                ),
               ),
-            ),
-          ],
-        ),
-      );
+            ],
+          ));
     });
   }
 

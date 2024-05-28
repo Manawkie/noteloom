@@ -14,6 +14,20 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
+  String _universityName = "";
+  @override
+  void initState() {
+    setState(() {
+      _universityName = widget.universityName;
+    });
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   Future _logIn() async {
     await Auth.signIn();
   }
@@ -46,6 +60,44 @@ class _LoginState extends State<Login> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Log in with your",
+                        style: GoogleFonts.ubuntu(
+                          color: Colors
+                              .white, // Adjust the color to match the background gradient
+                          fontSize: 16,
+                        ),
+                      ),
+                      Container(
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: Colors.grey.shade300,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.2),
+                                spreadRadius: 1,
+                                blurRadius: 10,
+                                offset: const Offset(
+                                    0, 3), // changes position of shadow
+                              ),
+                            ]),
+                        margin: const EdgeInsets.symmetric(vertical: 20),
+                        padding: const EdgeInsets.all(10),
+                        child: Text(
+                          _universityName,
+                          style: GoogleFonts.ubuntu(
+                            fontSize: 30,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
+                  ),
                   ElevatedButton(
                     onPressed: () {
                       context.go("/");
